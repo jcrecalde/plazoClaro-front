@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de plazos | PlazoClaro</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+
+      <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
+        <a href="./calculator.html">Calculadora</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Calculadora de plazos judiciales</h1>
+        <p>
+          Ingresá los datos básicos del plazo para obtener una fecha estimada de vencimiento
+          y una explicación inicial del cómputo.
+        </p>
+      </div>
+    </section>
+
+    <section class="container calculator-layout">
+      <form id="deadlineForm" class="form-card">
+        <div class="form-group">
+          <label for="notificationDate">Fecha de notificación</label>
+          <input type="date" id="notificationDate" required />
+        </div>
+
+        <div class="form-group">
+          <label for="daysCount">Cantidad de días</label>
+          <input type="number" id="daysCount" min="1" placeholder="Ej: 5" required />
+        </div>
+
+        <div class="form-group">
+          <label for="dayType">Tipo de plazo</label>
+          <select id="dayType" required>
+            <option value="business">Días hábiles</option>
+            <option value="calendar">Días corridos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="jurisdiction">Jurisdicción</label>
+          <select id="jurisdiction" required>
+            <option value="pba">Provincia de Buenos Aires</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="actionType">Tipo de actuación</label>
+          <select id="actionType">
+            <option value="">Seleccionar opcionalmente</option>
+            <option value="Contestación">Contestación</option>
+            <option value="Apelación">Apelación</option>
+            <option value="Documentación">Presentación de documentación</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="caseName">Expediente</label>
+          <input type="text" id="caseName" placeholder="Ej: Pérez c/ Gómez s/ daños" />
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Observaciones</label>
+          <textarea id="notes" placeholder="Notas internas, criterio utilizado o aclaraciones..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Calcular vencimiento</button>
+      </form>
+
+      <aside class="result-card">
+        <h2>Resultado</h2>
+
+        <div id="emptyResult" class="result-empty">
+          Completá el formulario para calcular una fecha estimada de vencimiento.
+        </div>
+
+        <div id="calculationResult" class="hidden">
+          <p>Fecha estimada de vencimiento:</p>
+          <div id="deadlineDate" class="result-date"></div>
+
+          <div class="result-detail">
+            <div id="startDateDetail" class="detail-item"></div>
+            <div id="daysDetail" class="detail-item"></div>
+            <div id="excludedDetail" class="detail-item"></div>
+            <div id="jurisdictionDetail" class="detail-item"></div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn-secondary" type="button">Guardar plazo</button>
+            <button class="btn btn-secondary" type="button">Exportar PDF</button> 
+            <button id="clearResultBtn" class="btn btn-secondary" type="button">Limpiar cálculo</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="container">
+      <div class="notice">
+        <strong>Aviso:</strong>
+        este cálculo es orientativo. En esta primera versión se excluyen sábados, domingos
+        y los días inhábiles cargados manualmente. Todavía no contempla ferias judiciales,
+        asuetos especiales ni reglas particulares de cada organismo.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      PlazoClaro © 2026 — Cálculo orientativo sujeto a verificación profesional.
+    </div>
+  </footer>
+
+  <script src="./js/calculator.js"></script>
+</body>
+</html>
