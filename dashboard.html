@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de vencimientos | PlazoClaro</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+
+      <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
+        <a href="./calculator.html">Calculadora</a>
+        <a href="./dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Panel de vencimientos</h1>
+        <p>
+          Consultá los plazos guardados, revisá próximos vencimientos y actualizá su estado.
+        </p>
+      </div>
+    </section>
+
+    <section class="container dashboard-layout">
+      <div class="dashboard-header">
+        <div>
+          <h2>Vencimientos guardados</h2>
+          <p id="dashboardSummary">Cargando plazos...</p>
+        </div>
+
+        <div class="dashboard-actions">
+          <a href="./calculator.html" class="btn btn-primary">Calcular nuevo plazo</a>
+          <button id="refreshDeadlinesBtn" class="btn btn-secondary" type="button">
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div id="dashboardMessage" class="notice hidden"></div>
+
+      <div class="table-card">
+        <table class="deadlines-table">
+          <thead>
+            <tr>
+              <th>Expediente</th>
+              <th>Actuación</th>
+              <th>Notificación</th>
+              <th>Vencimiento</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="deadlinesTableBody">
+            <tr>
+              <td colspan="6">Cargando vencimientos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="notice">
+        <strong>Aviso:</strong>
+        los vencimientos listados son orientativos y deben ser verificados por el profesional
+        conforme a la normativa aplicable, resoluciones judiciales, ferias, asuetos y particularidades del expediente.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      PlazoClaro © 2026 — Panel de control de vencimientos judiciales.
+    </div>
+  </footer>
+
+  <script src="./js/dashboard.js"></script>
+</body>
+</html>
