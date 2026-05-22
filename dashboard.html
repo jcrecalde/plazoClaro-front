@@ -47,6 +47,35 @@
 
       <div id="dashboardMessage" class="notice hidden"></div>
 
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-label">Total</span>
+          <strong id="totalDeadlines">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-label">Pendientes</span>
+          <strong id="pendingDeadlines">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-label">Completados</span>
+          <strong id="completedDeadlines">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-label">Vencidos</span>
+          <strong id="expiredDeadlines">0</strong>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" type="button" data-filter="all">Todos</button>
+        <button class="filter-btn" type="button" data-filter="pending">Pendientes</button>
+        <button class="filter-btn" type="button" data-filter="completed">Completados</button>
+        <button class="filter-btn" type="button" data-filter="expired">Vencidos</button>
+      </div>
+
       <div class="table-card">
         <table class="deadlines-table">
           <thead>

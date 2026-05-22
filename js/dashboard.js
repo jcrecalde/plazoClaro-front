@@ -5,9 +5,28 @@ const dashboardSummary = document.getElementById("dashboardSummary");
 const dashboardMessage = document.getElementById("dashboardMessage");
 const refreshDeadlinesBtn = document.getElementById("refreshDeadlinesBtn");
 
+const totalDeadlines = document.getElementById("totalDeadlines");
+const pendingDeadlines = document.getElementById("pendingDeadlines");
+const completedDeadlines = document.getElementById("completedDeadlines");
+const expiredDeadlines = document.getElementById("expiredDeadlines");
+
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+let allDeadlines = [];
+let currentFilter = "all";
+
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
 refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
+
+filterButtons.forEach((button) => {
+  button.addEventListener("click", function () {
+    currentFilter = button.dataset.filter;
+
+    setActiveFilterButton(currentFilter);
+    renderDeadlines(getFilteredDeadlines());
+  });
+});
 
 async function loadDeadlines() {
   try {
@@ -27,7 +46,9 @@ async function loadDeadlines() {
 
     const deadlines = await response.json();
 
-    renderDeadlines(deadlines);
+    allDeadlines = sortDeadlines(deadlines);
+    updateSummaryCards(allDeadlines);
+    renderDeadlines(getFilteredDeadlines());
   } catch (error) {
     console.error(error);
 
@@ -41,8 +62,69 @@ async function loadDeadlines() {
   }
 }
 
+function sortDeadlines(deadlines) {
+  return [...deadlines].sort((a, b) => {
+    const statusOrder = {
+      expired: 1,
+      pending: 2,
+      completed: 3,
+    };
+
+    const statusA = statusOrder[getComputedStatus(a)] || 99;
+    const statusB = statusOrder[getComputedStatus(b)] || 99;
+
+    if (statusA !== statusB) {
+      return statusA - statusB;
+    }
+
+    return new Date(a.deadline_date) - new Date(b.deadline_date);
+  });
+}
+
+function getComputedStatus(deadline) {
+  if (deadline.status === "completed") {
+    return "completed";
+  }
+
+  if (isExpired(deadline.deadline_date)) {
+    return "expired";
+  }
+
+  return "pending";
+}
+
+function getFilteredDeadlines() {
+  if (currentFilter === "all") {
+    return allDeadlines;
+  }
+
+  return allDeadlines.filter((deadline) => getComputedStatus(deadline) === currentFilter);
+}
+
+function updateSummaryCards(deadlines) {
+  const counts = {
+    total: deadlines.length,
+    pending: 0,
+    completed: 0,
+    expired: 0,
+  };
+
+  deadlines.forEach((deadline) => {
+    const status = getComputedStatus(deadline);
+
+    if (status === "pending") counts.pending++;
+    if (status === "completed") counts.completed++;
+    if (status === "expired") counts.expired++;
+  });
+
+  totalDeadlines.textContent = counts.total;
+  pendingDeadlines.textContent = counts.pending;
+  completedDeadlines.textContent = counts.completed;
+  expiredDeadlines.textContent = counts.expired;
+}
+
 function renderDeadlines(deadlines) {
-  if (!deadlines.length) {
+  if (!allDeadlines.length) {
     dashboardSummary.textContent = "No hay plazos guardados todavía.";
 
     deadlinesTableBody.innerHTML = `
@@ -54,11 +136,22 @@ function renderDeadlines(deadlines) {
     return;
   }
 
-  dashboardSummary.textContent = `${deadlines.length} plazo(s) guardado(s).`;
+  dashboardSummary.textContent = `${allDeadlines.length} plazo(s) guardado(s).`;
+
+  if (!deadlines.length) {
+    deadlinesTableBody.innerHTML = `
+      <tr>
+        <td colspan="6">No hay vencimientos para el filtro seleccionado.</td>
+      </tr>
+    `;
+
+    return;
+  }
 
   deadlinesTableBody.innerHTML = "";
 
   deadlines.forEach((deadline) => {
+    const computedStatus = getComputedStatus(deadline);
     const row = document.createElement("tr");
 
     row.innerHTML = `
@@ -67,8 +160,8 @@ function renderDeadlines(deadlines) {
       <td>${formatDate(deadline.notification_date)}</td>
       <td><strong>${formatDate(deadline.deadline_date)}</strong></td>
       <td>
-        <span class="status-badge ${getStatusClass(deadline.status)}">
-          ${getStatusLabel(deadline.status)}
+        <span class="status-badge ${getStatusClass(computedStatus)}">
+          ${getStatusLabel(computedStatus)}
         </span>
       </td>
       <td>
@@ -157,6 +250,27 @@ async function deleteDeadline(deadlineId) {
     console.error(error);
     showMessage("No se pudo eliminar el plazo.", true);
   }
+}
+
+function setActiveFilterButton(filter) {
+  filterButtons.forEach((button) => {
+    if (button.dataset.filter === filter) {
+      button.classList.add("active");
+    } else {
+      button.classList.remove("active");
+    }
+  });
+}
+
+function isExpired(dateString) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  const deadlineDate = new Date(year, month - 1, day);
+  deadlineDate.setHours(0, 0, 0, 0);
+
+  return deadlineDate < today;
 }
 
 function formatDate(dateString) {
