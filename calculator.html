@@ -36,6 +36,14 @@
         <div class="form-group">
           <label for="notificationDate">Fecha de notificación</label>
           <input type="date" id="notificationDate" required />
+        </div> 
+
+        <div class="form-group">
+          <label for="startRule">Inicio del cómputo</label>
+          <select id="startRule" required>
+            <option value="next_day">Al día siguiente de la notificación</option>
+            <option value="same_day">El mismo día de la fecha indicada</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -101,8 +109,13 @@
           </div>
 
           <div class="result-actions">
-            <button class="btn btn-secondary" type="button">Guardar plazo</button>
-            <button class="btn btn-secondary" type="button">Exportar PDF</button> 
+            <button id="saveDeadlineBtn" class="btn btn-secondary" type="button">
+              Guardar plazo
+            </button>
+            <button class="btn btn-secondary" type="button">Exportar PDF</button>  
+            <a href="./dashboard.html" class="btn btn-secondary">
+              Ver dashboard
+            </a>
             <button id="clearResultBtn" class="btn btn-secondary" type="button">Limpiar cálculo</button>
           </div>
         </div>

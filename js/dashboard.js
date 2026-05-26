@@ -34,7 +34,7 @@ async function loadDeadlines() {
 
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="6">Cargando vencimientos...</td>
+        <td colspan="7">Cargando vencimientos...</td>
       </tr>
     `;
 
@@ -56,7 +56,7 @@ async function loadDeadlines() {
 
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="6">No se pudieron cargar los vencimientos. Verificá que el backend esté levantado.</td>
+        <td colspan="7">No se pudieron cargar los vencimientos. Verificá que el backend esté levantado.</td>
       </tr>
     `;
   }
@@ -129,7 +129,7 @@ function renderDeadlines(deadlines) {
 
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="6">Todavía no hay vencimientos guardados.</td>
+        <td colspan="7">Todavía no hay vencimientos guardados.</td>
       </tr>
     `;
 
@@ -141,7 +141,7 @@ function renderDeadlines(deadlines) {
   if (!deadlines.length) {
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="6">No hay vencimientos para el filtro seleccionado.</td>
+        <td colspan="7">No hay vencimientos para el filtro seleccionado.</td>
       </tr>
     `;
 
@@ -158,6 +158,7 @@ function renderDeadlines(deadlines) {
       <td>${escapeHTML(deadline.case_name || "Sin expediente")}</td>
       <td>${escapeHTML(deadline.action_type || "Sin actuación")}</td>
       <td>${formatDate(deadline.notification_date)}</td>
+      <td>${getStartRuleLabel(deadline.start_rule)}</td>
       <td><strong>${formatDate(deadline.deadline_date)}</strong></td>
       <td>
         <span class="status-badge ${getStatusClass(computedStatus)}">
@@ -290,6 +291,11 @@ function getStatusLabel(status) {
   if (status === "expired") return "Vencido";
 
   return "Sin estado";
+} 
+
+function getStartRuleLabel(startRule) {
+  if (startRule === "same_day") return "Mismo día";
+  return "Día siguiente";
 }
 
 function getStatusClass(status) {
