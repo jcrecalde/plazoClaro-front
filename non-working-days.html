@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Días inhábiles | PlazoClaro</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+
+      <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
+        <a href="./calculator.html">Calculadora</a>
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./non-working-days.html">Días inhábiles</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Administración de días inhábiles</h1>
+        <p>
+          Cargá feriados, asuetos o días inhábiles que deben excluirse del cómputo de plazos hábiles.
+        </p>
+      </div>
+    </section>
+
+    <section class="container calculator-layout">
+      <form id="nonWorkingDayForm" class="form-card">
+        <div class="form-group">
+          <label for="nonWorkingDate">Fecha</label>
+          <input type="date" id="nonWorkingDate" required />
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Motivo</label>
+          <input
+            type="text"
+            id="reason"
+            placeholder="Ej: Feriado nacional - 25 de Mayo"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="jurisdiction">Jurisdicción</label>
+          <select id="jurisdiction" required>
+            <option value="pba">Provincia de Buenos Aires</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="type">Tipo</label>
+          <select id="type" required>
+            <option value="national_holiday">Feriado nacional</option>
+            <option value="provincial_holiday">Feriado provincial</option>
+            <option value="judicial_recess">Feria judicial</option>
+            <option value="court_holiday">Asueto judicial</option>
+            <option value="special_non_working_day">Inhábil especial</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Guardar día inhábil
+        </button>
+      </form>
+
+      <aside class="result-card">
+        <h2>Días cargados</h2>
+        <p class="result-empty" id="nonWorkingDaysSummary">
+          Cargando días inhábiles...
+        </p>
+
+        <div class="result-actions">
+          <button id="refreshNonWorkingDaysBtn" class="btn btn-secondary" type="button">
+            Actualizar listado
+          </button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="container dashboard-layout">
+      <div id="nonWorkingDayMessage" class="notice hidden"></div>
+
+      <div class="table-card">
+        <table class="deadlines-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Motivo</th>
+              <th>Jurisdicción</th>
+              <th>Tipo</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="nonWorkingDaysTableBody">
+            <tr>
+              <td colspan="6">Cargando días inhábiles...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="notice">
+        <strong>Aviso:</strong>
+        los días cargados en esta sección son utilizados por el motor de cálculo para excluir fechas
+        en plazos hábiles. La carga debe ser verificada conforme a fuentes oficiales y normativa aplicable.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      PlazoClaro © 2026 — Administración de calendarios judiciales.
+    </div>
+  </footer>
+
+  <script src="./js/non-working-days.js"></script>
+</body>
+</html>
