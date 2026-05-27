@@ -855,4 +855,24 @@ textarea:focus {
   .edit-form {
     grid-template-columns: 1fr;
   }
+} 
+
+
+/* Dashboard search */
+
+.search-bar {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.035);
+}
+
+.search-bar label {
+  margin-bottom: 8px;
+}
+
+.search-bar input {
+  max-width: 560px;
 }

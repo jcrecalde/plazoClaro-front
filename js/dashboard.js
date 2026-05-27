@@ -9,7 +9,8 @@ const totalDeadlines = document.getElementById("totalDeadlines");
 const pendingDeadlines = document.getElementById("pendingDeadlines");
 const completedDeadlines = document.getElementById("completedDeadlines");
 const expiredDeadlines = document.getElementById("expiredDeadlines");
-
+  
+const deadlineSearch = document.getElementById("deadlineSearch");
 const filterButtons = document.querySelectorAll(".filter-btn"); 
 
 const deadlineDetailPanel = document.getElementById("deadlineDetailPanel");
@@ -40,11 +41,18 @@ const editJurisdiction = document.getElementById("editJurisdiction");
 const editNotes = document.getElementById("editNotes");
 
 let allDeadlines = [];
-let currentFilter = "all";
+let currentFilter = "all"; 
+let currentSearch = "";
 
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
-refreshDeadlinesBtn.addEventListener("click", loadDeadlines); 
+refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
+
+
+deadlineSearch.addEventListener("input", function () {
+  currentSearch = deadlineSearch.value.trim().toLowerCase();
+  renderDeadlines(getFilteredDeadlines());
+});
 
 closeDetailBtn.addEventListener("click", function () {
   deadlineDetailPanel.classList.add("hidden");
@@ -180,11 +188,37 @@ function getComputedStatus(deadline) {
 }
 
 function getFilteredDeadlines() {
-  if (currentFilter === "all") {
-    return allDeadlines;
+  let filteredDeadlines = allDeadlines;
+
+  if (currentFilter !== "all") {
+    filteredDeadlines = filteredDeadlines.filter(
+      (deadline) => getComputedStatus(deadline) === currentFilter
+    );
   }
 
-  return allDeadlines.filter((deadline) => getComputedStatus(deadline) === currentFilter);
+  if (currentSearch) {
+    filteredDeadlines = filteredDeadlines.filter((deadline) => {
+      const computedStatus = getComputedStatus(deadline);
+
+      const searchableText = [
+        deadline.case_name,
+        deadline.action_type,
+        deadline.notes,
+        deadline.notification_date,
+        deadline.start_date,
+        deadline.deadline_date,
+        getStatusLabel(computedStatus),
+        getStartRuleLabel(deadline.start_rule),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(currentSearch);
+    });
+  }
+
+  return filteredDeadlines;
 }
 
 function updateSummaryCards(deadlines) {
@@ -225,9 +259,13 @@ function renderDeadlines(deadlines) {
   dashboardSummary.textContent = `${allDeadlines.length} plazo(s) guardado(s).`;
 
   if (!deadlines.length) {
+    const emptyMessage = currentSearch
+      ? "No hay vencimientos que coincidan con la búsqueda."
+      : "No hay vencimientos para el filtro seleccionado.";
+
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="7">No hay vencimientos para el filtro seleccionado.</td>
+        <td colspan="7">${emptyMessage}</td>
       </tr>
     `;
 
