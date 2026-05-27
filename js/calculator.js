@@ -10,7 +10,8 @@ const deadlineDateElement = document.getElementById("deadlineDate");
 const startDateDetail = document.getElementById("startDateDetail");
 const daysDetail = document.getElementById("daysDetail");
 const excludedDetail = document.getElementById("excludedDetail");
-const jurisdictionDetail = document.getElementById("jurisdictionDetail");
+const jurisdictionDetail = document.getElementById("jurisdictionDetail"); 
+const calculatorMessage = document.getElementById("calculatorMessage");
 
 const clearResultBtn = document.getElementById("clearResultBtn");
 const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");
@@ -104,10 +105,10 @@ saveDeadlineBtn.addEventListener("click", async function () {
     const savedDeadline = await response.json();
 
     console.log("Plazo guardado:", savedDeadline);
-    alert("Plazo guardado correctamente.");
+    showCalculatorMessage("Plazo guardado correctamente. Podés verlo desde el dashboard.", true);
   } catch (error) {
     console.error(error);
-    alert("No se pudo guardar el plazo. Verificá que el backend y MongoDB estén funcionando.");
+    showCalculatorMessage("No se pudo guardar el plazo. Verificá que el backend y MongoDB estén funcionando.", true);
   } finally {
     saveDeadlineBtn.disabled = false;
     saveDeadlineBtn.textContent = "Guardar plazo";
@@ -160,7 +161,7 @@ function renderResult(result) {
   calculationResult.classList.remove("hidden");
   calculationResult.style.display = "block";
 
-  deadlineDateElement.textContent = formatDate(result.deadlineDate);
+  deadlineDateElement.textContent = formatDate(result.deadlineDate); 
 
   const startRuleText =
     result.startRule === "same_day"
@@ -188,12 +189,26 @@ function renderResult(result) {
   }
 
   jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;
+} 
+
+
+function showCalculatorMessage(message, visible) {
+  if (!visible || !message) {
+    calculatorMessage.classList.add("hidden");
+    calculatorMessage.textContent = "";
+    return;
+  }
+
+  calculatorMessage.textContent = message;
+  calculatorMessage.classList.remove("hidden");
 }
 
 clearResultBtn.addEventListener("click", function () {
   form.reset();
+ 
+  lastCalculationPayload = null; 
 
-  lastCalculationPayload = null;
+  showCalculatorMessage("", false);
 
   calculationResult.classList.add("hidden");
   calculationResult.style.display = "none";
