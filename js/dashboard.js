@@ -10,14 +10,31 @@ const pendingDeadlines = document.getElementById("pendingDeadlines");
 const completedDeadlines = document.getElementById("completedDeadlines");
 const expiredDeadlines = document.getElementById("expiredDeadlines");
 
-const filterButtons = document.querySelectorAll(".filter-btn");
+const filterButtons = document.querySelectorAll(".filter-btn"); 
+
+const deadlineDetailPanel = document.getElementById("deadlineDetailPanel");
+const closeDetailBtn = document.getElementById("closeDetailBtn");
+
+const detailCaseName = document.getElementById("detailCaseName");
+const detailActionType = document.getElementById("detailActionType");
+const detailNotificationDate = document.getElementById("detailNotificationDate");
+const detailStartRule = document.getElementById("detailStartRule");
+const detailStartDate = document.getElementById("detailStartDate");
+const detailDeadlineDate = document.getElementById("detailDeadlineDate");
+const detailStatus = document.getElementById("detailStatus");
+const detailExcludedDays = document.getElementById("detailExcludedDays");
+const detailNotes = document.getElementById("detailNotes");
 
 let allDeadlines = [];
 let currentFilter = "all";
 
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
-refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
+refreshDeadlinesBtn.addEventListener("click", loadDeadlines); 
+
+closeDetailBtn.addEventListener("click", function () {
+  deadlineDetailPanel.classList.add("hidden");
+});
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", function () {
@@ -167,11 +184,16 @@ function renderDeadlines(deadlines) {
       </td>
       <td>
         <div class="table-actions">
+          <button class="btn-small btn-detail" data-id="${deadline.id}">
+            Ver detalle
+          </button>
+
           ${
             deadline.status !== "completed"
               ? `<button class="btn-small btn-complete" data-id="${deadline.id}">Completar</button>`
               : `<button class="btn-small btn-pending" data-id="${deadline.id}">Pendiente</button>`
           }
+
           <button class="btn-small btn-delete" data-id="${deadline.id}">Eliminar</button>
         </div>
       </td>
@@ -183,10 +205,18 @@ function renderDeadlines(deadlines) {
   attachActionEvents();
 }
 
+
 function attachActionEvents() {
   const completeButtons = document.querySelectorAll(".btn-complete");
   const pendingButtons = document.querySelectorAll(".btn-pending");
   const deleteButtons = document.querySelectorAll(".btn-delete");
+  const detailButtons = document.querySelectorAll(".btn-detail");
+
+  detailButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      showDeadlineDetail(button.dataset.id);
+    });
+  });
 
   completeButtons.forEach((button) => {
     button.addEventListener("click", function () {
@@ -206,6 +236,55 @@ function attachActionEvents() {
     });
   });
 }
+
+
+function showDeadlineDetail(deadlineId) {
+  const deadline = allDeadlines.find((item) => item.id === deadlineId);
+
+  if (!deadline) {
+    showMessage("No se pudo encontrar el detalle del plazo.", true);
+    return;
+  }
+
+  const computedStatus = getComputedStatus(deadline);
+
+  detailCaseName.textContent = deadline.case_name || "Sin expediente";
+  detailActionType.textContent = deadline.action_type || "Sin actuación";
+  detailNotificationDate.textContent = formatDate(deadline.notification_date);
+  detailStartRule.textContent = getStartRuleLabel(deadline.start_rule);
+  detailStartDate.textContent = formatDate(deadline.start_date);
+  detailDeadlineDate.textContent = formatDate(deadline.deadline_date);
+  detailStatus.textContent = getStatusLabel(computedStatus);
+  detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
+
+  renderExcludedDaysDetail(deadline.excluded_days || []);
+
+  deadlineDetailPanel.classList.remove("hidden");
+
+  deadlineDetailPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+
+function renderExcludedDaysDetail(excludedDays) {
+  detailExcludedDays.innerHTML = "";
+
+  if (!excludedDays.length) {
+    const item = document.createElement("li");
+    item.textContent = "No se excluyeron días durante el período computado.";
+    detailExcludedDays.appendChild(item);
+    return;
+  }
+
+  excludedDays.forEach((excludedDay) => {
+    const item = document.createElement("li");
+    item.textContent = `${formatDate(excludedDay.date)} - ${excludedDay.reason}`;
+    detailExcludedDays.appendChild(item);
+  });
+}
+
 
 async function updateDeadlineStatus(deadlineId, status) {
   try {

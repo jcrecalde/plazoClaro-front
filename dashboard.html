@@ -75,7 +75,7 @@
         <button class="filter-btn" type="button" data-filter="pending">Pendientes</button>
         <button class="filter-btn" type="button" data-filter="completed">Completados</button>
         <button class="filter-btn" type="button" data-filter="expired">Vencidos</button>
-      </div>
+      </div> 
 
       <div class="table-card">
         <table class="deadlines-table">
@@ -89,7 +89,7 @@
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
-          </thead>
+          </thead> 
 
           <tbody id="deadlinesTableBody">
             <tr>
@@ -97,6 +97,61 @@
             </tr>
           </tbody>
         </table>
+      </div> 
+
+      <div id="deadlineDetailPanel" class="deadline-detail-panel hidden">
+        <div class="detail-panel-header">
+          <div>
+            <span class="badge">Detalle del plazo</span>
+            <h3 id="detailCaseName">Expediente</h3>
+          </div>
+
+          <button id="closeDetailBtn" class="btn btn-secondary" type="button">
+            Cerrar detalle
+          </button>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-box">
+            <span>Actuación</span>
+            <strong id="detailActionType">-</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Fecha de notificación</span>
+            <strong id="detailNotificationDate">-</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Inicio del cómputo</span>
+            <strong id="detailStartRule">-</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Inicio efectivo</span>
+            <strong id="detailStartDate">-</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Vencimiento</span>
+            <strong id="detailDeadlineDate">-</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Estado</span>
+            <strong id="detailStatus">-</strong>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Días excluidos</h4>
+          <ul id="detailExcludedDays" class="detail-list"></ul>
+        </div>
+
+        <div class="detail-section">
+          <h4>Observaciones</h4>
+          <p id="detailNotes" class="detail-notes">-</p>
+        </div>
       </div>
     </section>
 
