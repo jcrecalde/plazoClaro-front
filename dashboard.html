@@ -15,7 +15,7 @@
       <nav class="nav-links">
         <a href="./index.html">Inicio</a>
         <a href="./calculator.html">Calculadora</a>
-        <a href="./dashboard.html">Dashboard</a> 
+        <a href="./dashboard.html">Dashboard</a>
         <a href="./non-working-days.html">Días inhábiles</a>
       </nav>
     </div>
@@ -75,7 +75,7 @@
         <button class="filter-btn" type="button" data-filter="pending">Pendientes</button>
         <button class="filter-btn" type="button" data-filter="completed">Completados</button>
         <button class="filter-btn" type="button" data-filter="expired">Vencidos</button>
-      </div> 
+      </div>
 
       <div class="table-card">
         <table class="deadlines-table">
@@ -89,7 +89,7 @@
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
-          </thead> 
+          </thead>
 
           <tbody id="deadlinesTableBody">
             <tr>
@@ -97,8 +97,9 @@
             </tr>
           </tbody>
         </table>
-      </div> 
+      </div>
 
+      <!-- Panel de detalle del plazo -->
       <div id="deadlineDetailPanel" class="deadline-detail-panel hidden">
         <div class="detail-panel-header">
           <div>
@@ -153,6 +154,91 @@
           <p id="detailNotes" class="detail-notes">-</p>
         </div>
       </div>
+
+      <!-- Panel de edición del plazo -->
+      <div id="deadlineEditPanel" class="deadline-detail-panel hidden">
+        <div class="detail-panel-header">
+          <div>
+            <span class="badge">Editar plazo</span>
+            <h3>Modificar datos del vencimiento</h3>
+          </div>
+
+          <button id="cancelEditBtn" class="btn btn-secondary" type="button">
+            Cancelar edición
+          </button>
+        </div>
+
+        <form id="deadlineEditForm" class="edit-form">
+          <input type="hidden" id="editDeadlineId" />
+
+          <div class="form-group">
+            <label for="editCaseName">Expediente</label>
+            <input
+              type="text"
+              id="editCaseName"
+              placeholder="Ej: Pérez c/ Gómez s/ daños"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editActionType">Tipo de actuación</label>
+            <select id="editActionType">
+              <option value="">Seleccionar opcionalmente</option>
+              <option value="Contestación">Contestación</option>
+              <option value="Apelación">Apelación</option>
+              <option value="Documentación">Presentación de documentación</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editNotificationDate">Fecha de notificación</label>
+            <input type="date" id="editNotificationDate" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editStartRule">Inicio del cómputo</label>
+            <select id="editStartRule" required>
+              <option value="next_day">Al día siguiente de la notificación</option>
+              <option value="same_day">El mismo día de la fecha indicada</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDaysCount">Cantidad de días</label>
+            <input type="number" id="editDaysCount" min="1" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editDayType">Tipo de plazo</label>
+            <select id="editDayType" required>
+              <option value="business">Días hábiles</option>
+              <option value="calendar">Días corridos</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editJurisdiction">Jurisdicción</label>
+            <select id="editJurisdiction" required>
+              <option value="pba">Provincia de Buenos Aires</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="editNotes">Observaciones</label>
+            <textarea
+              id="editNotes"
+              placeholder="Notas internas, criterio utilizado o aclaraciones..."
+            ></textarea>
+          </div>
+
+          <div class="result-actions full-width">
+            <button type="submit" class="btn btn-primary">
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="container">
@@ -170,6 +256,6 @@
     </div>
   </footer>
 
-  <script src="./js/dashboard.js?v=2"></script>
+  <script src="./js/dashboard.js?v=4"></script>
 </body>
 </html>

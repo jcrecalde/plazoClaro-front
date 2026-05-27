@@ -23,7 +23,21 @@ const detailStartDate = document.getElementById("detailStartDate");
 const detailDeadlineDate = document.getElementById("detailDeadlineDate");
 const detailStatus = document.getElementById("detailStatus");
 const detailExcludedDays = document.getElementById("detailExcludedDays");
-const detailNotes = document.getElementById("detailNotes");
+const detailNotes = document.getElementById("detailNotes"); 
+
+const deadlineEditPanel = document.getElementById("deadlineEditPanel");
+const deadlineEditForm = document.getElementById("deadlineEditForm");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+const editDeadlineId = document.getElementById("editDeadlineId");
+const editCaseName = document.getElementById("editCaseName");
+const editActionType = document.getElementById("editActionType");
+const editNotificationDate = document.getElementById("editNotificationDate");
+const editStartRule = document.getElementById("editStartRule");
+const editDaysCount = document.getElementById("editDaysCount");
+const editDayType = document.getElementById("editDayType");
+const editJurisdiction = document.getElementById("editJurisdiction");
+const editNotes = document.getElementById("editNotes");
 
 let allDeadlines = [];
 let currentFilter = "all";
@@ -34,6 +48,10 @@ refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
 
 closeDetailBtn.addEventListener("click", function () {
   deadlineDetailPanel.classList.add("hidden");
+}); 
+
+cancelEditBtn.addEventListener("click", function () {
+  deadlineEditPanel.classList.add("hidden");
 });
 
 filterButtons.forEach((button) => {
@@ -43,6 +61,57 @@ filterButtons.forEach((button) => {
     setActiveFilterButton(currentFilter);
     renderDeadlines(getFilteredDeadlines());
   });
+}); 
+
+
+deadlineEditForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const deadlineId = editDeadlineId.value;
+
+  const payload = {
+    case_name: editCaseName.value.trim() || null,
+    action_type: editActionType.value || null,
+    notification_date: editNotificationDate.value,
+    days_count: Number(editDaysCount.value),
+    day_type: editDayType.value,
+    jurisdiction: editJurisdiction.value,
+    start_rule: editStartRule.value,
+    notes: editNotes.value.trim() || null,
+  };
+
+  if (!deadlineId) {
+    showMessage("No se encontró el ID del plazo a editar.", true);
+    return;
+  }
+
+  if (!payload.notification_date || !payload.days_count || payload.days_count <= 0) {
+    showMessage("Completá una fecha válida y una cantidad de días mayor a cero.", true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${DEADLINES_API_URL}/${deadlineId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("No se pudo editar el plazo.");
+    }
+
+    showMessage("Plazo editado y recalculado correctamente.", true);
+
+    deadlineEditPanel.classList.add("hidden");
+
+    await loadDeadlines();
+  } catch (error) {
+    console.error(error);
+    showMessage("No se pudo editar el plazo. Verificá que el backend esté funcionando.", true);
+  }
 });
 
 async function loadDeadlines() {
@@ -188,6 +257,10 @@ function renderDeadlines(deadlines) {
             Ver detalle
           </button>
 
+          <button class="btn-small btn-edit" data-id="${deadline.id}">
+            Editar
+          </button>
+
           ${
             deadline.status !== "completed"
               ? `<button class="btn-small btn-complete" data-id="${deadline.id}">Completar</button>`
@@ -207,14 +280,21 @@ function renderDeadlines(deadlines) {
 
 
 function attachActionEvents() {
+  const detailButtons = document.querySelectorAll(".btn-detail");
+  const editButtons = document.querySelectorAll(".btn-edit");
   const completeButtons = document.querySelectorAll(".btn-complete");
   const pendingButtons = document.querySelectorAll(".btn-pending");
   const deleteButtons = document.querySelectorAll(".btn-delete");
-  const detailButtons = document.querySelectorAll(".btn-detail");
 
   detailButtons.forEach((button) => {
     button.addEventListener("click", function () {
       showDeadlineDetail(button.dataset.id);
+    });
+  });
+
+  editButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      showEditForm(button.dataset.id);
     });
   });
 
@@ -282,6 +362,34 @@ function renderExcludedDaysDetail(excludedDays) {
     const item = document.createElement("li");
     item.textContent = `${formatDate(excludedDay.date)} - ${excludedDay.reason}`;
     detailExcludedDays.appendChild(item);
+  });
+} 
+
+
+function showEditForm(deadlineId) {
+  const deadline = allDeadlines.find((item) => item.id === deadlineId);
+
+  if (!deadline) {
+    showMessage("No se pudo encontrar el plazo para editar.", true);
+    return;
+  }
+
+  editDeadlineId.value = deadline.id;
+  editCaseName.value = deadline.case_name || "";
+  editActionType.value = deadline.action_type || "";
+  editNotificationDate.value = deadline.notification_date;
+  editStartRule.value = deadline.start_rule || "next_day";
+  editDaysCount.value = deadline.days_count;
+  editDayType.value = deadline.day_type;
+  editJurisdiction.value = deadline.jurisdiction;
+  editNotes.value = deadline.notes || "";
+
+  deadlineDetailPanel.classList.add("hidden");
+  deadlineEditPanel.classList.remove("hidden");
+
+  deadlineEditPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
   });
 }
 

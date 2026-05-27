@@ -831,4 +831,28 @@ textarea:focus {
   .detail-grid {
     grid-template-columns: 1fr;
   }
+} 
+
+
+/* Deadline edit form */
+
+.edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.edit-form .full-width {
+  grid-column: 1 / -1;
+}
+
+.btn-edit {
+  background: #DBEAFE;
+  color: #1E3A8A;
+}
+
+@media (max-width: 880px) {
+  .edit-form {
+    grid-template-columns: 1fr;
+  }
 }
