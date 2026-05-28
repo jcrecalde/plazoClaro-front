@@ -297,7 +297,7 @@ function renderDeadlines(deadlines) {
       <td>${escapeHTML(deadline.action_type || "Sin actuación")}</td>
       <td>${formatDate(deadline.notification_date)}</td>
       <td>${getStartRuleLabel(deadline.start_rule)}</td>
-      <td><strong>${formatDate(deadline.deadline_date)}</strong></td>
+      <td><strong>${formatDate(deadline.deadline_date)}</strong>${renderUrgencyBadge(deadline)}</td>
       <td>
         <span class="status-badge ${getStatusClass(computedStatus)}">
           ${getStatusLabel(computedStatus)}
@@ -529,6 +529,73 @@ function isUpcoming(deadline) {
   deadlineDate.setHours(0, 0, 0, 0);
 
   return deadlineDate >= today && deadlineDate <= nextSevenDays;
+} 
+
+function getDaysUntilDeadline(dateString) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  const deadlineDate = new Date(year, month - 1, day);
+  deadlineDate.setHours(0, 0, 0, 0);
+
+  const differenceInMs = deadlineDate - today;
+  return Math.round(differenceInMs / (1000 * 60 * 60 * 24));
+}
+
+function getUrgencyInfo(deadline) {
+  if (deadline.status === "completed") {
+    return null;
+  }
+
+  const daysUntilDeadline = getDaysUntilDeadline(deadline.deadline_date);
+
+  if (daysUntilDeadline < 0) {
+    return {
+      label: "Vencido",
+      className: "urgency-expired",
+    };
+  }
+
+  if (daysUntilDeadline === 0) {
+    return {
+      label: "Vence hoy",
+      className: "urgency-today",
+    };
+  }
+
+  if (daysUntilDeadline === 1) {
+    return {
+      label: "Vence mañana",
+      className: "urgency-tomorrow",
+    };
+  }
+
+  if (daysUntilDeadline <= 7) {
+    return {
+      label: `En ${daysUntilDeadline} días`,
+      className: "urgency-upcoming",
+    };
+  }
+
+  return {
+    label: "Más adelante",
+    className: "urgency-later",
+  };
+}
+
+function renderUrgencyBadge(deadline) {
+  const urgencyInfo = getUrgencyInfo(deadline);
+
+  if (!urgencyInfo) {
+    return "";
+  }
+
+  return `
+    <span class="urgency-badge ${urgencyInfo.className}">
+      ${urgencyInfo.label}
+    </span>
+  `;
 }
 
 function formatDate(dateString) {

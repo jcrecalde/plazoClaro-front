@@ -881,4 +881,42 @@ textarea:focus {
 
 .search-bar input {
   max-width: 560px;
+} 
+
+
+/* Deadline urgency badges */
+
+.urgency-badge {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.urgency-expired {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.urgency-today {
+  background: #FDE68A;
+  color: #78350F;
+}
+
+.urgency-tomorrow {
+  background: #FFEDD5;
+  color: #9A3412;
+}
+
+.urgency-upcoming {
+  background: #DBEAFE;
+  color: #1E3A8A;
+}
+
+.urgency-later {
+  background: #E5E7EB;
+  color: #374151;
 }
