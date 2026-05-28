@@ -12,7 +12,9 @@ const expiredDeadlines = document.getElementById("expiredDeadlines");
 const upcomingDeadlines = document.getElementById("upcomingDeadlines");
   
 const deadlineSearch = document.getElementById("deadlineSearch");
-const filterButtons = document.querySelectorAll(".filter-btn"); 
+const filterButtons = document.querySelectorAll(".filter-btn");  
+
+const exportDetailPdfBtn = document.getElementById("exportDetailPdfBtn");
 
 const deadlineDetailPanel = document.getElementById("deadlineDetailPanel");
 const closeDetailBtn = document.getElementById("closeDetailBtn");
@@ -42,8 +44,9 @@ const editJurisdiction = document.getElementById("editJurisdiction");
 const editNotes = document.getElementById("editNotes");
 
 let allDeadlines = [];
-let currentFilter = "all"; 
+let currentFilter = "all";
 let currentSearch = "";
+let selectedDeadlineForDetail = null; 
 
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
@@ -57,7 +60,16 @@ deadlineSearch.addEventListener("input", function () {
 
 closeDetailBtn.addEventListener("click", function () {
   deadlineDetailPanel.classList.add("hidden");
-}); 
+});  
+
+exportDetailPdfBtn.addEventListener("click", function () {
+  if (!selectedDeadlineForDetail) {
+    showMessage("Primero seleccioná un plazo para exportar.", true);
+    return;
+  }
+
+  exportDeadlineDetailToPdf(selectedDeadlineForDetail);
+});
 
 cancelEditBtn.addEventListener("click", function () {
   deadlineEditPanel.classList.add("hidden");
@@ -378,7 +390,8 @@ function showDeadlineDetail(deadlineId) {
     return;
   }
 
-  const computedStatus = getComputedStatus(deadline);
+  const computedStatus = getComputedStatus(deadline); 
+  selectedDeadlineForDetail = deadline;
 
   detailCaseName.textContent = deadline.case_name || "Sin expediente";
   detailActionType.textContent = deadline.action_type || "Sin actuación";
@@ -628,6 +641,265 @@ function getStatusClass(status) {
   if (status === "expired") return "status-expired";
 
   return "";
+} 
+
+ 
+function exportDeadlineDetailToPdf(deadline) {
+  const computedStatus = getComputedStatus(deadline);
+
+  const excludedDaysHtml = getExcludedDaysHtmlForPdf(deadline.excluded_days || []);
+
+  const caseName = escapeHTML(deadline.case_name || "Sin expediente");
+  const actionType = escapeHTML(deadline.action_type || "Sin actuación");
+  const notes = escapeHTML(deadline.notes || "Sin observaciones cargadas.");
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    showMessage("El navegador bloqueó la ventana de impresión. Permití ventanas emergentes para exportar el PDF.", true);
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Detalle de plazo - PlazoClaro</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          color: #111827;
+          margin: 40px;
+          line-height: 1.5;
+        }
+
+        .header {
+          border-bottom: 2px solid #111827;
+          padding-bottom: 16px;
+          margin-bottom: 24px;
+        }
+
+        .brand {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 28px;
+          font-weight: 800;
+          margin-bottom: 8px;
+        }
+
+        .brand span {
+          color: #9A6A1F;
+        }
+
+        h1 {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 26px;
+          margin: 0;
+        }
+
+        .subtitle {
+          color: #5F6B7A;
+          margin-top: 6px;
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          margin: 24px 0;
+        }
+
+        .box {
+          border: 1px solid #D8D2C4;
+          padding: 12px;
+          border-radius: 8px;
+          background: #FAFAF8;
+        }
+
+        .label {
+          display: block;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: #5F6B7A;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+
+        .value {
+          font-weight: 700;
+          color: #111827;
+        }
+
+        .deadline {
+          font-size: 22px;
+          font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .section {
+          margin-top: 24px;
+          padding-top: 16px;
+          border-top: 1px solid #D8D2C4;
+        }
+
+        ul {
+          padding-left: 20px;
+        }
+
+        li {
+          margin-bottom: 6px;
+        }
+
+        .notes {
+          border: 1px solid #D8D2C4;
+          background: #FAFAF8;
+          padding: 12px;
+          border-radius: 8px;
+          white-space: pre-wrap;
+        }
+
+        .warning {
+          margin-top: 30px;
+          border: 1px solid #E7C873;
+          background: #FFF8E7;
+          color: #6B4E16;
+          padding: 14px;
+          border-radius: 8px;
+          font-size: 13px;
+        }
+
+        .footer {
+          margin-top: 28px;
+          font-size: 12px;
+          color: #5F6B7A;
+        }
+
+        @media print {
+          body {
+            margin: 24px;
+          }
+
+          button {
+            display: none;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="header">
+        <div class="brand">Plazo<span>Claro</span></div>
+        <h1>Detalle del cálculo de plazo</h1>
+        <p class="subtitle">Documento generado desde el panel de vencimientos.</p>
+      </div>
+
+      <div class="grid">
+        <div class="box">
+          <span class="label">Expediente</span>
+          <span class="value">${caseName}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Actuación</span>
+          <span class="value">${actionType}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Fecha de notificación</span>
+          <span class="value">${formatDate(deadline.notification_date)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Inicio del cómputo</span>
+          <span class="value">${getStartRuleLabel(deadline.start_rule)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Inicio efectivo</span>
+          <span class="value">${formatDate(deadline.start_date)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Estado</span>
+          <span class="value">${getStatusLabel(computedStatus)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Tipo de plazo</span>
+          <span class="value">${getDayTypeLabelForPdf(deadline.day_type)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Cantidad de días</span>
+          <span class="value">${deadline.days_count}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Jurisdicción</span>
+          <span class="value">${getJurisdictionLabelForPdf(deadline.jurisdiction)}</span>
+        </div>
+
+        <div class="box">
+          <span class="label">Fecha de vencimiento</span>
+          <span class="value deadline">${formatDate(deadline.deadline_date)}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Días excluidos</h2>
+        ${excludedDaysHtml}
+      </div>
+
+      <div class="section">
+        <h2>Observaciones</h2>
+        <div class="notes">${notes}</div>
+      </div>
+
+      <div class="warning">
+        <strong>Aviso:</strong>
+        este documento es orientativo. El cálculo debe ser verificado por el profesional conforme a la normativa aplicable,
+        resoluciones judiciales, ferias, asuetos y particularidades del expediente.
+      </div>
+
+      <div class="footer">
+        PlazoClaro — Cálculo orientativo de plazos judiciales.
+      </div>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+
+  setTimeout(() => {
+    printWindow.print();
+  }, 300);
+}
+
+function getExcludedDaysHtmlForPdf(excludedDays) {
+  if (!excludedDays.length) {
+    return "<p>No se excluyeron días durante el período computado.</p>";
+  }
+
+  const items = excludedDays
+    .map((item) => {
+      return `<li>${formatDate(item.date)} - ${escapeHTML(item.reason)}</li>`;
+    })
+    .join("");
+
+  return `<ul>${items}</ul>`;
+}
+
+function getDayTypeLabelForPdf(dayType) {
+  if (dayType === "business") return "Días hábiles";
+  if (dayType === "calendar") return "Días corridos";
+  return "No especificado";
+}
+
+function getJurisdictionLabelForPdf(jurisdiction) {
+  if (jurisdiction === "pba") return "Provincia de Buenos Aires";
+  return "Jurisdicción no especificada";
 }
 
 function showMessage(message, visible) {
