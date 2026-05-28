@@ -8,7 +8,8 @@ const refreshDeadlinesBtn = document.getElementById("refreshDeadlinesBtn");
 const totalDeadlines = document.getElementById("totalDeadlines");
 const pendingDeadlines = document.getElementById("pendingDeadlines");
 const completedDeadlines = document.getElementById("completedDeadlines");
-const expiredDeadlines = document.getElementById("expiredDeadlines");
+const expiredDeadlines = document.getElementById("expiredDeadlines"); 
+const upcomingDeadlines = document.getElementById("upcomingDeadlines");
   
 const deadlineSearch = document.getElementById("deadlineSearch");
 const filterButtons = document.querySelectorAll(".filter-btn"); 
@@ -190,7 +191,11 @@ function getComputedStatus(deadline) {
 function getFilteredDeadlines() {
   let filteredDeadlines = allDeadlines;
 
-  if (currentFilter !== "all") {
+  if (currentFilter === "upcoming") {
+    filteredDeadlines = filteredDeadlines.filter((deadline) =>
+      isUpcoming(deadline)
+    );
+  } else if (currentFilter !== "all") {
     filteredDeadlines = filteredDeadlines.filter(
       (deadline) => getComputedStatus(deadline) === currentFilter
     );
@@ -227,6 +232,7 @@ function updateSummaryCards(deadlines) {
     pending: 0,
     completed: 0,
     expired: 0,
+    upcoming: 0,
   };
 
   deadlines.forEach((deadline) => {
@@ -235,12 +241,14 @@ function updateSummaryCards(deadlines) {
     if (status === "pending") counts.pending++;
     if (status === "completed") counts.completed++;
     if (status === "expired") counts.expired++;
+    if (isUpcoming(deadline)) counts.upcoming++;
   });
 
   totalDeadlines.textContent = counts.total;
   pendingDeadlines.textContent = counts.pending;
   completedDeadlines.textContent = counts.completed;
   expiredDeadlines.textContent = counts.expired;
+  upcomingDeadlines.textContent = counts.upcoming;
 }
 
 function renderDeadlines(deadlines) {
@@ -259,9 +267,15 @@ function renderDeadlines(deadlines) {
   dashboardSummary.textContent = `${allDeadlines.length} plazo(s) guardado(s).`;
 
   if (!deadlines.length) {
-    const emptyMessage = currentSearch
-      ? "No hay vencimientos que coincidan con la búsqueda."
-      : "No hay vencimientos para el filtro seleccionado.";
+    let emptyMessage = "No hay vencimientos para el filtro seleccionado.";
+
+    if (currentSearch) {
+      emptyMessage = "No hay vencimientos que coincidan con la búsqueda.";
+    }
+
+    if (currentFilter === "upcoming") {
+      emptyMessage = "No hay vencimientos pendientes dentro de los próximos 7 días.";
+    }
 
     deadlinesTableBody.innerHTML = `
       <tr>
@@ -497,6 +511,24 @@ function isExpired(dateString) {
   deadlineDate.setHours(0, 0, 0, 0);
 
   return deadlineDate < today;
+} 
+
+function isUpcoming(deadline) {
+  if (deadline.status === "completed") {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const nextSevenDays = new Date(today);
+  nextSevenDays.setDate(today.getDate() + 7);
+
+  const [year, month, day] = deadline.deadline_date.split("-").map(Number);
+  const deadlineDate = new Date(year, month - 1, day);
+  deadlineDate.setHours(0, 0, 0, 0);
+
+  return deadlineDate >= today && deadlineDate <= nextSevenDays;
 }
 
 function formatDate(dateString) {
