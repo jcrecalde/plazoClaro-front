@@ -27,7 +27,8 @@ const detailStartDate = document.getElementById("detailStartDate");
 const detailDeadlineDate = document.getElementById("detailDeadlineDate");
 const detailStatus = document.getElementById("detailStatus");
 const detailExcludedDays = document.getElementById("detailExcludedDays");
-const detailNotes = document.getElementById("detailNotes"); 
+const detailNotes = document.getElementById("detailNotes");
+const detailHistory = document.getElementById("detailHistory");
 
 const deadlineEditPanel = document.getElementById("deadlineEditPanel");
 const deadlineEditForm = document.getElementById("deadlineEditForm");
@@ -402,7 +403,8 @@ function showDeadlineDetail(deadlineId) {
   detailStatus.textContent = getStatusLabel(computedStatus);
   detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
 
-  renderExcludedDaysDetail(deadline.excluded_days || []);
+  renderExcludedDaysDetail(deadline.excluded_days || []); 
+  renderDeadlineHistory(deadline.history || []);
 
   deadlineDetailPanel.classList.remove("hidden");
 
@@ -428,7 +430,93 @@ function renderExcludedDaysDetail(excludedDays) {
     item.textContent = `${formatDate(excludedDay.date)} - ${excludedDay.reason}`;
     detailExcludedDays.appendChild(item);
   });
-} 
+}  
+
+function renderDeadlineHistory(history) {
+  detailHistory.innerHTML = "";
+
+  if (!history.length) {
+    detailHistory.innerHTML = `
+      <p class="detail-notes">Sin cambios registrados.</p>
+    `;
+    return;
+  }
+
+  const sortedHistory = [...history].sort((a, b) => {
+    return new Date(b.changed_at) - new Date(a.changed_at);
+  });
+
+  sortedHistory.forEach((item) => {
+    const historyItem = document.createElement("div");
+    historyItem.classList.add("history-item");
+
+    const previousData = item.previous_data || {};
+    const newData = item.new_data || {};
+
+    historyItem.innerHTML = `
+      <div class="history-header">
+        <strong>${formatDateTime(item.changed_at)}</strong>
+        <span>${getChangeTypeLabel(item.change_type)}</span>
+      </div>
+
+      <div class="history-grid">
+        <div>
+          <span>Vencimiento anterior</span>
+          <strong>${formatDate(previousData.deadline_date)}</strong>
+        </div>
+
+        <div>
+          <span>Nuevo vencimiento</span>
+          <strong>${formatDate(newData.deadline_date)}</strong>
+        </div>
+
+        <div>
+          <span>Días anteriores</span>
+          <strong>${previousData.days_count || "-"}</strong>
+        </div>
+
+        <div>
+          <span>Días nuevos</span>
+          <strong>${newData.days_count || "-"}</strong>
+        </div>
+
+        <div>
+          <span>Inicio anterior</span>
+          <strong>${getStartRuleLabel(previousData.start_rule)}</strong>
+        </div>
+
+        <div>
+          <span>Nuevo inicio</span>
+          <strong>${getStartRuleLabel(newData.start_rule)}</strong>
+        </div>
+      </div>
+
+      <div class="history-notes">
+        <span>Observación nueva</span>
+        <p>${escapeHTML(newData.notes || "Sin observaciones.")}</p>
+      </div>
+    `;
+
+    detailHistory.appendChild(historyItem);
+  });
+}
+
+function getChangeTypeLabel(changeType) {
+  if (changeType === "update") return "Edición del plazo";
+  return "Cambio registrado";
+}
+
+function formatDateTime(dateString) {
+  const date = new Date(dateString);
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
 
 
 function showEditForm(deadlineId) {
@@ -612,8 +700,16 @@ function renderUrgencyBadge(deadline) {
 }
 
 function formatDate(dateString) {
+  if (!dateString) {
+    return "-";
+  }
+
   const [year, month, day] = dateString.split("-").map(Number);
   const date = new Date(year, month - 1, day);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
 
   return new Intl.DateTimeFormat("es-AR", {
     day: "2-digit",

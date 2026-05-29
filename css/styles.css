@@ -919,4 +919,86 @@ textarea:focus {
 .urgency-later {
   background: #E5E7EB;
   color: #374151;
+} 
+
+
+/* Deadline history */
+
+.history-list {
+  display: grid;
+  gap: 14px;
+}
+
+.history-item {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.history-header strong {
+  color: var(--color-primary);
+}
+
+.history-header span {
+  background: #EDE9FE;
+  color: #4C1D95;
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.history-grid div,
+.history-notes {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.history-grid span,
+.history-notes span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.history-grid strong {
+  color: var(--color-primary);
+}
+
+.history-notes {
+  margin-top: 12px;
+}
+
+.history-notes p {
+  color: var(--color-muted);
+}
+
+@media (max-width: 700px) {
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-header {
+    flex-direction: column;
+  }
 }
