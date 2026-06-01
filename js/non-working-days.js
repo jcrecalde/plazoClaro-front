@@ -6,6 +6,10 @@ const reason = document.getElementById("reason");
 const jurisdiction = document.getElementById("jurisdiction");
 const type = document.getElementById("type");
 
+const importYear = document.getElementById("importYear");
+const importJurisdiction = document.getElementById("importJurisdiction");
+const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn");
+
 const nonWorkingDaysTableBody = document.getElementById("nonWorkingDaysTableBody");
 const nonWorkingDaysSummary = document.getElementById("nonWorkingDaysSummary");
 const nonWorkingDayMessage = document.getElementById("nonWorkingDayMessage");
@@ -15,6 +19,8 @@ document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
+importNationalHolidaysBtn.addEventListener("click", importNationalHolidays);
+
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -23,6 +29,10 @@ form.addEventListener("submit", async function (event) {
     reason: reason.value.trim(),
     jurisdiction: jurisdiction.value,
     type: type.value,
+    scope: "manual",
+    source: "manual",
+    source_url: null,
+    verified: true,
     active: true,
   };
 
@@ -58,17 +68,62 @@ form.addEventListener("submit", async function (event) {
   }
 });
 
+async function importNationalHolidays() {
+  const year = Number(importYear.value);
+  const selectedJurisdiction = importJurisdiction.value;
+
+  if (!year || year < 2016 || year > 2035) {
+    showMessage("Ingresá un año válido entre 2016 y 2035.", true);
+    return;
+  }
+
+  try {
+    importNationalHolidaysBtn.disabled = true;
+    importNationalHolidaysBtn.textContent = "Importando...";
+
+    const url = `${NON_WORKING_DAYS_API_URL}/import-national-holidays?year=${year}&jurisdiction=${selectedJurisdiction}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudieron importar los feriados nacionales.");
+    }
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `Importación finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudieron importar los feriados nacionales.", true);
+  } finally {
+    importNationalHolidaysBtn.disabled = false;
+    importNationalHolidaysBtn.textContent = "Importar feriados nacionales";
+  }
+}
+
 async function loadNonWorkingDays() {
   try {
     showMessage("", false);
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="6">Cargando días inhábiles...</td>
+        <td colspan="8">Cargando días inhábiles...</td>
       </tr>
     `;
 
-    const response = await fetch(`${NON_WORKING_DAYS_API_URL}?jurisdiction=pba&year=2026`);
+    const selectedYear = Number(importYear.value) || 2026;
+    const selectedJurisdiction = importJurisdiction.value || "pba";
+
+    const response = await fetch(
+      `${NON_WORKING_DAYS_API_URL}?jurisdiction=${selectedJurisdiction}&year=${selectedYear}`
+    );
 
     if (!response.ok) {
       throw new Error("No se pudieron cargar los días inhábiles.");
@@ -76,7 +131,7 @@ async function loadNonWorkingDays() {
 
     const nonWorkingDays = await response.json();
 
-    renderNonWorkingDays(nonWorkingDays);
+    renderNonWorkingDays(nonWorkingDays, selectedYear);
   } catch (error) {
     console.error(error);
 
@@ -84,26 +139,26 @@ async function loadNonWorkingDays() {
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="6">No se pudieron cargar los días inhábiles. Verificá que el backend esté levantado.</td>
+        <td colspan="8">No se pudieron cargar los días inhábiles. Verificá que el backend esté levantado.</td>
       </tr>
     `;
   }
 }
 
-function renderNonWorkingDays(nonWorkingDays) {
+function renderNonWorkingDays(nonWorkingDays, year) {
   if (!nonWorkingDays.length) {
-    nonWorkingDaysSummary.textContent = "No hay días inhábiles cargados para esta jurisdicción.";
+    nonWorkingDaysSummary.textContent = `No hay días inhábiles cargados para ${year}.`;
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="6">Todavía no hay días inhábiles cargados.</td>
+        <td colspan="8">Todavía no hay días inhábiles cargados.</td>
       </tr>
     `;
 
     return;
   }
 
-  nonWorkingDaysSummary.textContent = `${nonWorkingDays.length} día(s) inhábil(es) cargado(s).`;
+  nonWorkingDaysSummary.textContent = `${nonWorkingDays.length} día(s) inhábil(es) cargado(s) para ${year}.`;
 
   nonWorkingDaysTableBody.innerHTML = "";
 
@@ -115,6 +170,12 @@ function renderNonWorkingDays(nonWorkingDays) {
       <td>${escapeHTML(item.reason)}</td>
       <td>${getJurisdictionLabel(item.jurisdiction)}</td>
       <td>${getTypeLabel(item.type)}</td>
+      <td>${getSourceLabel(item.source)}</td>
+      <td>
+        <span class="status-badge ${item.verified ? "status-completed" : "status-pending"}">
+          ${item.verified ? "Verificado" : "Pendiente"}
+        </span>
+      </td>
       <td>
         <span class="status-badge ${item.active ? "status-completed" : "status-expired"}">
           ${item.active ? "Activo" : "Inactivo"}
@@ -170,8 +231,14 @@ async function deleteNonWorkingDay(nonWorkingDayId) {
 }
 
 function formatDate(dateString) {
+  if (!dateString) return "-";
+
   const [year, month, day] = dateString.split("-").map(Number);
   const date = new Date(year, month - 1, day);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
 
   return new Intl.DateTimeFormat("es-AR", {
     day: "2-digit",
@@ -192,11 +259,23 @@ function getTypeLabel(type) {
     provincial_holiday: "Feriado provincial",
     judicial_recess: "Feria judicial",
     court_holiday: "Asueto judicial",
+    term_suspension: "Suspensión de términos",
     special_non_working_day: "Inhábil especial",
     holiday: "Feriado",
   };
 
   return labels[type] || "Otro";
+}
+
+function getSourceLabel(source) {
+  const labels = {
+    manual: "Manual",
+    argentina_datos: "ArgentinaDatos",
+    scba: "SCBA",
+    csjn: "CSJN",
+  };
+
+  return labels[source] || source || "Sin fuente";
 }
 
 function showMessage(message, visible) {

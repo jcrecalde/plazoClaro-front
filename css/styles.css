@@ -1001,4 +1001,14 @@ textarea:focus {
   .history-header {
     flex-direction: column;
   }
+} 
+
+/* Non working days import */
+
+.result-card .form-group {
+  margin-top: 16px;
+}
+
+.result-card .result-empty + .form-group {
+  margin-top: 22px;
 }

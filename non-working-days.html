@@ -26,13 +26,16 @@
       <div class="container">
         <h1>Administración de días inhábiles</h1>
         <p>
-          Cargá feriados, asuetos o días inhábiles que deben excluirse del cómputo de plazos hábiles.
+          Cargá, importá y verificá feriados, asuetos o días inhábiles que deben excluirse
+          del cómputo de plazos hábiles.
         </p>
       </div>
     </section>
 
     <section class="container calculator-layout">
       <form id="nonWorkingDayForm" class="form-card">
+        <span class="badge">Carga manual</span>
+
         <div class="form-group">
           <label for="nonWorkingDate">Fecha</label>
           <input type="date" id="nonWorkingDate" required />
@@ -62,6 +65,7 @@
             <option value="provincial_holiday">Feriado provincial</option>
             <option value="judicial_recess">Feria judicial</option>
             <option value="court_holiday">Asueto judicial</option>
+            <option value="term_suspension">Suspensión de términos</option>
             <option value="special_non_working_day">Inhábil especial</option>
           </select>
         </div>
@@ -72,16 +76,39 @@
       </form>
 
       <aside class="result-card">
-        <h2>Días cargados</h2>
-        <p class="result-empty" id="nonWorkingDaysSummary">
-          Cargando días inhábiles...
+        <span class="badge">Importación automática</span>
+        <h2>Feriados nacionales</h2>
+
+        <p class="result-empty">
+          Importá feriados nacionales por año para reducir carga manual. Estos datos quedan
+          identificados con fuente, alcance nacional y estado de verificación.
         </p>
 
+        <div class="form-group">
+          <label for="importYear">Año</label>
+          <input type="number" id="importYear" min="2016" max="2035" value="2026" />
+        </div>
+
+        <div class="form-group">
+          <label for="importJurisdiction">Jurisdicción</label>
+          <select id="importJurisdiction">
+            <option value="pba">Provincia de Buenos Aires</option>
+          </select>
+        </div>
+
         <div class="result-actions">
+          <button id="importNationalHolidaysBtn" class="btn btn-primary" type="button">
+            Importar feriados nacionales
+          </button>
+
           <button id="refreshNonWorkingDaysBtn" class="btn btn-secondary" type="button">
             Actualizar listado
           </button>
         </div>
+
+        <p class="result-empty" id="nonWorkingDaysSummary">
+          Cargando días inhábiles...
+        </p>
       </aside>
     </section>
 
@@ -96,6 +123,8 @@
               <th>Motivo</th>
               <th>Jurisdicción</th>
               <th>Tipo</th>
+              <th>Fuente</th>
+              <th>Verificado</th>
               <th>Activo</th>
               <th>Acciones</th>
             </tr>
@@ -103,7 +132,7 @@
 
           <tbody id="nonWorkingDaysTableBody">
             <tr>
-              <td colspan="6">Cargando días inhábiles...</td>
+              <td colspan="8">Cargando días inhábiles...</td>
             </tr>
           </tbody>
         </table>
@@ -114,7 +143,8 @@
       <div class="notice">
         <strong>Aviso:</strong>
         los días cargados en esta sección son utilizados por el motor de cálculo para excluir fechas
-        en plazos hábiles. La carga debe ser verificada conforme a fuentes oficiales y normativa aplicable.
+        en plazos hábiles. La carga e importación deben ser verificadas conforme a fuentes oficiales,
+        normativa aplicable, jurisdicción, ferias, asuetos y resoluciones judiciales.
       </div>
     </section>
   </main>
@@ -125,6 +155,6 @@
     </div>
   </footer>
 
-  <script src="./js/non-working-days.js"></script>
+  <script src="./js/non-working-days.js?v=2"></script>
 </body>
 </html>
