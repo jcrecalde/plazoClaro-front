@@ -10,6 +10,14 @@ const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn");
 
+const filterYear = document.getElementById("filterYear");
+const filterType = document.getElementById("filterType");
+const filterSource = document.getElementById("filterSource");
+const filterVerified = document.getElementById("filterVerified");
+const filterActive = document.getElementById("filterActive");
+const applyNonWorkingDayFiltersBtn = document.getElementById("applyNonWorkingDayFiltersBtn");
+const clearNonWorkingDayFiltersBtn = document.getElementById("clearNonWorkingDayFiltersBtn");
+
 const nonWorkingDaysTableBody = document.getElementById("nonWorkingDaysTableBody");
 const nonWorkingDaysSummary = document.getElementById("nonWorkingDaysSummary");
 const nonWorkingDayMessage = document.getElementById("nonWorkingDayMessage");
@@ -20,6 +28,18 @@ document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
 importNationalHolidaysBtn.addEventListener("click", importNationalHolidays);
+
+applyNonWorkingDayFiltersBtn.addEventListener("click", loadNonWorkingDays);
+
+clearNonWorkingDayFiltersBtn.addEventListener("click", function () {
+  filterYear.value = importYear.value || "2026";
+  filterType.value = "";
+  filterSource.value = "";
+  filterVerified.value = "";
+  filterActive.value = "";
+
+  loadNonWorkingDays();
+});
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -93,6 +113,8 @@ async function importNationalHolidays() {
       throw new Error(result.detail || "No se pudieron importar los feriados nacionales.");
     }
 
+    filterYear.value = year;
+
     await loadNonWorkingDays();
 
     showMessage(
@@ -118,12 +140,9 @@ async function loadNonWorkingDays() {
       </tr>
     `;
 
-    const selectedYear = Number(importYear.value) || 2026;
-    const selectedJurisdiction = importJurisdiction.value || "pba";
+    const url = buildNonWorkingDaysUrl();
 
-    const response = await fetch(
-      `${NON_WORKING_DAYS_API_URL}?jurisdiction=${selectedJurisdiction}&year=${selectedYear}`
-    );
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error("No se pudieron cargar los días inhábiles.");
@@ -131,7 +150,7 @@ async function loadNonWorkingDays() {
 
     const nonWorkingDays = await response.json();
 
-    renderNonWorkingDays(nonWorkingDays, selectedYear);
+    renderNonWorkingDays(nonWorkingDays);
   } catch (error) {
     console.error(error);
 
@@ -145,20 +164,50 @@ async function loadNonWorkingDays() {
   }
 }
 
-function renderNonWorkingDays(nonWorkingDays, year) {
+function buildNonWorkingDaysUrl() {
+  const params = new URLSearchParams();
+
+  const selectedYear = Number(filterYear.value || importYear.value) || 2026;
+  const selectedJurisdiction = importJurisdiction.value || "pba";
+
+  params.append("jurisdiction", selectedJurisdiction);
+  params.append("year", selectedYear);
+
+  if (filterType.value) {
+    params.append("day_type", filterType.value);
+  }
+
+  if (filterSource.value) {
+    params.append("source", filterSource.value);
+  }
+
+  if (filterVerified.value) {
+    params.append("verified", filterVerified.value);
+  }
+
+  if (filterActive.value) {
+    params.append("active", filterActive.value);
+  }
+
+  return `${NON_WORKING_DAYS_API_URL}?${params.toString()}`;
+}
+
+function renderNonWorkingDays(nonWorkingDays) {
+  const selectedYear = Number(filterYear.value || importYear.value) || 2026;
+
   if (!nonWorkingDays.length) {
-    nonWorkingDaysSummary.textContent = `No hay días inhábiles cargados para ${year}.`;
+    nonWorkingDaysSummary.textContent = `No hay días inhábiles para los filtros seleccionados.`;
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="8">Todavía no hay días inhábiles cargados.</td>
+        <td colspan="8">No hay días inhábiles para mostrar.</td>
       </tr>
     `;
 
     return;
   }
 
-  nonWorkingDaysSummary.textContent = `${nonWorkingDays.length} día(s) inhábil(es) cargado(s) para ${year}.`;
+  nonWorkingDaysSummary.textContent = `${nonWorkingDays.length} día(s) inhábil(es) cargado(s) para ${selectedYear}.`;
 
   nonWorkingDaysTableBody.innerHTML = "";
 
@@ -183,6 +232,18 @@ function renderNonWorkingDays(nonWorkingDays, year) {
       </td>
       <td>
         <div class="table-actions">
+          ${
+            !item.verified
+              ? `<button class="btn-small btn-complete btn-verify-day" data-id="${item.id}">Verificar</button>`
+              : ""
+          }
+
+          ${
+            item.active
+              ? `<button class="btn-small btn-pending btn-toggle-day" data-id="${item.id}" data-active="false">Desactivar</button>`
+              : `<button class="btn-small btn-complete btn-toggle-day" data-id="${item.id}" data-active="true">Activar</button>`
+          }
+
           <button class="btn-small btn-delete" data-id="${item.id}">
             Eliminar
           </button>
@@ -193,17 +254,59 @@ function renderNonWorkingDays(nonWorkingDays, year) {
     nonWorkingDaysTableBody.appendChild(row);
   });
 
-  attachDeleteEvents();
+  attachActionEvents();
 }
 
-function attachDeleteEvents() {
+function attachActionEvents() {
+  const verifyButtons = document.querySelectorAll(".btn-verify-day");
+  const toggleButtons = document.querySelectorAll(".btn-toggle-day");
   const deleteButtons = document.querySelectorAll(".btn-delete");
+
+  verifyButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      updateNonWorkingDay(button.dataset.id, { verified: true }, "Día inhábil marcado como verificado.");
+    });
+  });
+
+  toggleButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const newActiveValue = button.dataset.active === "true";
+      const message = newActiveValue
+        ? "Día inhábil activado correctamente."
+        : "Día inhábil desactivado correctamente.";
+
+      updateNonWorkingDay(button.dataset.id, { active: newActiveValue }, message);
+    });
+  });
 
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {
       deleteNonWorkingDay(button.dataset.id);
     });
   });
+}
+
+async function updateNonWorkingDay(nonWorkingDayId, payload, successMessage) {
+  try {
+    const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${nonWorkingDayId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "No se pudo actualizar el día inhábil.");
+    }
+
+    await loadNonWorkingDays();
+    showMessage(successMessage, true);
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudo actualizar el día inhábil.", true);
+  }
 }
 
 async function deleteNonWorkingDay(nonWorkingDayId) {
@@ -222,8 +325,8 @@ async function deleteNonWorkingDay(nonWorkingDayId) {
       throw new Error("No se pudo eliminar el día inhábil.");
     }
 
+    await loadNonWorkingDays();
     showMessage("Día inhábil eliminado correctamente.", true);
-    loadNonWorkingDays();
   } catch (error) {
     console.error(error);
     showMessage("No se pudo eliminar el día inhábil.", true);
