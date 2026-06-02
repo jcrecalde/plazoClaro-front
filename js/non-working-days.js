@@ -10,7 +10,8 @@ const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn");
 
-const filterYear = document.getElementById("filterYear");
+const filterYear = document.getElementById("filterYear"); 
+const filterJurisdiction = document.getElementById("filterJurisdiction");
 const filterType = document.getElementById("filterType");
 const filterSource = document.getElementById("filterSource");
 const filterVerified = document.getElementById("filterVerified");
@@ -30,9 +31,10 @@ refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 importNationalHolidaysBtn.addEventListener("click", importNationalHolidays);
 
 applyNonWorkingDayFiltersBtn.addEventListener("click", loadNonWorkingDays);
-
+ 
 clearNonWorkingDayFiltersBtn.addEventListener("click", function () {
   filterYear.value = importYear.value || "2026";
+  filterJurisdiction.value = importJurisdiction.value || "pba";
   filterType.value = "";
   filterSource.value = "";
   filterVerified.value = "";
@@ -40,6 +42,7 @@ clearNonWorkingDayFiltersBtn.addEventListener("click", function () {
 
   loadNonWorkingDays();
 });
+
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -114,6 +117,7 @@ async function importNationalHolidays() {
     }
 
     filterYear.value = year;
+    filterJurisdiction.value = selectedJurisdiction;
 
     await loadNonWorkingDays();
 
@@ -168,7 +172,7 @@ function buildNonWorkingDaysUrl() {
   const params = new URLSearchParams();
 
   const selectedYear = Number(filterYear.value || importYear.value) || 2026;
-  const selectedJurisdiction = importJurisdiction.value || "pba";
+  const selectedJurisdiction = filterJurisdiction.value || importJurisdiction.value || "pba";
 
   params.append("jurisdiction", selectedJurisdiction);
   params.append("year", selectedYear);
@@ -352,6 +356,7 @@ function formatDate(dateString) {
 
 function getJurisdictionLabel(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
+  if (jurisdiction === "national_federal") return "Nacional / Federal";
 
   return "Jurisdicción no especificada";
 }

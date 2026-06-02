@@ -995,6 +995,8 @@ function getDayTypeLabelForPdf(dayType) {
 
 function getJurisdictionLabelForPdf(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
+  if (jurisdiction === "national_federal") return "Nacional / Federal";
+
   return "Jurisdicción no especificada";
 }
 
