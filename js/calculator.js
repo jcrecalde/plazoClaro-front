@@ -13,10 +13,31 @@ const excludedDetail = document.getElementById("excludedDetail");
 const jurisdictionDetail = document.getElementById("jurisdictionDetail"); 
 const calculatorMessage = document.getElementById("calculatorMessage");
 
-const clearResultBtn = document.getElementById("clearResultBtn");
-const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");
+const clearResultBtn = document.getElementById("clearResultBtn"); 
+const jurisdictionSelect = document.getElementById("jurisdiction");
+const departmentSelect = document.getElementById("department");
+const departmentGroup = document.getElementById("departmentGroup");
+const departmentDetail = document.getElementById("departmentDetail");
+const saveDeadlineBtn = document.getElementById("saveDeadlineBtn"); 
+
+jurisdictionSelect.addEventListener("change", updateDepartmentVisibility);
+
+function updateDepartmentVisibility() {
+  if (jurisdictionSelect.value === "pba") {
+    departmentGroup.classList.remove("hidden");
+    departmentGroup.style.display = "block";
+    return;
+  }
+
+  departmentSelect.value = "";
+  departmentGroup.classList.add("hidden");
+  departmentGroup.style.display = "none";
+}
+
+updateDepartmentVisibility();
 
 let lastCalculationPayload = null;
+let lastCalculationResult = null;
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -25,7 +46,7 @@ form.addEventListener("submit", async function (event) {
   const startRule = document.getElementById("startRule").value;
   const daysCount = Number(document.getElementById("daysCount").value);
   const dayType = document.getElementById("dayType").value;
-  const jurisdiction = document.getElementById("jurisdiction").value;
+  const selectedJurisdiction = jurisdictionSelect.value;
 
   if (!notificationDateValue || !daysCount || daysCount <= 0) {
     alert("Completá una fecha válida y una cantidad de días mayor a cero.");
@@ -36,8 +57,11 @@ form.addEventListener("submit", async function (event) {
     notification_date: notificationDateValue,
     days_count: daysCount,
     day_type: dayType,
-    jurisdiction: jurisdiction,
+    jurisdiction: selectedJurisdiction,
     start_rule: startRule,
+    department: selectedJurisdiction === "pba" ? departmentSelect.value || null : null,
+    locality: null,
+    court: null,
   };
 
   try {
@@ -57,6 +81,7 @@ form.addEventListener("submit", async function (event) {
     const result = normalizeApiResult(apiResult);
 
     lastCalculationPayload = payload;
+    lastCalculationResult = result;
 
     renderResult(result);
   } catch (error) {
@@ -82,7 +107,10 @@ saveDeadlineBtn.addEventListener("click", async function () {
     days_count: lastCalculationPayload.days_count,
     day_type: lastCalculationPayload.day_type,
     jurisdiction: lastCalculationPayload.jurisdiction,
-    start_rule: lastCalculationPayload.start_rule,
+    start_rule: lastCalculationPayload.start_rule, 
+    department: lastCalculationResult?.department || null,
+    locality: lastCalculationResult?.locality || null,
+    court: lastCalculationResult?.court || null,
     notes: notes || null,
   };
 
@@ -132,7 +160,10 @@ function normalizeApiResult(apiResult) {
     })),
     dayType: apiResult.day_type,
     jurisdiction: apiResult.jurisdiction,
-    startRule: apiResult.start_rule,
+    startRule: apiResult.start_rule, 
+    department: apiResult.department,
+    locality: apiResult.locality,
+    court: apiResult.court,
   };
 }
 
@@ -190,7 +221,13 @@ function renderResult(result) {
       "Al tratarse de días corridos, no se excluyeron sábados, domingos ni días inhábiles.";
   }
 
-  jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;
+  jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;  
+
+    if (result.department) {
+    departmentDetail.textContent = `Departamento judicial seleccionado: ${result.department}.`;
+  } else {
+    departmentDetail.textContent = "No se seleccionó un departamento judicial específico.";
+  }
 } 
 
 
@@ -208,7 +245,8 @@ function showCalculatorMessage(message, visible) {
 clearResultBtn.addEventListener("click", function () {
   form.reset();
  
-  lastCalculationPayload = null; 
+  lastCalculationPayload = null;
+  lastCalculationResult = null;
 
   showCalculatorMessage("", false);
 
@@ -222,5 +260,6 @@ clearResultBtn.addEventListener("click", function () {
   startDateDetail.textContent = "";
   daysDetail.textContent = "";
   excludedDetail.textContent = "";
-  jurisdictionDetail.textContent = "";
+  jurisdictionDetail.textContent = ""; 
+  departmentDetail.textContent = "";
 });

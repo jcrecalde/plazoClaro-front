@@ -145,6 +145,11 @@
           <div class="detail-box">
             <span>Fecha de notificación</span>
             <strong id="detailNotificationDate">-</strong>
+          </div> 
+
+          <div class="detail-box">
+            <span>Departamento judicial</span>
+            <strong id="detailDepartment">Sin departamento específico</strong>
           </div>
 
           <div class="detail-box">
@@ -221,7 +226,8 @@
               <option value="Documentación">Presentación de documentación</option>
               <option value="Otro">Otro</option>
             </select>
-          </div>
+          </div> 
+
 
           <div class="form-group">
             <label for="editNotificationDate">Fecha de notificación</label>
@@ -255,6 +261,18 @@
               <option value="pba">Provincia de Buenos Aires</option>
               <option value="national_federal">Nacional / Federal</option>
             </select>
+          </div> 
+
+          <div class="form-group" id="editDepartmentGroup">
+            <label for="editDepartment">Departamento judicial</label>
+            <select id="editDepartment">
+              <option value="">Sin departamento específico</option>
+              <option value="Azul">Azul</option>
+              <option value="La Plata">La Plata</option>
+            </select>
+            <small class="field-help">
+              Solo aplica para Provincia de Buenos Aires.
+            </small>
           </div>
 
           <div class="form-group full-width">
@@ -289,6 +307,6 @@
     </div>
   </footer>
 
-  <script src="./js/dashboard.js?v=8"></script>
+  <script src="./js/dashboard.js?v=11"></script>
 </body>
 </html>

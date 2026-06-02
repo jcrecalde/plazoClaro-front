@@ -26,6 +26,7 @@ const detailStartRule = document.getElementById("detailStartRule");
 const detailStartDate = document.getElementById("detailStartDate");
 const detailDeadlineDate = document.getElementById("detailDeadlineDate");
 const detailStatus = document.getElementById("detailStatus");
+const detailDepartment = document.getElementById("detailDepartment");
 const detailExcludedDays = document.getElementById("detailExcludedDays");
 const detailNotes = document.getElementById("detailNotes");
 const detailHistory = document.getElementById("detailHistory");
@@ -42,7 +43,9 @@ const editStartRule = document.getElementById("editStartRule");
 const editDaysCount = document.getElementById("editDaysCount");
 const editDayType = document.getElementById("editDayType");
 const editJurisdiction = document.getElementById("editJurisdiction");
-const editNotes = document.getElementById("editNotes");
+const editDepartment = document.getElementById("editDepartment");
+const editDepartmentGroup = document.getElementById("editDepartmentGroup");
+const editNotes = document.getElementById("editNotes"); 
 
 let allDeadlines = [];
 let currentFilter = "all";
@@ -83,7 +86,22 @@ filterButtons.forEach((button) => {
     setActiveFilterButton(currentFilter);
     renderDeadlines(getFilteredDeadlines());
   });
-}); 
+});  
+
+
+editJurisdiction.addEventListener("change", updateEditDepartmentVisibility);
+
+function updateEditDepartmentVisibility() {
+  if (editJurisdiction.value === "pba") {
+    editDepartmentGroup.classList.remove("hidden");
+    editDepartmentGroup.style.display = "block";
+    return;
+  }
+
+  editDepartment.value = "";
+  editDepartmentGroup.classList.add("hidden");
+  editDepartmentGroup.style.display = "none";
+}
 
 
 deadlineEditForm.addEventListener("submit", async function (event) {
@@ -99,6 +117,9 @@ deadlineEditForm.addEventListener("submit", async function (event) {
     day_type: editDayType.value,
     jurisdiction: editJurisdiction.value,
     start_rule: editStartRule.value,
+    department: editJurisdiction.value === "pba" ? editDepartment.value || null : null,
+    locality: null,
+    court: null,
     notes: editNotes.value.trim() || null,
   };
 
@@ -401,6 +422,7 @@ function showDeadlineDetail(deadlineId) {
   detailStartDate.textContent = formatDate(deadline.start_date);
   detailDeadlineDate.textContent = formatDate(deadline.deadline_date);
   detailStatus.textContent = getStatusLabel(computedStatus);
+  detailDepartment.textContent = deadline.department || "Sin departamento específico";
   detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
 
   renderExcludedDaysDetail(deadline.excluded_days || []); 
@@ -535,7 +557,10 @@ function showEditForm(deadlineId) {
   editDaysCount.value = deadline.days_count;
   editDayType.value = deadline.day_type;
   editJurisdiction.value = deadline.jurisdiction;
+  editDepartment.value = deadline.department || "";
   editNotes.value = deadline.notes || "";
+
+  updateEditDepartmentVisibility();
 
   deadlineDetailPanel.classList.add("hidden");
   deadlineEditPanel.classList.remove("hidden");
@@ -937,10 +962,14 @@ function exportDeadlineDetailToPdf(deadline) {
         </div>
 
         <div class="box">
+          <span class="label">Departamento judicial</span>
+          <span class="value">${getDepartmentLabelForPdf(deadline.department)}</span>
+        </div>
+
+        <div class="box">
           <span class="label">Fecha de vencimiento</span>
           <span class="value deadline">${formatDate(deadline.deadline_date)}</span>
         </div>
-      </div>
 
       <div class="section">
         <h2>Días excluidos</h2>
@@ -1009,6 +1038,10 @@ function showMessage(message, visible) {
 
   dashboardMessage.textContent = message;
   dashboardMessage.classList.remove("hidden");
+} 
+
+function getDepartmentLabelForPdf(department) {
+  return department || "Sin departamento específico";
 }
 
 function escapeHTML(value) {

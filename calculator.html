@@ -65,6 +65,18 @@
             <option value="pba">Provincia de Buenos Aires</option>
             <option value="national_federal">Nacional / Federal</option>
           </select>
+        </div> 
+
+        <div class="form-group" id="departmentGroup">
+          <label for="department">Departamento judicial</label>
+          <select id="department">
+            <option value="">Sin departamento específico</option>
+            <option value="Azul">Azul</option>
+            <option value="La Plata">La Plata</option>
+          </select>
+          <small class="field-help">
+            Solo aplica para días inhábiles o suspensiones con alcance departamental.
+          </small>
         </div>
 
         <div class="form-group">
@@ -109,6 +121,7 @@
             <div id="daysDetail" class="detail-item"></div>
             <div id="excludedDetail" class="detail-item"></div>
             <div id="jurisdictionDetail" class="detail-item"></div>
+            <div id="departmentDetail" class="detail-item"></div>
           </div>
 
           <div class="result-actions">
@@ -141,6 +154,6 @@
     </div>
   </footer>
 
-  <script src="./js/calculator.js"></script>
+  <script src="./js/calculator.js?v=11"></script>
 </body>
 </html>
