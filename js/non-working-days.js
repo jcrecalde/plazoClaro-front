@@ -38,7 +38,10 @@ const filterScope = document.getElementById("filterScope");
 const filterDepartment = document.getElementById("filterDepartment");
 const filterDepartmentGroup = document.getElementById("filterDepartmentGroup"); 
 
-const submitNonWorkingDayBtn = document.getElementById("submitNonWorkingDayBtn");
+const submitNonWorkingDayBtn = document.getElementById("submitNonWorkingDayBtn"); 
+
+const nonWorkingDayFormBadge = document.getElementById("nonWorkingDayFormBadge");
+const cancelEditNonWorkingDayBtn = document.getElementById("cancelEditNonWorkingDayBtn");
 
 
 let editingNonWorkingDayId = null; 
@@ -74,7 +77,21 @@ function updateDepartmentVisibilityForManualLoad() {
   department.value = "";
   departmentGroup.classList.add("hidden");
   departmentGroup.style.display = "none";
+} 
+
+function resetNonWorkingDayFormMode() {
+  editingNonWorkingDayId = null;
+  editingNonWorkingDayData = null;
+
+  form.reset();
+  updateDepartmentVisibilityForManualLoad();
+
+  submitNonWorkingDayBtn.textContent = "Guardar día inhábil";
+  nonWorkingDayFormBadge.textContent = "Carga manual";
+  cancelEditNonWorkingDayBtn.classList.add("hidden");
+  form.classList.remove("editing-mode");
 }
+
 
 updateDepartmentVisibilityForManualLoad(); 
 updateFilterDepartmentVisibility();
@@ -120,7 +137,13 @@ if (nonWorkingDaysTopScroll && nonWorkingDaysTableScroll) {
     nonWorkingDaysTopScroll.scrollLeft = nonWorkingDaysTableScroll.scrollLeft;
     isSyncingHorizontalScroll = false;
   });
-}
+} 
+
+
+cancelEditNonWorkingDayBtn.addEventListener("click", function () {
+  resetNonWorkingDayFormMode();
+  showMessage("Edición cancelada. Podés cargar un nuevo día inhábil.", true);
+});
 
 
 form.addEventListener("submit", async function (event) {
@@ -181,11 +204,7 @@ form.addEventListener("submit", async function (event) {
 
     const wasEditing = Boolean(editingNonWorkingDayId);
 
-    editingNonWorkingDayId = null; 
-    editingNonWorkingDayData = null;
-    form.reset();
-    updateDepartmentVisibilityForManualLoad();
-    submitNonWorkingDayBtn.textContent = "Guardar día inhábil";
+    resetNonWorkingDayFormMode();
 
     await loadNonWorkingDays();
 
@@ -226,6 +245,10 @@ function startEditingNonWorkingDay(nonWorkingDayId) {
   updateDepartmentVisibilityForManualLoad();
 
   submitNonWorkingDayBtn.textContent = "Guardar cambios";
+  nonWorkingDayFormBadge.textContent = "Editando día inhábil";
+  cancelEditNonWorkingDayBtn.classList.remove("hidden");
+  form.classList.add("editing-mode");
+
   showMessage("Editando día inhábil. Modificá los datos y guardá los cambios.", true);
 
   window.scrollTo({

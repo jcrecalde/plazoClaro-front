@@ -34,7 +34,7 @@
 
     <section class="container calculator-layout">
       <form id="nonWorkingDayForm" class="form-card">
-        <span class="badge">Carga manual</span>
+        <span class="badge" id="nonWorkingDayFormBadge">Carga manual</span>
 
         <div class="form-group">
           <label for="nonWorkingDate">Fecha</label>
@@ -109,9 +109,19 @@
           ></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary" id="submitNonWorkingDayBtn">
-          Guardar día inhábil
-        </button>
+        <div class="result-actions">
+          <button type="submit" class="btn btn-primary" id="submitNonWorkingDayBtn">
+            Guardar día inhábil
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary hidden"
+            id="cancelEditNonWorkingDayBtn"
+          >
+            Cancelar edición
+          </button>
+        </div>
       </form>
 
       <aside class="result-card">
@@ -295,6 +305,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=14"></script>
+  <script src="./js/non-working-days.js?v=15"></script>
 </body>
 </html>

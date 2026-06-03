@@ -1172,4 +1172,17 @@ textarea:focus {
 .non-working-days-table-card .btn-small {
   padding: 7px 9px;
   font-size: 0.78rem;
+} 
+
+
+/* Modo edición de días inhábiles */
+
+.form-card.editing-mode {
+  border-top-color: var(--color-secondary);
+  box-shadow: 0 12px 32px rgba(154, 106, 31, 0.14);
+}
+
+.form-card.editing-mode .badge {
+  background: rgba(154, 106, 31, 0.18);
+  color: var(--color-secondary);
 }
