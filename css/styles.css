@@ -1017,9 +1017,18 @@ textarea:focus {
 
 .calendar-filter-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 14px;
   margin-top: 14px;
+}
+
+.calendar-filter-grid .form-group {
+  min-width: 0;
+}
+
+.calendar-filter-grid select,
+.calendar-filter-grid input {
+  width: 100%;
 }
 
 @media (max-width: 1080px) {
@@ -1119,14 +1128,16 @@ textarea:focus {
 
 .non-working-days-table-card th:nth-child(4),
 .non-working-days-table-card td:nth-child(4) {
-  width: 145px;
+  width: 170px;
+  white-space: normal;
 }
 
 
 .non-working-days-table-card th:nth-child(5),
 .non-working-days-table-card td:nth-child(5) {
-  width: 155px;
-} 
+  width: 180px;
+  white-space: normal;
+}
 
 .non-working-days-table-card th:nth-child(6),
 .non-working-days-table-card td:nth-child(6) {

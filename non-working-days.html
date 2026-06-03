@@ -184,7 +184,27 @@
               <option value="special_non_working_day">Inhábil especial</option>
               <option value="holiday">Feriado</option>
             </select>
+          </div> 
+
+
+          <div class="form-group">
+            <label for="filterScope">Alcance</label>
+            <select id="filterScope">
+              <option value="">Todos</option>
+              <option value="national">Nacional</option>
+              <option value="provincial">Provincial</option>
+              <option value="department">Departamento judicial</option>
+              <option value="locality">Localidad</option>
+              <option value="court">Organismo / juzgado</option>
+              <option value="manual">General / Manual</option>
+            </select>
           </div>
+
+          <div class="form-group" id="filterDepartmentGroup">
+            <label for="filterDepartment">Departamento judicial</label>
+            <select id="filterDepartment"></select>
+          </div>
+
 
           <div class="form-group">
             <label for="filterSource">Fuente</label>
@@ -275,6 +295,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=12"></script>
+  <script src="./js/non-working-days.js?v=13"></script>
 </body>
 </html>

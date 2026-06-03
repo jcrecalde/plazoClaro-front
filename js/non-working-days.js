@@ -32,15 +32,27 @@ const refreshNonWorkingDaysBtn = document.getElementById("refreshNonWorkingDaysB
 
 const nonWorkingDaysTopScroll = document.getElementById("nonWorkingDaysTopScroll");
 const nonWorkingDaysTopScrollInner = document.getElementById("nonWorkingDaysTopScrollInner");
-const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll");
+const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll"); 
+
+const filterScope = document.getElementById("filterScope");
+const filterDepartment = document.getElementById("filterDepartment");
+const filterDepartmentGroup = document.getElementById("filterDepartmentGroup");
 
 populatePbaDepartmentSelect(department, {
   includeEmpty: true,
   emptyLabel: "Sin departamento específico",
+}); 
+
+populatePbaDepartmentSelect(filterDepartment, {
+  includeEmpty: true,
+  emptyLabel: "Todos los departamentos",
 });
 
 scope.addEventListener("change", updateDepartmentVisibilityForManualLoad);
-jurisdiction.addEventListener("change", updateDepartmentVisibilityForManualLoad);
+jurisdiction.addEventListener("change", updateDepartmentVisibilityForManualLoad); 
+
+filterScope.addEventListener("change", updateFilterDepartmentVisibility);
+filterJurisdiction.addEventListener("change", updateFilterDepartmentVisibility);
 
 function updateDepartmentVisibilityForManualLoad() {
   const shouldShowDepartment =
@@ -57,7 +69,8 @@ function updateDepartmentVisibilityForManualLoad() {
   departmentGroup.style.display = "none";
 }
 
-updateDepartmentVisibilityForManualLoad();
+updateDepartmentVisibilityForManualLoad(); 
+updateFilterDepartmentVisibility();
 
 document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 
@@ -73,7 +86,11 @@ clearNonWorkingDayFiltersBtn.addEventListener("click", function () {
   filterType.value = "";
   filterSource.value = "";
   filterVerified.value = "";
-  filterActive.value = "";
+  filterActive.value = ""; 
+  filterScope.value = "";
+  filterDepartment.value = ""; 
+
+  updateFilterDepartmentVisibility();
 
   loadNonWorkingDays();
 }); 
@@ -155,7 +172,23 @@ form.addEventListener("submit", async function (event) {
     console.error(error);
     showMessage(error.message || "No se pudo guardar el día inhábil.", true);
   }
-}); 
+});  
+
+
+function updateFilterDepartmentVisibility() {
+  const shouldShowDepartment =
+    filterJurisdiction.value === "pba" && filterScope.value === "department";
+
+  if (shouldShowDepartment) {
+    filterDepartmentGroup.classList.remove("hidden");
+    filterDepartmentGroup.style.display = "block";
+    return;
+  }
+
+  filterDepartment.value = "";
+  filterDepartmentGroup.classList.add("hidden");
+  filterDepartmentGroup.style.display = "none";
+}
 
 
 function updateNonWorkingDaysTopScrollWidth() {
@@ -256,8 +289,16 @@ function buildNonWorkingDaysUrl() {
 
   if (filterType.value) {
     params.append("day_type", filterType.value);
+  } 
+   
+  if (filterScope.value) {
+    params.append("scope", filterScope.value);
   }
 
+  if (filterDepartment.value) {
+    params.append("department", filterDepartment.value);
+  } 
+  
   if (filterSource.value) {
     params.append("source", filterSource.value);
   }
