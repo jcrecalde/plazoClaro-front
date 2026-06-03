@@ -36,7 +36,14 @@ const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableSc
 
 const filterScope = document.getElementById("filterScope");
 const filterDepartment = document.getElementById("filterDepartment");
-const filterDepartmentGroup = document.getElementById("filterDepartmentGroup");
+const filterDepartmentGroup = document.getElementById("filterDepartmentGroup"); 
+
+const submitNonWorkingDayBtn = document.getElementById("submitNonWorkingDayBtn");
+
+
+let editingNonWorkingDayId = null; 
+let editingNonWorkingDayData = null;
+let currentNonWorkingDays = [];
 
 populatePbaDepartmentSelect(department, {
   includeEmpty: true,
@@ -135,8 +142,12 @@ form.addEventListener("submit", async function (event) {
     source_url: null,
     source_reference: sourceReference.value.trim() || null,
     notes: nonWorkingNotes.value.trim() || null,
-    verified: true,
-    active: true,
+    verified: editingNonWorkingDayId
+      ? Boolean(editingNonWorkingDayData?.verified)
+      : true,
+    active: editingNonWorkingDayId
+      ? Boolean(editingNonWorkingDayData?.active)
+      : true,
   }; 
 
   if (!payload.date || !payload.reason) {
@@ -145,8 +156,14 @@ form.addEventListener("submit", async function (event) {
   }
 
   try {
-    const response = await fetch(NON_WORKING_DAYS_API_URL, {
-      method: "POST",
+    const url = editingNonWorkingDayId
+      ? `${NON_WORKING_DAYS_API_URL}/${editingNonWorkingDayId}`
+      : NON_WORKING_DAYS_API_URL;
+
+    const method = editingNonWorkingDayId ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
       },
@@ -162,17 +179,60 @@ form.addEventListener("submit", async function (event) {
       );
     }
 
+    const wasEditing = Boolean(editingNonWorkingDayId);
+
+    editingNonWorkingDayId = null; 
+    editingNonWorkingDayData = null;
     form.reset();
     updateDepartmentVisibilityForManualLoad();
+    submitNonWorkingDayBtn.textContent = "Guardar día inhábil";
 
     await loadNonWorkingDays();
 
-    showMessage("Día inhábil guardado correctamente.", true);
+    showMessage(
+      wasEditing
+        ? "Día inhábil actualizado correctamente."
+        : "Día inhábil guardado correctamente.",
+      true
+    );
   } catch (error) {
     console.error(error);
     showMessage(error.message || "No se pudo guardar el día inhábil.", true);
   }
-});  
+}); 
+
+function startEditingNonWorkingDay(nonWorkingDayId) {
+  const selectedDay = currentNonWorkingDays.find(
+    (item) => item.id === nonWorkingDayId
+  );
+
+  if (!selectedDay) {
+    showMessage("No se encontró el día inhábil seleccionado.", true);
+    return;
+  }
+
+  editingNonWorkingDayId = nonWorkingDayId; 
+  editingNonWorkingDayData = selectedDay;
+
+  nonWorkingDate.value = selectedDay.date;
+  reason.value = selectedDay.reason || "";
+  jurisdiction.value = selectedDay.jurisdiction || "pba";
+  nonWorkingDayType.value = selectedDay.type || "";
+  scope.value = selectedDay.scope || "manual";
+  department.value = selectedDay.department || "";
+  sourceReference.value = selectedDay.source_reference || "";
+  nonWorkingNotes.value = selectedDay.notes || "";
+
+  updateDepartmentVisibilityForManualLoad();
+
+  submitNonWorkingDayBtn.textContent = "Guardar cambios";
+  showMessage("Editando día inhábil. Modificá los datos y guardá los cambios.", true);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
 
 
 function updateFilterDepartmentVisibility() {
@@ -314,7 +374,10 @@ function buildNonWorkingDaysUrl() {
   return `${NON_WORKING_DAYS_API_URL}?${params.toString()}`;
 }
 
-function renderNonWorkingDays(nonWorkingDays) {
+function renderNonWorkingDays(nonWorkingDays) { 
+
+  currentNonWorkingDays = nonWorkingDays; 
+
   const selectedYear = Number(filterYear.value || importYear.value) || 2026;
 
   if (!nonWorkingDays.length) {
@@ -357,6 +420,10 @@ function renderNonWorkingDays(nonWorkingDays) {
       </td>
       <td>
         <div class="table-actions">
+          <button class="btn-small btn-edit btn-edit-day" data-id="${item.id}">
+            Editar
+          </button>
+
           ${
             !item.verified
               ? `<button class="btn-small btn-complete btn-verify-day" data-id="${item.id}">Verificar</button>`
@@ -386,7 +453,14 @@ function renderNonWorkingDays(nonWorkingDays) {
 function attachActionEvents() {
   const verifyButtons = document.querySelectorAll(".btn-verify-day");
   const toggleButtons = document.querySelectorAll(".btn-toggle-day");
-  const deleteButtons = document.querySelectorAll(".btn-delete");
+  const deleteButtons = document.querySelectorAll(".btn-delete"); 
+  const editButtons = document.querySelectorAll(".btn-edit-day"); 
+
+  editButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      startEditingNonWorkingDay(button.dataset.id);
+    });
+  });
 
   verifyButtons.forEach((button) => {
     button.addEventListener("click", function () {
