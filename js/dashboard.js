@@ -45,12 +45,41 @@ const editDayType = document.getElementById("editDayType");
 const editJurisdiction = document.getElementById("editJurisdiction");
 const editDepartment = document.getElementById("editDepartment");
 const editDepartmentGroup = document.getElementById("editDepartmentGroup");
-const editNotes = document.getElementById("editNotes"); 
+const editNotes = document.getElementById("editNotes");   
+
+const nonWorkingDaysTopScroll = document.getElementById("nonWorkingDaysTopScroll");
+const nonWorkingDaysTopScrollInner = document.getElementById("nonWorkingDaysTopScrollInner");
+const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll");
+
+populatePbaDepartmentSelect(editDepartment, {
+  includeEmpty: true,
+  emptyLabel: "Sin departamento específico",
+});
 
 let allDeadlines = [];
 let currentFilter = "all";
 let currentSearch = "";
-let selectedDeadlineForDetail = null; 
+let selectedDeadlineForDetail = null;  
+
+let isSyncingHorizontalScroll = false;
+
+if (nonWorkingDaysTopScroll && nonWorkingDaysTableScroll) {
+  nonWorkingDaysTopScroll.addEventListener("scroll", function () {
+    if (isSyncingHorizontalScroll) return;
+
+    isSyncingHorizontalScroll = true;
+    nonWorkingDaysTableScroll.scrollLeft = nonWorkingDaysTopScroll.scrollLeft;
+    isSyncingHorizontalScroll = false;
+  });
+
+  nonWorkingDaysTableScroll.addEventListener("scroll", function () {
+    if (isSyncingHorizontalScroll) return;
+
+    isSyncingHorizontalScroll = true;
+    nonWorkingDaysTopScroll.scrollLeft = nonWorkingDaysTableScroll.scrollLeft;
+    isSyncingHorizontalScroll = false;
+  });
+}
 
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
@@ -89,7 +118,18 @@ filterButtons.forEach((button) => {
 });  
 
 
-editJurisdiction.addEventListener("change", updateEditDepartmentVisibility);
+editJurisdiction.addEventListener("change", updateEditDepartmentVisibility); 
+
+
+function updateNonWorkingDaysTopScrollWidth() {
+  if (!nonWorkingDaysTopScrollInner || !nonWorkingDaysTableScroll) return;
+
+  const table = nonWorkingDaysTableScroll.querySelector(".deadlines-table");
+
+  if (!table) return;
+
+  nonWorkingDaysTopScrollInner.style.width = `${table.scrollWidth}px`;
+}
 
 function updateEditDepartmentVisibility() {
   if (editJurisdiction.value === "pba") {
@@ -361,7 +401,8 @@ function renderDeadlines(deadlines) {
     deadlinesTableBody.appendChild(row);
   });
 
-  attachActionEvents();
+  attachActionEvents(); 
+  updateNonWorkingDaysTopScrollWidth();
 }
 
 

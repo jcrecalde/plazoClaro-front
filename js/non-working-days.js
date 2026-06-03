@@ -3,9 +3,15 @@ const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days";
 const form = document.getElementById("nonWorkingDayForm");
 const nonWorkingDate = document.getElementById("nonWorkingDate");
 const reason = document.getElementById("reason");
-const jurisdiction = document.getElementById("jurisdiction");
-const type = document.getElementById("type");
+const jurisdiction = document.getElementById("jurisdiction"); 
+const nonWorkingDayType = document.getElementById("nonWorkingDayType");
 
+const scope = document.getElementById("scope");
+const department = document.getElementById("department");
+const departmentGroup = document.getElementById("departmentGroup");
+const sourceReference = document.getElementById("sourceReference");
+const nonWorkingNotes = document.getElementById("nonWorkingNotes");
+ 
 const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn");
@@ -22,7 +28,36 @@ const clearNonWorkingDayFiltersBtn = document.getElementById("clearNonWorkingDay
 const nonWorkingDaysTableBody = document.getElementById("nonWorkingDaysTableBody");
 const nonWorkingDaysSummary = document.getElementById("nonWorkingDaysSummary");
 const nonWorkingDayMessage = document.getElementById("nonWorkingDayMessage");
-const refreshNonWorkingDaysBtn = document.getElementById("refreshNonWorkingDaysBtn");
+const refreshNonWorkingDaysBtn = document.getElementById("refreshNonWorkingDaysBtn");  
+
+const nonWorkingDaysTopScroll = document.getElementById("nonWorkingDaysTopScroll");
+const nonWorkingDaysTopScrollInner = document.getElementById("nonWorkingDaysTopScrollInner");
+const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll");
+
+populatePbaDepartmentSelect(department, {
+  includeEmpty: true,
+  emptyLabel: "Sin departamento específico",
+});
+
+scope.addEventListener("change", updateDepartmentVisibilityForManualLoad);
+jurisdiction.addEventListener("change", updateDepartmentVisibilityForManualLoad);
+
+function updateDepartmentVisibilityForManualLoad() {
+  const shouldShowDepartment =
+    jurisdiction.value === "pba" && scope.value === "department";
+
+  if (shouldShowDepartment) {
+    departmentGroup.classList.remove("hidden");
+    departmentGroup.style.display = "block";
+    return;
+  }
+
+  department.value = "";
+  departmentGroup.classList.add("hidden");
+  departmentGroup.style.display = "none";
+}
+
+updateDepartmentVisibilityForManualLoad();
 
 document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 
@@ -41,7 +76,27 @@ clearNonWorkingDayFiltersBtn.addEventListener("click", function () {
   filterActive.value = "";
 
   loadNonWorkingDays();
-});
+}); 
+
+let isSyncingHorizontalScroll = false;
+
+if (nonWorkingDaysTopScroll && nonWorkingDaysTableScroll) {
+  nonWorkingDaysTopScroll.addEventListener("scroll", function () {
+    if (isSyncingHorizontalScroll) return;
+
+    isSyncingHorizontalScroll = true;
+    nonWorkingDaysTableScroll.scrollLeft = nonWorkingDaysTopScroll.scrollLeft;
+    isSyncingHorizontalScroll = false;
+  });
+
+  nonWorkingDaysTableScroll.addEventListener("scroll", function () {
+    if (isSyncingHorizontalScroll) return;
+
+    isSyncingHorizontalScroll = true;
+    nonWorkingDaysTopScroll.scrollLeft = nonWorkingDaysTableScroll.scrollLeft;
+    isSyncingHorizontalScroll = false;
+  });
+}
 
 
 form.addEventListener("submit", async function (event) {
@@ -51,13 +106,21 @@ form.addEventListener("submit", async function (event) {
     date: nonWorkingDate.value,
     reason: reason.value.trim(),
     jurisdiction: jurisdiction.value,
-    type: type.value,
-    scope: "manual",
+    type: nonWorkingDayType.value,
+    scope: scope.value,
+    department:
+      jurisdiction.value === "pba" && scope.value === "department"
+        ? department.value || null
+        : null,
+    locality: null,
+    court: null,
     source: "manual",
     source_url: null,
+    source_reference: sourceReference.value.trim() || null,
+    notes: nonWorkingNotes.value.trim() || null,
     verified: true,
     active: true,
-  };
+  }; 
 
   if (!payload.date || !payload.reason) {
     showMessage("Completá la fecha y el motivo.", true);
@@ -75,6 +138,7 @@ form.addEventListener("submit", async function (event) {
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("Error al guardar día inhábil:", errorData);
 
       throw new Error(
         errorData.detail || "No se pudo guardar el día inhábil."
@@ -82,14 +146,27 @@ form.addEventListener("submit", async function (event) {
     }
 
     form.reset();
+    updateDepartmentVisibilityForManualLoad();
+
+    await loadNonWorkingDays();
 
     showMessage("Día inhábil guardado correctamente.", true);
-    loadNonWorkingDays();
   } catch (error) {
     console.error(error);
     showMessage(error.message || "No se pudo guardar el día inhábil.", true);
   }
-});
+}); 
+
+
+function updateNonWorkingDaysTopScrollWidth() {
+  if (!nonWorkingDaysTopScrollInner || !nonWorkingDaysTableScroll) return;
+
+  const table = nonWorkingDaysTableScroll.querySelector(".deadlines-table");
+
+  if (!table) return;
+
+  nonWorkingDaysTopScrollInner.style.width = `${table.scrollWidth}px`;
+}
 
 async function importNationalHolidays() {
   const year = Number(importYear.value);
@@ -140,7 +217,7 @@ async function loadNonWorkingDays() {
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="8">Cargando días inhábiles...</td>
+        <td colspan="11">Cargando días inhábiles...</td>
       </tr>
     `;
 
@@ -162,7 +239,7 @@ async function loadNonWorkingDays() {
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="8">No se pudieron cargar los días inhábiles. Verificá que el backend esté levantado.</td>
+        <td colspan="11">No se pudieron cargar los días inhábiles. Verificá que el backend esté levantado.</td>
       </tr>
     `;
   }
@@ -204,7 +281,7 @@ function renderNonWorkingDays(nonWorkingDays) {
 
     nonWorkingDaysTableBody.innerHTML = `
       <tr>
-        <td colspan="8">No hay días inhábiles para mostrar.</td>
+        <td colspan="11">No hay días inhábiles para mostrar.</td>
       </tr>
     `;
 
@@ -223,7 +300,10 @@ function renderNonWorkingDays(nonWorkingDays) {
       <td>${escapeHTML(item.reason)}</td>
       <td>${getJurisdictionLabel(item.jurisdiction)}</td>
       <td>${getTypeLabel(item.type)}</td>
+      <td>${getScopeLabel(item.scope)}</td>
+      <td>${escapeHTML(item.department || "-")}</td>
       <td>${getSourceLabel(item.source)}</td>
+      <td>${escapeHTML(item.source_reference || "-")}</td>
       <td>
         <span class="status-badge ${item.verified ? "status-completed" : "status-pending"}">
           ${item.verified ? "Verificado" : "Pendiente"}
@@ -258,7 +338,8 @@ function renderNonWorkingDays(nonWorkingDays) {
     nonWorkingDaysTableBody.appendChild(row);
   });
 
-  attachActionEvents();
+  attachActionEvents(); 
+  updateNonWorkingDaysTopScrollWidth();
 }
 
 function attachActionEvents() {
@@ -373,6 +454,19 @@ function getTypeLabel(type) {
   };
 
   return labels[type] || "Otro";
+} 
+
+function getScopeLabel(scope) {
+  const labels = {
+    national: "Nacional",
+    provincial: "Provincial",
+    department: "Departamento judicial",
+    locality: "Localidad",
+    court: "Organismo / juzgado",
+    manual: "General / Manual",
+  };
+
+  return labels[scope] || "General / Manual";
 }
 
 function getSourceLabel(source) {

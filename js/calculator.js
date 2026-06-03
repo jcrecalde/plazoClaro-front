@@ -18,7 +18,12 @@ const jurisdictionSelect = document.getElementById("jurisdiction");
 const departmentSelect = document.getElementById("department");
 const departmentGroup = document.getElementById("departmentGroup");
 const departmentDetail = document.getElementById("departmentDetail");
-const saveDeadlineBtn = document.getElementById("saveDeadlineBtn"); 
+const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");  
+
+populatePbaDepartmentSelect(departmentSelect, {
+  includeEmpty: true,
+  emptyLabel: "Sin departamento específico",
+});
 
 jurisdictionSelect.addEventListener("change", updateDepartmentVisibility);
 

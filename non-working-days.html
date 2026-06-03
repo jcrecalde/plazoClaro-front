@@ -57,11 +57,12 @@
             <option value="pba">Provincia de Buenos Aires</option>
             <option value="national_federal">Nacional / Federal</option>
           </select>
-        </div>
+        </div> 
 
         <div class="form-group">
-          <label for="type">Tipo</label>
-          <select id="type" required>
+          <label for="nonWorkingDayType">Tipo</label>
+          <select id="nonWorkingDayType" required>
+            <option value="">Seleccionar tipo</option>
             <option value="national_holiday">Feriado nacional</option>
             <option value="provincial_holiday">Feriado provincial</option>
             <option value="judicial_recess">Feria judicial</option>
@@ -69,6 +70,43 @@
             <option value="term_suspension">Suspensión de términos</option>
             <option value="special_non_working_day">Inhábil especial</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="scope">Alcance</label>
+          <select id="scope" required>
+            <option value="manual">General / Manual</option>
+            <option value="national">Nacional</option>
+            <option value="provincial">Provincial</option>
+            <option value="department">Departamento judicial</option>
+            <option value="locality">Localidad</option>
+            <option value="court">Organismo / juzgado</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="departmentGroup">
+          <label for="department">Departamento judicial</label>
+          <select id="department"></select>
+          <small class="field-help">
+            Solo se usa cuando el alcance es “Departamento judicial”.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="sourceReference">Referencia / resolución</label>
+          <input
+            type="text"
+            id="sourceReference"
+            placeholder="Ej: Resolución SCBA, carga de prueba, enlace interno..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="nonWorkingNotes">Notas internas</label>
+          <textarea
+            id="nonWorkingNotes"
+            placeholder="Aclaraciones sobre el alcance, fuente o criterio utilizado..."
+          ></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">
@@ -189,7 +227,11 @@
         </div>
       </div>
 
-      <div class="table-card">
+      <div class="table-scroll-top" id="nonWorkingDaysTopScroll">
+        <div id="nonWorkingDaysTopScrollInner"></div>
+      </div>
+
+      <div class="table-card non-working-days-table-card" id="nonWorkingDaysTableScroll">
         <table class="deadlines-table">
           <thead>
             <tr>
@@ -197,7 +239,10 @@
               <th>Motivo</th>
               <th>Jurisdicción</th>
               <th>Tipo</th>
+              <th>Alcance</th>
+              <th>Departamento</th>
               <th>Fuente</th>
+              <th>Referencia</th>
               <th>Verificado</th>
               <th>Activo</th>
               <th>Acciones</th>
@@ -206,7 +251,7 @@
 
           <tbody id="nonWorkingDaysTableBody">
             <tr>
-              <td colspan="8">Cargando días inhábiles...</td>
+              <td colspan="11">Cargando días inhábiles...</td>
             </tr>
           </tbody>
         </table>
@@ -229,6 +274,7 @@
     </div>
   </footer>
 
-  <script src="./js/non-working-days.js?v=5"></script>
+  <script src="./js/pba-departments.js?v=1"></script>
+  <script src="./js/non-working-days.js?v=12"></script>
 </body>
 </html>

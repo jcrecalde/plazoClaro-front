@@ -1038,4 +1038,127 @@ textarea:focus {
   .calendar-filter-grid {
     grid-template-columns: 1fr;
   }
+} 
+
+
+/* Tabla de días inhábiles: versión compacta con scroll propio */
+
+.table-scroll-top {
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 14px;
+  margin-bottom: 8px;
+  border: 1px solid #D8D2C4;
+  border-radius: 8px;
+  background: #FAFAF8;
+}
+
+.table-scroll-top div {
+  height: 1px;
+}
+
+/* Contenedor de la tabla: tiene scroll horizontal y vertical propio */
+.non-working-days-table-card {
+  overflow: auto;
+  width: 100%;
+  max-height: 620px;
+  border-radius: 12px;
+}
+
+/* Tabla más compacta */
+.non-working-days-table-card .deadlines-table {
+  min-width: 1120px;
+  table-layout: fixed;
+}
+
+/* Encabezado fijo al scrollear verticalmente dentro de la tabla */
+.non-working-days-table-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Celdas más chicas */
+.non-working-days-table-card th,
+.non-working-days-table-card td {
+  padding: 12px 11px;
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+/* Evita que casi todo se parta en mil líneas */
+.non-working-days-table-card th,
+.non-working-days-table-card td {
+  white-space: nowrap;
+}
+
+/* Motivo y referencia sí pueden ocupar varias líneas */
+.non-working-days-table-card th:nth-child(2),
+.non-working-days-table-card td:nth-child(2) {
+  width: 250px;
+  white-space: normal;
+}
+
+
+.non-working-days-table-card th:nth-child(8),
+.non-working-days-table-card td:nth-child(8) {
+  width: 180px;
+  white-space: normal;
+}
+
+/* Anchos por columna */
+.non-working-days-table-card th:nth-child(1),
+.non-working-days-table-card td:nth-child(1) {
+  width: 90px;
+}
+
+.non-working-days-table-card th:nth-child(3),
+.non-working-days-table-card td:nth-child(3) {
+  width: 180px;
+}
+
+.non-working-days-table-card th:nth-child(4),
+.non-working-days-table-card td:nth-child(4) {
+  width: 145px;
+}
+
+
+.non-working-days-table-card th:nth-child(5),
+.non-working-days-table-card td:nth-child(5) {
+  width: 155px;
+} 
+
+.non-working-days-table-card th:nth-child(6),
+.non-working-days-table-card td:nth-child(6) {
+  width: 145px;
+}
+
+
+.non-working-days-table-card th:nth-child(7),
+.non-working-days-table-card td:nth-child(7) {
+  width: 100px;
+}
+
+.non-working-days-table-card th:nth-child(9),
+.non-working-days-table-card td:nth-child(9),
+.non-working-days-table-card th:nth-child(10),
+.non-working-days-table-card td:nth-child(10) {
+  width: 95px;
+}
+
+.non-working-days-table-card th:nth-child(11),
+.non-working-days-table-card td:nth-child(11) {
+  width: 165px;
+}
+
+/* Acciones más compactas */
+.non-working-days-table-card .table-actions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.non-working-days-table-card .btn-small {
+  padding: 7px 9px;
+  font-size: 0.78rem;
 }
