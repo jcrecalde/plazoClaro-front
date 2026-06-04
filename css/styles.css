@@ -925,8 +925,7 @@ textarea:focus {
 /* Deadline history */
 
 .history-list {
-  display: grid;
-  gap: 14px;
+  max-width: 1100px;
 }
 
 .history-item {
@@ -1185,4 +1184,87 @@ textarea:focus {
 .form-card.editing-mode .badge {
   background: rgba(154, 106, 31, 0.18);
   color: var(--color-secondary);
+} 
+
+
+.history-changes {
+  display: grid;
+  gap: 10px;
+}
+
+.history-change-row {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.history-change-row strong {
+  display: block;
+  color: var(--color-primary);
+  margin-bottom: 6px;
+}
+
+.history-before {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.history-after {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.history-arrow {
+  margin: 0 8px;
+  color: var(--color-muted);
+} 
+
+.history-item {
+  max-width: 100%;
+}
+
+.history-change-row {
+  max-width: 900px;
+}
+
+.history-change-row div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.history-before,
+.history-after {
+  word-break: break-word;
+} 
+
+
+/* Historial de días inhábiles: panel más cómodo */
+
+#nonWorkingDayHistoryPanel {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#nonWorkingDayHistoryPanel .history-list {
+  max-width: 100%;
+}
+
+#nonWorkingDayHistoryPanel .history-item {
+  max-width: 100%;
+}
+
+#nonWorkingDayHistoryPanel .history-change-row {
+  max-width: 100%;
+}
+
+#nonWorkingDayHistoryPanel .history-header {
+  align-items: center;
+}
+
+#nonWorkingDayHistoryPanel .history-change-row div {
+  font-size: 0.9rem;
 }

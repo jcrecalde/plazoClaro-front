@@ -41,7 +41,12 @@ const filterDepartmentGroup = document.getElementById("filterDepartmentGroup");
 const submitNonWorkingDayBtn = document.getElementById("submitNonWorkingDayBtn"); 
 
 const nonWorkingDayFormBadge = document.getElementById("nonWorkingDayFormBadge");
-const cancelEditNonWorkingDayBtn = document.getElementById("cancelEditNonWorkingDayBtn");
+const cancelEditNonWorkingDayBtn = document.getElementById("cancelEditNonWorkingDayBtn"); 
+
+const nonWorkingDayHistoryPanel = document.getElementById("nonWorkingDayHistoryPanel");
+const historyPanelTitle = document.getElementById("historyPanelTitle");
+const nonWorkingDayHistoryContent = document.getElementById("nonWorkingDayHistoryContent");
+const closeNonWorkingDayHistoryBtn = document.getElementById("closeNonWorkingDayHistoryBtn");
 
 
 let editingNonWorkingDayId = null; 
@@ -220,6 +225,10 @@ form.addEventListener("submit", async function (event) {
   }
 }); 
 
+closeNonWorkingDayHistoryBtn.addEventListener("click", function () {
+  nonWorkingDayHistoryPanel.classList.add("hidden");
+});
+
 function startEditingNonWorkingDay(nonWorkingDayId) {
   const selectedDay = currentNonWorkingDays.find(
     (item) => item.id === nonWorkingDayId
@@ -254,6 +263,59 @@ function startEditingNonWorkingDay(nonWorkingDayId) {
   window.scrollTo({
     top: 0,
     behavior: "smooth",
+  });
+} 
+
+
+function showNonWorkingDayHistory(nonWorkingDayId) {
+  const selectedDay = currentNonWorkingDays.find(
+    (item) => item.id === nonWorkingDayId
+  );
+
+  if (!selectedDay) {
+    showMessage("No se encontró el día inhábil seleccionado.", true);
+    return;
+  }
+
+  historyPanelTitle.textContent = `Historial - ${formatDate(selectedDay.date)}`;
+
+  const history = selectedDay.history || [];
+
+  if (!history.length) {
+    nonWorkingDayHistoryContent.innerHTML = `
+      <p class="detail-notes">Sin cambios registrados.</p>
+    `;
+  } else {
+    nonWorkingDayHistoryContent.innerHTML = history
+      .slice()
+      .reverse()
+      .map((item) => {
+        const changedFields = renderChangedHistoryFields(
+          item.previous_data,
+          item.new_data
+        );
+
+        return `
+          <div class="history-item">
+            <div class="history-header">
+              <strong>${formatDateTime(item.changed_at)}</strong>
+              <span>${getHistoryTypeLabel(item.change_type)}</span>
+            </div>
+
+            <div class="history-changes">
+              ${changedFields}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  nonWorkingDayHistoryPanel.classList.remove("hidden");
+
+  nonWorkingDayHistoryPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
   });
 }
 
@@ -445,6 +507,10 @@ function renderNonWorkingDays(nonWorkingDays) {
         <div class="table-actions">
           <button class="btn-small btn-edit btn-edit-day" data-id="${item.id}">
             Editar
+          </button>  
+
+          <button class="btn-small btn-detail btn-history-day" data-id="${item.id}">
+            Historial
           </button>
 
           ${
@@ -476,12 +542,19 @@ function renderNonWorkingDays(nonWorkingDays) {
 function attachActionEvents() {
   const verifyButtons = document.querySelectorAll(".btn-verify-day");
   const toggleButtons = document.querySelectorAll(".btn-toggle-day");
-  const deleteButtons = document.querySelectorAll(".btn-delete"); 
-  const editButtons = document.querySelectorAll(".btn-edit-day"); 
+  const deleteButtons = document.querySelectorAll(".btn-delete");
+  const editButtons = document.querySelectorAll(".btn-edit-day");
+  const historyButtons = document.querySelectorAll(".btn-history-day");
 
   editButtons.forEach((button) => {
     button.addEventListener("click", function () {
       startEditingNonWorkingDay(button.dataset.id);
+    });
+  }); 
+
+  historyButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      showNonWorkingDayHistory(button.dataset.id);
     });
   });
 
@@ -627,6 +700,145 @@ function showMessage(message, visible) {
 
   nonWorkingDayMessage.textContent = message;
   nonWorkingDayMessage.classList.remove("hidden");
+} 
+
+
+function formatDateTime(dateTimeString) {
+  if (!dateTimeString) return "-";
+
+  const date = new Date(dateTimeString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function getHistoryTypeLabel(changeType) {
+  const labels = {
+    full_update: "Edición completa",
+    partial_update: "Actualización rápida",
+  };
+
+  return labels[changeType] || "Cambio";
+}
+
+function renderHistorySnapshot(snapshot) {
+  if (!snapshot) return "<p>-</p>";
+
+  return `
+    <p><strong>Motivo:</strong> ${escapeHTML(snapshot.reason || "-")}</p>
+    <p><strong>Tipo:</strong> ${getTypeLabel(snapshot.type)}</p>
+    <p><strong>Alcance:</strong> ${getScopeLabel(snapshot.scope)}</p>
+    <p><strong>Departamento:</strong> ${escapeHTML(snapshot.department || "-")}</p>
+    <p><strong>Referencia:</strong> ${escapeHTML(snapshot.source_reference || "-")}</p>
+    <p><strong>Notas:</strong> ${escapeHTML(snapshot.notes || "-")}</p>
+    <p><strong>Verificado:</strong> ${snapshot.verified ? "Sí" : "No"}</p>
+    <p><strong>Activo:</strong> ${snapshot.active ? "Sí" : "No"}</p>
+  `;
+} 
+
+
+
+function renderChangedHistoryFields(previousData = {}, newData = {}) {
+  const fieldsToCompare = [
+    "date",
+    "reason",
+    "jurisdiction",
+    "type",
+    "scope",
+    "department",
+    "locality",
+    "court",
+    "source",
+    "source_url",
+    "source_reference",
+    "notes",
+    "verified",
+    "active",
+  ];
+
+  const changedFields = fieldsToCompare.filter((field) => {
+    const previousValue = previousData?.[field] ?? null;
+    const newValue = newData?.[field] ?? null;
+
+    return previousValue !== newValue;
+  });
+
+  if (!changedFields.length) {
+    return `<p class="detail-notes">No se detectaron cambios relevantes.</p>`;
+  }
+
+  return changedFields
+    .map((field) => {
+      return `
+        <div class="history-change-row">
+          <strong>${getHistoryFieldLabel(field)}</strong>
+          <div>
+            <span class="history-before">${formatHistoryFieldValue(field, previousData?.[field])}</span>
+            <span class="history-arrow">→</span>
+            <span class="history-after">${formatHistoryFieldValue(field, newData?.[field])}</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function getHistoryFieldLabel(field) {
+  const labels = {
+    date: "Fecha",
+    reason: "Motivo",
+    jurisdiction: "Jurisdicción",
+    type: "Tipo",
+    scope: "Alcance",
+    department: "Departamento",
+    locality: "Localidad",
+    court: "Organismo / juzgado",
+    source: "Fuente",
+    source_url: "URL de fuente",
+    source_reference: "Referencia",
+    notes: "Notas",
+    verified: "Verificado",
+    active: "Activo",
+  };
+
+  return labels[field] || field;
+}
+
+function formatHistoryFieldValue(field, value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  if (field === "date") {
+    return formatDate(value);
+  }
+
+  if (field === "jurisdiction") {
+    return getJurisdictionLabel(value);
+  }
+
+  if (field === "type") {
+    return getTypeLabel(value);
+  }
+
+  if (field === "scope") {
+    return getScopeLabel(value);
+  }
+
+  if (field === "verified" || field === "active") {
+    return value ? "Sí" : "No";
+  }
+
+  return escapeHTML(value);
 }
 
 function escapeHTML(value) {

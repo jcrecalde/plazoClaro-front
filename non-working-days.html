@@ -286,7 +286,24 @@
           </tbody>
         </table>
       </div>
-    </section>
+    </section> 
+
+    <div id="nonWorkingDayHistoryPanel" class="deadline-detail-panel hidden">
+      <div class="detail-panel-header">
+        <div>
+          <span class="badge">Historial</span>
+          <h3 id="historyPanelTitle">Historial de cambios</h3>
+        </div>
+
+        <button id="closeNonWorkingDayHistoryBtn" class="btn btn-secondary" type="button">
+          Cerrar historial
+        </button>
+      </div>
+
+      <div id="nonWorkingDayHistoryContent" class="history-list">
+        Sin cambios registrados.
+      </div>
+    </div>
 
     <section class="container">
       <div class="notice">
@@ -305,6 +322,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=15"></script>
+  <script src="./js/non-working-days.js?v=17"></script>
 </body>
 </html>
