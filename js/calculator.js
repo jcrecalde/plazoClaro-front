@@ -153,19 +153,28 @@ function createLocalDate(dateString) {
   return new Date(year, month - 1, day);
 }
 
+
 function normalizeApiResult(apiResult) {
   return {
     notificationDate: createLocalDate(apiResult.notification_date),
     startDate: createLocalDate(apiResult.start_date),
     deadlineDate: createLocalDate(apiResult.deadline_date),
     countedDays: apiResult.counted_days,
-    excludedDays: apiResult.excluded_days.map((item) => ({
+    excludedDays: (apiResult.excluded_days || []).map((item) => ({
       date: createLocalDate(item.date),
       reason: item.reason,
+      type: item.type,
+      scope: item.scope,
+      department: item.department,
+      locality: item.locality,
+      court: item.court,
+      source: item.source,
+      sourceReference: item.source_reference,
+      verified: item.verified,
     })),
     dayType: apiResult.day_type,
     jurisdiction: apiResult.jurisdiction,
-    startRule: apiResult.start_rule, 
+    startRule: apiResult.start_rule,
     department: apiResult.department,
     locality: apiResult.locality,
     court: apiResult.court,
@@ -199,7 +208,7 @@ function renderResult(result) {
   calculationResult.classList.remove("hidden");
   calculationResult.style.display = "block";
 
-  deadlineDateElement.textContent = formatDate(result.deadlineDate); 
+  deadlineDateElement.textContent = formatDate(result.deadlineDate);
 
   const startRuleText =
     result.startRule === "same_day"
@@ -211,29 +220,23 @@ function renderResult(result) {
   daysDetail.textContent = `Se computaron ${result.countedDays} ${getDayTypeLabel(result.dayType)}.`;
 
   if (result.dayType === "business") {
-    if (result.excludedDays.length === 0) {
-      excludedDetail.textContent =
-        "No se excluyeron sábados, domingos ni días inhábiles durante el período computado.";
-    } else {
-      const excludedText = result.excludedDays
-        .map((item) => `${formatDate(item.date)} (${item.reason})`)
-        .join(", ");
-
-      excludedDetail.textContent = `Se excluyeron los siguientes días: ${excludedText}.`;
-    }
+    excludedDetail.innerHTML = renderExcludedDays(result.excludedDays);
   } else {
-    excludedDetail.textContent =
-      "Al tratarse de días corridos, no se excluyeron sábados, domingos ni días inhábiles.";
+    excludedDetail.innerHTML = `
+      <p class="result-empty">
+        Al tratarse de días corridos, no se excluyeron sábados, domingos ni días inhábiles.
+      </p>
+    `;
   }
 
-  jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;  
+  jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;
 
-    if (result.department) {
+  if (result.department) {
     departmentDetail.textContent = `Departamento judicial seleccionado: ${result.department}.`;
   } else {
     departmentDetail.textContent = "No se seleccionó un departamento judicial específico.";
   }
-} 
+}
 
 
 function showCalculatorMessage(message, visible) {
@@ -267,4 +270,105 @@ clearResultBtn.addEventListener("click", function () {
   excludedDetail.textContent = "";
   jurisdictionDetail.textContent = ""; 
   departmentDetail.textContent = "";
-});
+}); 
+
+
+function getExcludedDayTypeLabel(type) {
+  const labels = {
+    national_holiday: "Feriado nacional",
+    provincial_holiday: "Feriado provincial",
+    judicial_recess: "Feria judicial",
+    court_holiday: "Asueto judicial",
+    term_suspension: "Suspensión de términos",
+    special_non_working_day: "Inhábil especial",
+    weekend: "Fin de semana",
+    holiday: "Feriado",
+  };
+
+  return labels[type] || "Día inhábil";
+}
+
+function getExcludedDayScopeLabel(scope) {
+  const labels = {
+    national: "Nacional",
+    provincial: "Provincial",
+    department: "Departamento judicial",
+    locality: "Localidad",
+    court: "Organismo / juzgado",
+    manual: "General / Manual",
+    general: "General",
+  };
+
+  return labels[scope] || "General";
+}
+
+function getExcludedDaySourceLabel(source) {
+  const labels = {
+    manual: "Manual",
+    argentina_datos: "ArgentinaDatos",
+    scba: "SCBA",
+    csjn: "CSJN",
+    system: "Sistema",
+  };
+
+  return labels[source] || source || "Sin fuente";
+}
+
+function getExcludedDayVerifiedLabel(verified) {
+  if (verified === true) return "Verificado";
+  if (verified === false) return "Pendiente de verificación";
+
+  return "Sin estado de verificación";
+}
+
+function renderExcludedDays(excludedDays) {
+  if (!excludedDays || !excludedDays.length) {
+    return `
+      <p class="result-empty">
+        No se excluyeron sábados, domingos ni días inhábiles durante el período computado.
+      </p>
+    `;
+  }
+
+  return `
+    <div class="excluded-days-list">
+      ${excludedDays
+        .map((day) => {
+          return `
+            <div class="excluded-day-card">
+              <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+
+              <div class="excluded-day-meta">
+                <span>${getExcludedDayTypeLabel(day.type)}</span>
+                <span>Alcance: ${getExcludedDayScopeLabel(day.scope)}</span>
+                <span>Fuente: ${getExcludedDaySourceLabel(day.source)}</span>
+                <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+              </div>
+
+              ${
+                day.department
+                  ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
+                  : ""
+              }
+
+              ${
+                day.sourceReference
+                  ? `<p><strong>Referencia:</strong> ${escapeHTML(day.sourceReference)}</p>`
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}

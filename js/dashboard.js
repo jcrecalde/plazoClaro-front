@@ -482,18 +482,43 @@ function renderExcludedDaysDetail(excludedDays) {
   detailExcludedDays.innerHTML = "";
 
   if (!excludedDays.length) {
-    const item = document.createElement("li");
-    item.textContent = "No se excluyeron días durante el período computado.";
-    detailExcludedDays.appendChild(item);
+    detailExcludedDays.innerHTML = `
+      <li class="detail-notes">
+        No se excluyeron días durante el período computado.
+      </li>
+    `;
     return;
   }
 
-  excludedDays.forEach((excludedDay) => {
-    const item = document.createElement("li");
-    item.textContent = `${formatDate(excludedDay.date)} - ${excludedDay.reason}`;
-    detailExcludedDays.appendChild(item);
-  });
-}  
+  detailExcludedDays.innerHTML = excludedDays
+    .map((day) => {
+      return `
+        <li class="excluded-day-card">
+          <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+
+          <div class="excluded-day-meta">
+            <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
+            <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
+            <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
+            <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+          </div>
+
+          ${
+            day.department
+              ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
+              : ""
+          }
+
+          ${
+            day.source_reference
+              ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+              : ""
+          }
+        </li>
+      `;
+    })
+    .join("");
+}
 
 function renderDeadlineHistory(history) {
   detailHistory.innerHTML = "";
@@ -935,6 +960,42 @@ function exportDeadlineDetailToPdf(deadline) {
           margin-top: 28px;
           font-size: 12px;
           color: #5F6B7A;
+        } 
+
+
+        .excluded-day-pdf {
+          border: 1px solid #D8D2C4;
+          background: #FAFAF8;
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 10px;
+        }
+
+        .excluded-day-pdf strong {
+          color: #111827;
+        }
+
+        .excluded-day-pdf p {
+          margin: 8px 0 0;
+          color: #5F6B7A;
+          font-size: 13px;
+        }
+
+        .excluded-day-meta-pdf {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+          margin-top: 8px;
+        }
+
+        .excluded-day-meta-pdf span {
+          border: 1px solid #D8D2C4;
+          background: #FFFFFF;
+          color: #5F6B7A;
+          border-radius: 999px;
+          padding: 4px 8px;
+          font-size: 11px;
+          font-weight: 700;
         }
 
         @media print {
@@ -1048,14 +1109,36 @@ function getExcludedDaysHtmlForPdf(excludedDays) {
     return "<p>No se excluyeron días durante el período computado.</p>";
   }
 
-  const items = excludedDays
-    .map((item) => {
-      return `<li>${formatDate(item.date)} - ${escapeHTML(item.reason)}</li>`;
+  return excludedDays
+    .map((day) => {
+      return `
+        <div class="excluded-day-pdf">
+          <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+
+          <div class="excluded-day-meta-pdf">
+            <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
+            <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
+            <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
+            <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+          </div>
+
+          ${
+            day.department
+              ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
+              : ""
+          }
+
+          ${
+            day.source_reference
+              ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+              : ""
+          }
+        </div>
+      `;
     })
     .join("");
+} 
 
-  return `<ul>${items}</ul>`;
-}
 
 function getDayTypeLabelForPdf(dayType) {
   if (dayType === "business") return "Días hábiles";
@@ -1083,10 +1166,101 @@ function showMessage(message, visible) {
 
 function getDepartmentLabelForPdf(department) {
   return department || "Sin departamento específico";
+} 
+
+
+function getExcludedDayTypeLabel(type, reason = "") {
+  const labels = {
+    national_holiday: "Feriado nacional",
+    provincial_holiday: "Feriado provincial",
+    judicial_recess: "Feria judicial",
+    court_holiday: "Asueto judicial",
+    term_suspension: "Suspensión de términos",
+    special_non_working_day: "Inhábil especial",
+    weekend: "Fin de semana",
+    holiday: "Feriado",
+  };
+
+  if (labels[type]) {
+    return labels[type];
+  }
+
+  const normalizedReason = String(reason).toLowerCase();
+
+  if (normalizedReason.includes("sábado") || normalizedReason.includes("domingo")) {
+    return "Fin de semana";
+  }
+
+  if (normalizedReason.includes("feriado nacional")) {
+    return "Feriado nacional";
+  }
+
+  if (normalizedReason.includes("suspensión")) {
+    return "Suspensión de términos";
+  }
+
+  return "Día inhábil";
+}
+
+function getExcludedDayScopeLabel(scope, type, reason = "") {
+  const labels = {
+    national: "Nacional",
+    provincial: "Provincial",
+    department: "Departamento judicial",
+    locality: "Localidad",
+    court: "Organismo / juzgado",
+    manual: "General / Manual",
+    general: "General",
+  };
+
+  if (labels[scope]) {
+    return labels[scope];
+  }
+
+  const normalizedReason = String(reason).toLowerCase();
+
+  if (type === "weekend" || normalizedReason.includes("sábado") || normalizedReason.includes("domingo")) {
+    return "General";
+  }
+
+  if (type === "national_holiday" || normalizedReason.includes("feriado nacional")) {
+    return "Nacional";
+  }
+
+  return "General";
+}
+
+function getExcludedDaySourceLabel(source, type, reason = "") {
+  const labels = {
+    manual: "Manual",
+    argentina_datos: "ArgentinaDatos",
+    scba: "SCBA",
+    csjn: "CSJN",
+    system: "Sistema",
+  };
+
+  if (labels[source]) {
+    return labels[source];
+  }
+
+  const normalizedReason = String(reason).toLowerCase();
+
+  if (type === "weekend" || normalizedReason.includes("sábado") || normalizedReason.includes("domingo")) {
+    return "Sistema";
+  }
+
+  return "Sin fuente";
+}
+
+function getExcludedDayVerifiedLabel(verified) {
+  if (verified === true) return "Verificado";
+  if (verified === false) return "Pendiente de verificación";
+
+  return "Sin estado de verificación";
 }
 
 function escapeHTML(value) {
-  return String(value)
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
