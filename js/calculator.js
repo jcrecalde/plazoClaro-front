@@ -330,7 +330,21 @@ function renderExcludedDays(excludedDays) {
     `;
   }
 
+  const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
+
   return `
+    ${
+      hasUnverifiedDays
+        ? `
+          <div class="verification-warning">
+            <strong>Atención:</strong>
+            este cálculo incluye días inhábiles importados automáticamente que todavía no fueron verificados.
+            Revisá la fuente antes de usar este vencimiento como definitivo.
+          </div>
+        `
+        : ""
+    }
+
     <div class="excluded-days-list">
       ${excludedDays
         .map((day) => {

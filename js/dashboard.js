@@ -490,34 +490,50 @@ function renderExcludedDaysDetail(excludedDays) {
     return;
   }
 
-  detailExcludedDays.innerHTML = excludedDays
-    .map((day) => {
-      return `
-        <li class="excluded-day-card">
-          <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+  const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
 
-          <div class="excluded-day-meta">
-            <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
-            <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
-            <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
-            <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
-          </div>
+  detailExcludedDays.innerHTML = `
+    ${
+      hasUnverifiedDays
+        ? `
+          <li class="verification-warning">
+            <strong>Atención:</strong>
+            este plazo contiene días inhábiles pendientes de verificación.
+            Revisá la fuente antes de usar el vencimiento como definitivo.
+          </li>
+        `
+        : ""
+    }
 
-          ${
-            day.department
-              ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
-              : ""
-          }
+    ${excludedDays
+      .map((day) => {
+        return `
+          <li class="excluded-day-card">
+            <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
 
-          ${
-            day.source_reference
-              ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
-              : ""
-          }
-        </li>
-      `;
-    })
-    .join("");
+            <div class="excluded-day-meta">
+              <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
+              <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
+              <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
+              <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+            </div>
+
+            ${
+              day.department
+                ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
+                : ""
+            }
+
+            ${
+              day.source_reference
+                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+                : ""
+            }
+          </li>
+        `;
+      })
+      .join("")}
+  `;
 }
 
 function renderDeadlineHistory(history) {
@@ -996,6 +1012,16 @@ function exportDeadlineDetailToPdf(deadline) {
           padding: 4px 8px;
           font-size: 11px;
           font-weight: 700;
+        } 
+
+        .verification-warning-pdf {
+          border: 1px solid #E7C873;
+          background: #FFF8E7;
+          color: #6B4E16;
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          font-size: 13px;
         }
 
         @media print {
@@ -1109,35 +1135,51 @@ function getExcludedDaysHtmlForPdf(excludedDays) {
     return "<p>No se excluyeron días durante el período computado.</p>";
   }
 
-  return excludedDays
-    .map((day) => {
-      return `
-        <div class="excluded-day-pdf">
-          <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+  const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
 
-          <div class="excluded-day-meta-pdf">
-            <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
-            <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
-            <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
-            <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+  return `
+    ${
+      hasUnverifiedDays
+        ? `
+          <div class="verification-warning-pdf">
+            <strong>Atención:</strong>
+            este cálculo incluye días inhábiles pendientes de verificación.
+            Revisá la fuente antes de usar este vencimiento como definitivo.
           </div>
+        `
+        : ""
+    }
 
-          ${
-            day.department
-              ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
-              : ""
-          }
+    ${excludedDays
+      .map((day) => {
+        return `
+          <div class="excluded-day-pdf">
+            <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
 
-          ${
-            day.source_reference
-              ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
-              : ""
-          }
-        </div>
-      `;
-    })
-    .join("");
-} 
+            <div class="excluded-day-meta-pdf">
+              <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
+              <span>Alcance: ${getExcludedDayScopeLabel(day.scope, day.type, day.reason)}</span>
+              <span>Fuente: ${getExcludedDaySourceLabel(day.source, day.type, day.reason)}</span>
+              <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
+            </div>
+
+            ${
+              day.department
+                ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
+                : ""
+            }
+
+            ${
+              day.source_reference
+                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+                : ""
+            }
+          </div>
+        `;
+      })
+      .join("")}
+  `;
+}
 
 
 function getDayTypeLabelForPdf(dayType) {
