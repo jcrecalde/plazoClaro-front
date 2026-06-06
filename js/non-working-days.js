@@ -46,7 +46,19 @@ const cancelEditNonWorkingDayBtn = document.getElementById("cancelEditNonWorking
 const nonWorkingDayHistoryPanel = document.getElementById("nonWorkingDayHistoryPanel");
 const historyPanelTitle = document.getElementById("historyPanelTitle");
 const nonWorkingDayHistoryContent = document.getElementById("nonWorkingDayHistoryContent");
-const closeNonWorkingDayHistoryBtn = document.getElementById("closeNonWorkingDayHistoryBtn");
+const closeNonWorkingDayHistoryBtn = document.getElementById("closeNonWorkingDayHistoryBtn"); 
+
+const totalNonWorkingDays = document.getElementById("totalNonWorkingDays");
+const pendingVerificationDays = document.getElementById("pendingVerificationDays");
+const verifiedNonWorkingDays = document.getElementById("verifiedNonWorkingDays");
+const automaticNonWorkingDays = document.getElementById("automaticNonWorkingDays"); 
+
+
+const showPendingVerificationBtn = document.getElementById("showPendingVerificationBtn");
+const showAllNonWorkingDaysBtn = document.getElementById("showAllNonWorkingDaysBtn"); 
+
+
+const verifyVisiblePendingDaysBtn = document.getElementById("verifyVisiblePendingDaysBtn");
 
 
 let editingNonWorkingDayId = null; 
@@ -148,8 +160,30 @@ if (nonWorkingDaysTopScroll && nonWorkingDaysTableScroll) {
 cancelEditNonWorkingDayBtn.addEventListener("click", function () {
   resetNonWorkingDayFormMode();
   showMessage("Edición cancelada. Podés cargar un nuevo día inhábil.", true);
+}); 
+
+showPendingVerificationBtn.addEventListener("click", function () {
+  filterVerified.value = "false";
+  filterActive.value = "true";
+  loadNonWorkingDays();
 });
 
+showAllNonWorkingDaysBtn.addEventListener("click", function () {
+  filterYear.value = importYear.value || "2026";
+  filterJurisdiction.value = importJurisdiction.value || "pba";
+  filterType.value = "";
+  filterSource.value = "";
+  filterVerified.value = "";
+  filterActive.value = "";
+  filterScope.value = "";
+  filterDepartment.value = "";
+
+  updateFilterDepartmentVisibility();
+
+  loadNonWorkingDays();
+});
+ 
+verifyVisiblePendingDaysBtn.addEventListener("click", verifyVisiblePendingDays);
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -457,11 +491,34 @@ function buildNonWorkingDaysUrl() {
   }
 
   return `${NON_WORKING_DAYS_API_URL}?${params.toString()}`;
+} 
+
+function updateNonWorkingDaysSummary(nonWorkingDays) {
+  const total = nonWorkingDays.length;
+
+  const pendingVerification = nonWorkingDays.filter(
+    (day) => day.verified === false
+  ).length;
+
+  const verified = nonWorkingDays.filter(
+    (day) => day.verified === true
+  ).length;
+
+  const automatic = nonWorkingDays.filter(
+    (day) => day.source && day.source !== "manual"
+  ).length;
+
+  totalNonWorkingDays.textContent = total;
+  pendingVerificationDays.textContent = pendingVerification;
+  verifiedNonWorkingDays.textContent = verified;
+  automaticNonWorkingDays.textContent = automatic;
 }
 
 function renderNonWorkingDays(nonWorkingDays) { 
 
-  currentNonWorkingDays = nonWorkingDays; 
+  currentNonWorkingDays = nonWorkingDays;  
+
+  updateNonWorkingDaysSummary(nonWorkingDays);
 
   const selectedYear = Number(filterYear.value || importYear.value) || 2026;
 
@@ -580,6 +637,57 @@ function attachActionEvents() {
       deleteNonWorkingDay(button.dataset.id);
     });
   });
+} 
+
+async function verifyVisiblePendingDays() {
+  const pendingVisibleDays = currentNonWorkingDays.filter(
+    (day) => day.verified === false
+  );
+
+  if (!pendingVisibleDays.length) {
+    showMessage("No hay días pendientes visibles para verificar.", true);
+    return;
+  }
+
+  const confirmVerification = confirm(
+    `Vas a marcar como verificados ${pendingVisibleDays.length} día(s) inhábil(es) visibles. ¿Confirmás que ya revisaste la fuente correspondiente?`
+  );
+
+  if (!confirmVerification) {
+    return;
+  }
+
+  try {
+    verifyVisiblePendingDaysBtn.disabled = true;
+    verifyVisiblePendingDaysBtn.textContent = "Verificando...";
+
+    for (const day of pendingVisibleDays) {
+      const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${day.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ verified: true }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`No se pudo verificar el día ${formatDate(day.date)}.`);
+      }
+    }
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `${pendingVisibleDays.length} día(s) inhábil(es) marcado(s) como verificados.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudieron verificar los días visibles.", true);
+  } finally {
+    verifyVisiblePendingDaysBtn.disabled = false;
+    verifyVisiblePendingDaysBtn.textContent = "Verificar pendientes visibles";
+  }
 }
 
 async function updateNonWorkingDay(nonWorkingDayId, payload, successMessage) {
