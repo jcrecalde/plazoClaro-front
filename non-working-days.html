@@ -258,42 +258,54 @@
       </div> 
 
 
-      <div class="summary-grid non-working-summary-grid">
-        <div class="summary-card">
-          <span>Total de días inhábiles</span>
-          <strong id="totalNonWorkingDays">0</strong>
-        </div> 
+      <div class="non-working-summary-panel">
+        <div class="non-working-summary-header">
+          <div>
+            <span class="badge">Resumen</span>
+            <h2>Estado del calendario jurídico</h2>
+            <p>
+              Controlá rápidamente cuántos días inhábiles están cargados, verificados
+              o pendientes de revisión.
+            </p>
+          </div>
 
-        <div class="result-actions non-working-summary-actions">
-          <button id="showPendingVerificationBtn" class="btn btn-secondary" type="button">
-            Ver pendientes de verificación
-          </button> 
+          <div class="non-working-summary-actions">
+            <button id="showPendingVerificationBtn" class="btn btn-secondary" type="button">
+              Ver pendientes de verificación
+            </button>
 
-          <button id="verifyVisiblePendingDaysBtn" class="btn btn-secondary" type="button">
-            Verificar pendientes visibles
-          </button>
+            <button id="verifyVisiblePendingDaysBtn" class="btn btn-secondary" type="button">
+              Verificar pendientes visibles
+            </button>
 
-          <button id="showAllNonWorkingDaysBtn" class="btn btn-secondary" type="button">
-            Ver calendario completo
-          </button>
+            <button id="showAllNonWorkingDaysBtn" class="btn btn-secondary" type="button">
+              Ver calendario completo
+            </button>
+          </div>
         </div>
 
-        <div class="summary-card">
-          <span>Pendientes de verificación</span>
-          <strong id="pendingVerificationDays">0</strong>
-        </div>
+        <div class="summary-grid non-working-summary-grid">
+          <div class="summary-card">
+            <span>Total de días inhábiles</span>
+            <strong id="totalNonWorkingDays">0</strong>
+          </div>
 
-        <div class="summary-card">
-          <span>Verificados</span>
-          <strong id="verifiedNonWorkingDays">0</strong>
-        </div>
+          <div class="summary-card">
+            <span>Pendientes de verificación</span>
+            <strong id="pendingVerificationDays">0</strong>
+          </div>
 
-        <div class="summary-card">
-          <span>Importados automáticamente</span>
-          <strong id="automaticNonWorkingDays">0</strong>
-        </div>
-      </div> 
+          <div class="summary-card">
+            <span>Verificados</span>
+            <strong id="verifiedNonWorkingDays">0</strong>
+          </div>
 
+          <div class="summary-card">
+            <span>Importados automáticamente</span>
+            <strong id="automaticNonWorkingDays">0</strong>
+          </div>
+        </div>
+      </div>
 
       <div class="table-scroll-top" id="nonWorkingDaysTopScroll">
         <div id="nonWorkingDaysTopScrollInner"></div>
@@ -360,6 +372,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=20"></script>
+  <script src="./js/non-working-days.js?v=26"></script>
 </body>
 </html>

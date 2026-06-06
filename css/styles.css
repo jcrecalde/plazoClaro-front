@@ -1365,6 +1365,65 @@ textarea:focus {
 
 .non-working-summary-actions {
   margin-bottom: 18px;
+} 
+
+
+/* Panel resumen de días inhábiles */
+
+.non-working-summary-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 22px;
+  margin: 24px 0;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.04);
+}
+
+.non-working-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.non-working-summary-header h2 {
+  margin: 8px 0 6px;
+  font-family: var(--font-serif);
+  color: var(--color-primary);
+}
+
+.non-working-summary-header p {
+  margin: 0;
+  color: var(--color-muted);
+  max-width: 620px;
+}
+
+.non-working-summary-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.non-working-summary-grid {
+  margin: 0;
+}
+
+.non-working-summary-grid .summary-card {
+  min-height: 120px;
+}
+
+@media (max-width: 900px) {
+  .non-working-summary-header {
+    flex-direction: column;
+  }
+
+  .non-working-summary-actions {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 900px) {
