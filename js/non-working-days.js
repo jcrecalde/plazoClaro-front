@@ -15,7 +15,8 @@ const nonWorkingNotes = document.getElementById("nonWorkingNotes");
 const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn"); 
-const importScbaCalendarBtn = document.getElementById("importScbaCalendarBtn");
+const importScbaCalendarBtn = document.getElementById("importScbaCalendarBtn"); 
+const importCsjnCalendarBtn = document.getElementById("importCsjnCalendarBtn");
 
 const filterYear = document.getElementById("filterYear"); 
 const filterJurisdiction = document.getElementById("filterJurisdiction");
@@ -119,7 +120,8 @@ document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
 importNationalHolidaysBtn.addEventListener("click", importNationalHolidays); 
-importScbaCalendarBtn.addEventListener("click", importScbaCalendar);
+importScbaCalendarBtn.addEventListener("click", importScbaCalendar); 
+importCsjnCalendarBtn.addEventListener("click", importCsjnCalendar);
 
 applyNonWorkingDayFiltersBtn.addEventListener("click", loadNonWorkingDays);
  
@@ -481,6 +483,65 @@ async function importScbaCalendar() {
   } finally {
     importScbaCalendarBtn.disabled = false;
     importScbaCalendarBtn.textContent = "Importar calendario SCBA";
+  }
+} 
+
+
+async function importCsjnCalendar() {
+  const year = Number(importYear.value);
+
+  if (!year || year < 2016 || year > 2035) {
+    showMessage("Ingresá un año válido entre 2016 y 2035.", true);
+    return;
+  }
+
+  const confirmImport = confirm(
+    `Vas a importar el calendario CSJN para el año ${year}. Los registros quedarán pendientes de verificación. ¿Querés continuar?`
+  );
+
+  if (!confirmImport) {
+    return;
+  }
+
+  try {
+    importCsjnCalendarBtn.disabled = true;
+    importCsjnCalendarBtn.textContent = "Importando CSJN...";
+
+    const url = `${NON_WORKING_DAYS_API_URL}/import-csjn-calendar?year=${year}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudo importar el calendario CSJN.");
+    }
+
+    filterYear.value = year;
+    filterJurisdiction.value = "national_federal";
+    filterSource.value = "csjn";
+    filterVerified.value = "";
+    filterActive.value = "";
+    filterType.value = "";
+    filterScope.value = "";
+    filterDepartment.value = "";
+
+    updateFilterDepartmentVisibility();
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `Importación CSJN finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudo importar el calendario CSJN.", true);
+  } finally {
+    importCsjnCalendarBtn.disabled = false;
+    importCsjnCalendarBtn.textContent = "Importar calendario CSJN";
   }
 }
 
