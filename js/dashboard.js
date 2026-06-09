@@ -403,6 +403,111 @@ function renderDeadlines(deadlines) {
 
   attachActionEvents(); 
   updateNonWorkingDaysTopScrollWidth();
+} 
+
+
+function getExcludedDateKey(dateValue) {
+  if (dateValue instanceof Date) {
+    const year = dateValue.getFullYear();
+    const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+    const day = String(dateValue.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  if (typeof dateValue === "string") {
+    return dateValue.split("T")[0];
+  }
+
+  return "";
+}
+
+function getExcludedDateSortValue(dateValue) {
+  const dateKey = getExcludedDateKey(dateValue);
+
+  if (!dateKey) return 0;
+
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  return Date.UTC(year, month - 1, day);
+}
+
+function areConsecutiveExcludedDates(previousDate, currentDate) {
+  const oneDayInMs = 24 * 60 * 60 * 1000;
+
+  return (
+    getExcludedDateSortValue(currentDate) -
+      getExcludedDateSortValue(previousDate) ===
+    oneDayInMs
+  );
+}
+
+function getExcludedDaySourceReference(day) {
+  return day.sourceReference ?? day.source_reference ?? null;
+}
+
+function getExcludedDayGroupKey(day) {
+  return JSON.stringify({
+    reason: day.reason || "",
+    type: day.type || "",
+    scope: day.scope || "",
+    department: day.department || "",
+    locality: day.locality || "",
+    court: day.court || "",
+    source: day.source || "",
+    sourceReference: getExcludedDaySourceReference(day) || "",
+    verified: day.verified,
+  });
+}
+
+function groupExcludedDays(excludedDays) {
+  if (!excludedDays || !excludedDays.length) {
+    return [];
+  }
+
+  const sortedDays = [...excludedDays].sort(
+    (a, b) => getExcludedDateSortValue(a.date) - getExcludedDateSortValue(b.date)
+  );
+
+  const groups = [];
+
+  sortedDays.forEach((day) => {
+    const groupKey = getExcludedDayGroupKey(day);
+    const lastGroup = groups[groups.length - 1];
+
+    const canJoinPreviousGroup =
+      lastGroup &&
+      lastGroup.groupKey === groupKey &&
+      areConsecutiveExcludedDates(lastGroup.endDate, day.date);
+
+    if (canJoinPreviousGroup) {
+      lastGroup.endDate = day.date;
+      lastGroup.days.push(day);
+      return;
+    }
+
+    groups.push({
+      ...day,
+      startDate: day.date,
+      endDate: day.date,
+      sourceReference: getExcludedDaySourceReference(day),
+      days: [day],
+      groupKey,
+    });
+  });
+
+  return groups;
+}
+
+function getExcludedDateRangeLabel(group) {
+  const startDate = formatDate(group.startDate);
+  const endDate = formatDate(group.endDate);
+
+  if (startDate === endDate) {
+    return startDate;
+  }
+
+  return `${startDate} al ${endDate}`;
 }
 
 
@@ -491,6 +596,7 @@ function renderExcludedDaysDetail(excludedDays) {
   }
 
   const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
+  const groupedExcludedDays = groupExcludedDays(excludedDays);
 
   detailExcludedDays.innerHTML = `
     ${
@@ -505,11 +611,11 @@ function renderExcludedDaysDetail(excludedDays) {
         : ""
     }
 
-    ${excludedDays
+    ${groupedExcludedDays
       .map((day) => {
         return `
           <li class="excluded-day-card">
-            <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+            <strong>${getExcludedDateRangeLabel(day)} - ${escapeHTML(day.reason)}</strong>
 
             <div class="excluded-day-meta">
               <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
@@ -519,14 +625,20 @@ function renderExcludedDaysDetail(excludedDays) {
             </div>
 
             ${
+              day.days.length > 1
+                ? `<p><strong>Días agrupados:</strong> ${day.days.length}</p>`
+                : ""
+            }
+
+            ${
               day.department
                 ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
                 : ""
             }
 
             ${
-              day.source_reference
-                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+              day.sourceReference
+                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.sourceReference)}</p>`
                 : ""
             }
           </li>
@@ -535,6 +647,7 @@ function renderExcludedDaysDetail(excludedDays) {
       .join("")}
   `;
 }
+
 
 function renderDeadlineHistory(history) {
   detailHistory.innerHTML = "";
@@ -985,6 +1098,16 @@ function exportDeadlineDetailToPdf(deadline) {
           padding: 12px;
           border-radius: 8px;
           margin-bottom: 10px;
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+
+        .box,
+        .notes,
+        .warning,
+        .verification-warning-pdf {
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
 
         .excluded-day-pdf strong {
@@ -1031,6 +1154,15 @@ function exportDeadlineDetailToPdf(deadline) {
 
           button {
             display: none;
+          }
+
+          .excluded-day-pdf,
+          .box,
+          .notes,
+          .warning,
+          .verification-warning-pdf {
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
         }
       </style>
@@ -1098,29 +1230,30 @@ function exportDeadlineDetailToPdf(deadline) {
           <span class="label">Fecha de vencimiento</span>
           <span class="value deadline">${formatDate(deadline.deadline_date)}</span>
         </div>
+        </div>
 
-      <div class="section">
-        <h2>Días excluidos</h2>
-        ${excludedDaysHtml}
-      </div>
+        <div class="section">
+          <h2>Días excluidos</h2>
+          ${excludedDaysHtml}
+        </div> 
 
-      <div class="section">
-        <h2>Observaciones</h2>
-        <div class="notes">${notes}</div>
-      </div>
+        <div class="section">
+          <h2>Observaciones</h2>
+          <div class="notes">${notes}</div>
+        </div>
 
-      <div class="warning">
-        <strong>Aviso:</strong>
-        este documento es orientativo. El cálculo debe ser verificado por el profesional conforme a la normativa aplicable,
-        resoluciones judiciales, ferias, asuetos y particularidades del expediente.
-      </div>
+        <div class="warning">
+          <strong>Aviso:</strong>
+          este documento es orientativo. El cálculo debe ser verificado por el profesional conforme a la normativa aplicable,
+          resoluciones judiciales, ferias, asuetos y particularidades del expediente.
+        </div>
 
-      <div class="footer">
-        PlazoClaro — Cálculo orientativo de plazos judiciales.
-      </div>
-    </body>
-    </html>
-  `);
+        <div class="footer">
+          PlazoClaro — Cálculo orientativo de plazos judiciales.
+        </div>
+      </body>
+      </html>
+    `);
 
   printWindow.document.close();
   printWindow.focus();
@@ -1136,6 +1269,7 @@ function getExcludedDaysHtmlForPdf(excludedDays) {
   }
 
   const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
+  const groupedExcludedDays = groupExcludedDays(excludedDays);
 
   return `
     ${
@@ -1150,11 +1284,11 @@ function getExcludedDaysHtmlForPdf(excludedDays) {
         : ""
     }
 
-    ${excludedDays
+    ${groupedExcludedDays
       .map((day) => {
         return `
           <div class="excluded-day-pdf">
-            <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+            <strong>${getExcludedDateRangeLabel(day)} - ${escapeHTML(day.reason)}</strong>
 
             <div class="excluded-day-meta-pdf">
               <span>${getExcludedDayTypeLabel(day.type, day.reason)}</span>
@@ -1164,14 +1298,20 @@ function getExcludedDaysHtmlForPdf(excludedDays) {
             </div>
 
             ${
+              day.days.length > 1
+                ? `<p><strong>Días agrupados:</strong> ${day.days.length}</p>`
+                : ""
+            }
+
+            ${
               day.department
                 ? `<p><strong>Departamento:</strong> ${escapeHTML(day.department)}</p>`
                 : ""
             }
 
             ${
-              day.source_reference
-                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.source_reference)}</p>`
+              day.sourceReference
+                ? `<p><strong>Referencia:</strong> ${escapeHTML(day.sourceReference)}</p>`
                 : ""
             }
           </div>

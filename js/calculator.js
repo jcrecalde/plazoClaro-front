@@ -319,7 +319,113 @@ function getExcludedDayVerifiedLabel(verified) {
   if (verified === false) return "Pendiente de verificación";
 
   return "Sin estado de verificación";
+} 
+
+
+function getExcludedDateKey(dateValue) {
+  if (dateValue instanceof Date) {
+    const year = dateValue.getFullYear();
+    const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+    const day = String(dateValue.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  if (typeof dateValue === "string") {
+    return dateValue.split("T")[0];
+  }
+
+  return "";
 }
+
+function getExcludedDateSortValue(dateValue) {
+  const dateKey = getExcludedDateKey(dateValue);
+
+  if (!dateKey) return 0;
+
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  return Date.UTC(year, month - 1, day);
+}
+
+function areConsecutiveExcludedDates(previousDate, currentDate) {
+  const oneDayInMs = 24 * 60 * 60 * 1000;
+
+  return (
+    getExcludedDateSortValue(currentDate) -
+      getExcludedDateSortValue(previousDate) ===
+    oneDayInMs
+  );
+}
+
+function getExcludedDaySourceReference(day) {
+  return day.sourceReference ?? day.source_reference ?? null;
+}
+
+function getExcludedDayGroupKey(day) {
+  return JSON.stringify({
+    reason: day.reason || "",
+    type: day.type || "",
+    scope: day.scope || "",
+    department: day.department || "",
+    locality: day.locality || "",
+    court: day.court || "",
+    source: day.source || "",
+    sourceReference: getExcludedDaySourceReference(day) || "",
+    verified: day.verified,
+  });
+}
+
+function groupExcludedDays(excludedDays) {
+  if (!excludedDays || !excludedDays.length) {
+    return [];
+  }
+
+  const sortedDays = [...excludedDays].sort(
+    (a, b) => getExcludedDateSortValue(a.date) - getExcludedDateSortValue(b.date)
+  );
+
+  const groups = [];
+
+  sortedDays.forEach((day) => {
+    const groupKey = getExcludedDayGroupKey(day);
+    const lastGroup = groups[groups.length - 1];
+
+    const canJoinPreviousGroup =
+      lastGroup &&
+      lastGroup.groupKey === groupKey &&
+      areConsecutiveExcludedDates(lastGroup.endDate, day.date);
+
+    if (canJoinPreviousGroup) {
+      lastGroup.endDate = day.date;
+      lastGroup.days.push(day);
+      return;
+    }
+
+    groups.push({
+      ...day,
+      startDate: day.date,
+      endDate: day.date,
+      sourceReference: getExcludedDaySourceReference(day),
+      days: [day],
+      groupKey,
+    });
+  });
+
+  return groups;
+}
+
+function getExcludedDateRangeLabel(group) {
+  const startDate = formatDate(group.startDate);
+  const endDate = formatDate(group.endDate);
+
+  if (startDate === endDate) {
+    return startDate;
+  }
+
+  return `${startDate} al ${endDate}`;
+} 
+
 
 function renderExcludedDays(excludedDays) {
   if (!excludedDays || !excludedDays.length) {
@@ -331,6 +437,7 @@ function renderExcludedDays(excludedDays) {
   }
 
   const hasUnverifiedDays = excludedDays.some((day) => day.verified === false);
+  const groupedExcludedDays = groupExcludedDays(excludedDays);
 
   return `
     ${
@@ -346,11 +453,11 @@ function renderExcludedDays(excludedDays) {
     }
 
     <div class="excluded-days-list">
-      ${excludedDays
+      ${groupedExcludedDays
         .map((day) => {
           return `
             <div class="excluded-day-card">
-              <strong>${formatDate(day.date)} - ${escapeHTML(day.reason)}</strong>
+              <strong>${getExcludedDateRangeLabel(day)} - ${escapeHTML(day.reason)}</strong>
 
               <div class="excluded-day-meta">
                 <span>${getExcludedDayTypeLabel(day.type)}</span>
@@ -358,6 +465,12 @@ function renderExcludedDays(excludedDays) {
                 <span>Fuente: ${getExcludedDaySourceLabel(day.source)}</span>
                 <span>${getExcludedDayVerifiedLabel(day.verified)}</span>
               </div>
+
+              ${
+                day.days.length > 1
+                  ? `<p><strong>Días agrupados:</strong> ${day.days.length}</p>`
+                  : ""
+              }
 
               ${
                 day.department
