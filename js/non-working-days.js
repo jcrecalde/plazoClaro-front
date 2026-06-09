@@ -14,7 +14,8 @@ const nonWorkingNotes = document.getElementById("nonWorkingNotes");
  
 const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
-const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn");
+const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn"); 
+const importScbaCalendarBtn = document.getElementById("importScbaCalendarBtn");
 
 const filterYear = document.getElementById("filterYear"); 
 const filterJurisdiction = document.getElementById("filterJurisdiction");
@@ -117,7 +118,8 @@ document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
-importNationalHolidaysBtn.addEventListener("click", importNationalHolidays);
+importNationalHolidaysBtn.addEventListener("click", importNationalHolidays); 
+importScbaCalendarBtn.addEventListener("click", importScbaCalendar);
 
 applyNonWorkingDayFiltersBtn.addEventListener("click", loadNonWorkingDays);
  
@@ -420,6 +422,64 @@ async function importNationalHolidays() {
   } finally {
     importNationalHolidaysBtn.disabled = false;
     importNationalHolidaysBtn.textContent = "Importar feriados nacionales";
+  }
+} 
+
+async function importScbaCalendar() {
+  const year = Number(importYear.value);
+
+  if (!year || year < 2016 || year > 2035) {
+    showMessage("Ingresá un año válido entre 2016 y 2035.", true);
+    return;
+  }
+
+  const confirmImport = confirm(
+    `Vas a importar el calendario SCBA para el año ${year}. Los registros quedarán pendientes de verificación. ¿Querés continuar?`
+  );
+
+  if (!confirmImport) {
+    return;
+  }
+
+  try {
+    importScbaCalendarBtn.disabled = true;
+    importScbaCalendarBtn.textContent = "Importando SCBA...";
+
+    const url = `${NON_WORKING_DAYS_API_URL}/import-scba-calendar?year=${year}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudo importar el calendario SCBA.");
+    }
+
+    filterYear.value = year;
+    filterJurisdiction.value = "pba";
+    filterSource.value = "scba";
+    filterVerified.value = "";
+    filterActive.value = "";
+    filterType.value = "";
+    filterScope.value = "";
+    filterDepartment.value = "";
+
+    updateFilterDepartmentVisibility();
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `Importación SCBA finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudo importar el calendario SCBA.", true);
+  } finally {
+    importScbaCalendarBtn.disabled = false;
+    importScbaCalendarBtn.textContent = "Importar calendario SCBA";
   }
 }
 
