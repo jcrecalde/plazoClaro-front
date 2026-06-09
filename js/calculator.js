@@ -192,7 +192,25 @@ function formatDate(date) {
 function getDayTypeLabel(dayType) {
   if (dayType === "business") return "días hábiles";
   return "días corridos";
-}
+} 
+ 
+
+function getJurisdictionScopeDetail(result) {
+  if (result.jurisdiction === "pba") {
+    if (result.department) {
+      return `Departamento judicial seleccionado: ${result.department}.`;
+    }
+
+    return "No se seleccionó un departamento judicial específico.";
+  }
+
+  if (result.jurisdiction === "national_federal") {
+    return "Ámbito seleccionado: Nacional / Federal. No aplica departamento judicial provincial.";
+  }
+
+  return "Ámbito jurisdiccional no especificado.";
+} 
+
 
 function getJurisdictionLabel(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
@@ -231,11 +249,7 @@ function renderResult(result) {
 
   jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;
 
-  if (result.department) {
-    departmentDetail.textContent = `Departamento judicial seleccionado: ${result.department}.`;
-  } else {
-    departmentDetail.textContent = "No se seleccionó un departamento judicial específico.";
-  }
+  departmentDetail.textContent = getJurisdictionScopeDetail(result);
 }
 
 

@@ -568,7 +568,7 @@ function showDeadlineDetail(deadlineId) {
   detailStartDate.textContent = formatDate(deadline.start_date);
   detailDeadlineDate.textContent = formatDate(deadline.deadline_date);
   detailStatus.textContent = getStatusLabel(computedStatus);
-  detailDepartment.textContent = deadline.department || "Sin departamento específico";
+  detailDepartment.textContent = getJurisdictionScopeLabel(deadline);
   detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
 
   renderExcludedDaysDetail(deadline.excluded_days || []); 
@@ -1222,8 +1222,8 @@ function exportDeadlineDetailToPdf(deadline) {
         </div>
 
         <div class="box">
-          <span class="label">Departamento judicial</span>
-          <span class="value">${getDepartmentLabelForPdf(deadline.department)}</span>
+          <span class="label">${getJurisdictionScopeTitleForPdf(deadline)}</span>
+          <span class="value">${getJurisdictionScopeValueForPdf(deadline)}</span>
         </div>
 
         <div class="box">
@@ -1326,6 +1326,19 @@ function getDayTypeLabelForPdf(dayType) {
   if (dayType === "business") return "Días hábiles";
   if (dayType === "calendar") return "Días corridos";
   return "No especificado";
+} 
+
+
+function getJurisdictionScopeLabel(deadline) {
+  if (deadline.jurisdiction === "pba") {
+    return deadline.department || "Sin departamento judicial específico";
+  }
+
+  if (deadline.jurisdiction === "national_federal") {
+    return "No aplica departamento judicial provincial. Ámbito: Nacional / Federal.";
+  }
+
+  return "Ámbito no especificado.";
 }
 
 function getJurisdictionLabelForPdf(jurisdiction) {
@@ -1345,6 +1358,31 @@ function showMessage(message, visible) {
   dashboardMessage.textContent = message;
   dashboardMessage.classList.remove("hidden");
 } 
+
+
+function getJurisdictionScopeTitleForPdf(deadline) {
+  if (deadline.jurisdiction === "pba") {
+    return "Departamento judicial";
+  }
+
+  if (deadline.jurisdiction === "national_federal") {
+    return "Ámbito";
+  }
+
+  return "Ámbito / jurisdicción";
+}
+
+function getJurisdictionScopeValueForPdf(deadline) {
+  if (deadline.jurisdiction === "pba") {
+    return deadline.department || "Sin departamento judicial específico";
+  }
+
+  if (deadline.jurisdiction === "national_federal") {
+    return "Nacional / Federal";
+  }
+
+  return "No especificado";
+}
 
 function getDepartmentLabelForPdf(department) {
   return department || "Sin departamento específico";
