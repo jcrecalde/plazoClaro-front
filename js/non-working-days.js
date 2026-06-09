@@ -471,9 +471,10 @@ async function importScbaCalendar() {
     await loadNonWorkingDays();
 
     showMessage(
-      `Importación SCBA finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      `Importación SCBA finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Duplicados omitidos: ${result.skipped_duplicate_calendar ?? 0}. Total recibido: ${result.total_received}.`,
       true
-    );
+    ); 
+    
   } catch (error) {
     console.error(error);
     showMessage(error.message || "No se pudo importar el calendario SCBA.", true);
