@@ -1414,6 +1414,92 @@ textarea:focus {
 
 .non-working-summary-grid .summary-card {
   min-height: 120px;
+} 
+
+
+/* Limpieza visual del detalle de plazos */
+
+#detailExcludedDays {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+#detailExcludedDays > li {
+  margin-left: 0;
+}
+
+#detailExcludedDays .verification-warning {
+  margin-bottom: 12px;
+}
+
+.deadline-detail-panel .excluded-day-card,
+#detailExcludedDays .excluded-day-card {
+  margin-bottom: 12px;
+}
+
+.deadline-detail-panel .excluded-day-card p,
+#detailExcludedDays .excluded-day-card p {
+  margin: 8px 0 0;
+} 
+
+.detail-section h3,
+.deadline-detail-panel h3 {
+  margin-bottom: 14px;
+} 
+
+
+/* Resultado de calculadora más compacto */
+
+.result-card .excluded-days-list {
+  gap: 10px;
+}
+
+.result-card .excluded-day-card {
+  padding: 12px;
+}
+
+.result-card .excluded-day-card strong {
+  font-size: 0.95rem;
+}
+
+.result-card .excluded-day-meta {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.result-card .excluded-day-meta span {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.result-card .excluded-day-card p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+}
+
+.result-card .verification-warning {
+  margin-bottom: 10px;
+}
+
+.result-card .detail-item {
+  padding: 10px 12px;
+}
+
+.result-card .result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.result-card .result-actions .btn {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .result-card .result-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1424,7 +1510,7 @@ textarea:focus {
   .non-working-summary-actions {
     justify-content: flex-start;
   }
-}
+} 
 
 @media (max-width: 900px) {
   .summary-grid {
