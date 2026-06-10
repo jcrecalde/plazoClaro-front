@@ -60,7 +60,10 @@ const showPendingVerificationBtn = document.getElementById("showPendingVerificat
 const showAllNonWorkingDaysBtn = document.getElementById("showAllNonWorkingDaysBtn"); 
 
 
-const verifyVisiblePendingDaysBtn = document.getElementById("verifyVisiblePendingDaysBtn");
+const verifyVisiblePendingDaysBtn = document.getElementById("verifyVisiblePendingDaysBtn"); 
+
+const sourceStatusTableBody = document.getElementById("sourceStatusTableBody");
+const refreshSourceStatusBtn = document.getElementById("refreshSourceStatusBtn");
 
 
 let editingNonWorkingDayId = null; 
@@ -265,7 +268,12 @@ form.addEventListener("submit", async function (event) {
 
 closeNonWorkingDayHistoryBtn.addEventListener("click", function () {
   nonWorkingDayHistoryPanel.classList.add("hidden");
-});
+}); 
+
+
+if (refreshSourceStatusBtn) {
+  refreshSourceStatusBtn.addEventListener("click", loadSourceStatus);
+}
 
 function startEditingNonWorkingDay(nonWorkingDayId) {
   const selectedDay = currentNonWorkingDays.find(
@@ -303,6 +311,26 @@ function startEditingNonWorkingDay(nonWorkingDayId) {
     behavior: "smooth",
   });
 } 
+
+function getSourceStatusPeriod(item) {
+  if (!item.earliest_date || !item.latest_date) {
+    return "-";
+  }
+
+  if (item.earliest_date === item.latest_date) {
+    return formatDate(item.earliest_date);
+  }
+
+  return `${formatDate(item.earliest_date)} al ${formatDate(item.latest_date)}`;
+}
+
+function getPendingSourceStatusClass(item) {
+  if (item.pending_verification > 0) {
+    return "source-status-pending";
+  }
+
+  return "source-status-ok";
+}
 
 
 function showNonWorkingDayHistory(nonWorkingDayId) {
@@ -563,7 +591,9 @@ async function loadNonWorkingDays() {
       throw new Error("No se pudieron cargar los días inhábiles.");
     }
 
-    const nonWorkingDays = await response.json();
+    const nonWorkingDays = await response.json(); 
+
+    await loadSourceStatus();
 
     renderNonWorkingDays(nonWorkingDays);
   } catch (error) {
@@ -1069,6 +1099,96 @@ function formatHistoryFieldValue(field, value) {
   }
 
   return escapeHTML(value);
+} 
+
+
+async function loadSourceStatus() {
+  if (!sourceStatusTableBody) return;
+
+  const year = Number(filterYear.value || importYear.value);
+
+  if (!year) {
+    sourceStatusTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">Seleccioná un año válido para ver el estado de fuentes.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  try {
+    sourceStatusTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">Cargando estado de fuentes...</td>
+      </tr>
+    `;
+
+    const url = `${NON_WORKING_DAYS_API_URL}/source-status?year=${year}`;
+
+    const response = await fetch(url);
+    const sourceStatus = await response.json();
+
+    if (!response.ok) {
+      throw new Error(sourceStatus.detail || "No se pudo cargar el estado de fuentes.");
+    }
+
+    renderSourceStatus(sourceStatus);
+  } catch (error) {
+    console.error(error);
+
+    sourceStatusTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">No se pudo cargar el estado de fuentes.</td>
+      </tr>
+    `;
+  }
+} 
+
+
+function renderSourceStatus(sourceStatus) {
+  if (!sourceStatus.length) {
+    sourceStatusTableBody.innerHTML = `
+      <tr>
+        <td colspan="8">No hay fuentes cargadas para el año seleccionado.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  sourceStatusTableBody.innerHTML = sourceStatus
+    .map((item) => {
+      return `
+        <tr>
+          <td>
+            <strong>${getSourceLabel(item.source)}</strong>
+            ${
+              item.automatic
+                ? `<span class="source-status-chip automatic">Automática</span>`
+                : `<span class="source-status-chip manual">Manual</span>`
+            }
+          </td>
+
+          <td>${getJurisdictionLabel(item.jurisdiction)}</td>
+
+          <td><strong>${item.total}</strong></td>
+
+          <td>${item.verified}</td>
+
+          <td>
+            <span class="source-status-badge ${getPendingSourceStatusClass(item)}">
+              ${item.pending_verification}
+            </span>
+          </td>
+
+          <td>${item.active}</td>
+
+          <td>${item.inactive}</td>
+
+          <td>${getSourceStatusPeriod(item)}</td>
+        </tr>
+      `;
+    })
+    .join("");
 }
 
 function escapeHTML(value) {

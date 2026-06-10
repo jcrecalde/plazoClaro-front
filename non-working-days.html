@@ -289,6 +289,47 @@
               Ver calendario completo
             </button>
           </div>
+        </div> 
+
+
+        <div class="source-status-panel">
+          <div class="source-status-header">
+            <div>
+              <span class="badge">Fuentes</span>
+              <h2>Estado global de fuentes del calendario</h2>
+              <p>
+                Revisá qué fuentes están cargadas para el año seleccionado en todas las jurisdicciones,
+                cuántos registros aportan y cuántos están pendientes de verificación.
+              </p>
+            </div>
+
+            <button id="refreshSourceStatusBtn" class="btn btn-secondary" type="button">
+              Actualizar estado de fuentes
+            </button>
+          </div>
+
+          <div class="source-status-table-wrapper">
+            <table class="source-status-table">
+              <thead>
+                <tr>
+                  <th>Fuente</th>
+                  <th>Jurisdicción</th>
+                  <th>Total</th>
+                  <th>Verificados</th>
+                  <th>Pendientes</th>
+                  <th>Activos</th>
+                  <th>Inactivos</th>
+                  <th>Período</th>
+                </tr>
+              </thead>
+
+              <tbody id="sourceStatusTableBody">
+                <tr>
+                  <td colspan="8">Cargando estado de fuentes...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="summary-grid non-working-summary-grid">
@@ -379,6 +420,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=29"></script>
+  <script src="./js/non-working-days.js?v=32"></script>
 </body>
 </html>
