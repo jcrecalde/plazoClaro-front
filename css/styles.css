@@ -1589,6 +1589,11 @@ textarea:focus {
 .source-status-ok {
   background: #DCFCE7;
   color: #166534;
+} 
+
+
+.source-status-table .btn-small {
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {

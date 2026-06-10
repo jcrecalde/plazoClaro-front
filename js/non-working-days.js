@@ -1110,7 +1110,7 @@ async function loadSourceStatus() {
   if (!year) {
     sourceStatusTableBody.innerHTML = `
       <tr>
-        <td colspan="8">Seleccioná un año válido para ver el estado de fuentes.</td>
+        <td colspan="9">Seleccioná un año válido para ver el estado de fuentes.</td>
       </tr>
     `;
     return;
@@ -1119,7 +1119,7 @@ async function loadSourceStatus() {
   try {
     sourceStatusTableBody.innerHTML = `
       <tr>
-        <td colspan="8">Cargando estado de fuentes...</td>
+        <td colspan="9">Cargando estado de fuentes...</td>
       </tr>
     `;
 
@@ -1138,7 +1138,7 @@ async function loadSourceStatus() {
 
     sourceStatusTableBody.innerHTML = `
       <tr>
-        <td colspan="8">No se pudo cargar el estado de fuentes.</td>
+        <td colspan="9">No se pudo cargar el estado de fuentes.</td>
       </tr>
     `;
   }
@@ -1149,7 +1149,7 @@ function renderSourceStatus(sourceStatus) {
   if (!sourceStatus.length) {
     sourceStatusTableBody.innerHTML = `
       <tr>
-        <td colspan="8">No hay fuentes cargadas para el año seleccionado.</td>
+        <td colspan="9">No hay fuentes cargadas para el año seleccionado.</td>
       </tr>
     `;
     return;
@@ -1184,11 +1184,61 @@ function renderSourceStatus(sourceStatus) {
 
           <td>${item.inactive}</td>
 
-          <td>${getSourceStatusPeriod(item)}</td>
+          <td>${getSourceStatusPeriod(item)}</td> 
+
+          <td>
+            <button
+              class="btn-small btn-detail btn-filter-source-status"
+              type="button"
+              data-year="${item.year}"
+              data-jurisdiction="${item.jurisdiction}"
+              data-source="${item.source}"
+            >
+              Ver registros
+            </button>
+          </td>
+          
         </tr>
       `;
     })
     .join("");
+
+    attachSourceStatusFilterEvents();
+} 
+
+
+function attachSourceStatusFilterEvents() {
+  const sourceFilterButtons = document.querySelectorAll(
+    ".btn-filter-source-status"
+  );
+
+  sourceFilterButtons.forEach((button) => {
+    button.addEventListener("click", async function () {
+      filterYear.value = button.dataset.year || filterYear.value || "2026";
+      filterJurisdiction.value = button.dataset.jurisdiction || "";
+      filterSource.value = button.dataset.source || "";
+
+      filterType.value = "";
+      filterVerified.value = "";
+      filterActive.value = "";
+      filterScope.value = "";
+      filterDepartment.value = "";
+
+      updateFilterDepartmentVisibility();
+
+      await loadNonWorkingDays();
+
+      showMessage(
+        `Mostrando registros de ${getSourceLabel(button.dataset.source)} para ${getJurisdictionLabel(button.dataset.jurisdiction)}.`,
+        true
+      );
+
+      nonWorkingDaysTableScroll.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
 }
 
 function escapeHTML(value) {
