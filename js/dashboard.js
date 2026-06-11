@@ -26,7 +26,8 @@ const detailStartRule = document.getElementById("detailStartRule");
 const detailStartDate = document.getElementById("detailStartDate");
 const detailDeadlineDate = document.getElementById("detailDeadlineDate");
 const detailStatus = document.getElementById("detailStatus");
-const detailDepartment = document.getElementById("detailDepartment");
+const detailDepartment = document.getElementById("detailDepartment"); 
+const detailDepartmentLabel = detailDepartment?.previousElementSibling;
 const detailExcludedDays = document.getElementById("detailExcludedDays");
 const detailNotes = document.getElementById("detailNotes");
 const detailHistory = document.getElementById("detailHistory");
@@ -43,9 +44,15 @@ const editStartRule = document.getElementById("editStartRule");
 const editDaysCount = document.getElementById("editDaysCount");
 const editDayType = document.getElementById("editDayType");
 const editJurisdiction = document.getElementById("editJurisdiction");
+ 
+
 const editDepartment = document.getElementById("editDepartment");
 const editDepartmentGroup = document.getElementById("editDepartmentGroup");
-const editNotes = document.getElementById("editNotes");   
+
+const editCourt = document.getElementById("editCourt");
+const editCourtGroup = document.getElementById("editCourtGroup");
+
+const editNotes = document.getElementById("editNotes");
 
 const nonWorkingDaysTopScroll = document.getElementById("nonWorkingDaysTopScroll");
 const nonWorkingDaysTopScrollInner = document.getElementById("nonWorkingDaysTopScrollInner");
@@ -118,7 +125,7 @@ filterButtons.forEach((button) => {
 });  
 
 
-editJurisdiction.addEventListener("change", updateEditDepartmentVisibility); 
+editJurisdiction.addEventListener("change", updateEditJurisdictionDependentFields);
 
 
 function updateNonWorkingDaysTopScrollWidth() {
@@ -131,16 +138,27 @@ function updateNonWorkingDaysTopScrollWidth() {
   nonWorkingDaysTopScrollInner.style.width = `${table.scrollWidth}px`;
 }
 
-function updateEditDepartmentVisibility() {
-  if (editJurisdiction.value === "pba") {
+function updateEditJurisdictionDependentFields() {
+  const isPba = editJurisdiction.value === "pba";
+  const isNationalFederal = editJurisdiction.value === "national_federal";
+
+  if (isPba) {
     editDepartmentGroup.classList.remove("hidden");
     editDepartmentGroup.style.display = "block";
-    return;
+  } else {
+    editDepartment.value = "";
+    editDepartmentGroup.classList.add("hidden");
+    editDepartmentGroup.style.display = "none";
   }
 
-  editDepartment.value = "";
-  editDepartmentGroup.classList.add("hidden");
-  editDepartmentGroup.style.display = "none";
+  if (isNationalFederal) {
+    editCourtGroup.classList.remove("hidden");
+    editCourtGroup.style.display = "block";
+  } else {
+    editCourt.value = "";
+    editCourtGroup.classList.add("hidden");
+    editCourtGroup.style.display = "none";
+  }
 }
 
 
@@ -159,7 +177,10 @@ deadlineEditForm.addEventListener("submit", async function (event) {
     start_rule: editStartRule.value,
     department: editJurisdiction.value === "pba" ? editDepartment.value || null : null,
     locality: null,
-    court: null,
+    court:
+      editJurisdiction.value === "national_federal"
+        ? editCourt.value || null
+        : null,
     notes: editNotes.value.trim() || null,
   };
 
@@ -567,7 +588,12 @@ function showDeadlineDetail(deadlineId) {
   detailStartRule.textContent = getStartRuleLabel(deadline.start_rule);
   detailStartDate.textContent = formatDate(deadline.start_date);
   detailDeadlineDate.textContent = formatDate(deadline.deadline_date);
-  detailStatus.textContent = getStatusLabel(computedStatus);
+  detailStatus.textContent = getStatusLabel(computedStatus); 
+
+  if (detailDepartmentLabel) {
+    detailDepartmentLabel.textContent = getJurisdictionScopeTitle(deadline);
+  }
+
   detailDepartment.textContent = getJurisdictionScopeLabel(deadline);
   detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
 
@@ -753,9 +779,10 @@ function showEditForm(deadlineId) {
   editDayType.value = deadline.day_type;
   editJurisdiction.value = deadline.jurisdiction;
   editDepartment.value = deadline.department || "";
+  editCourt.value = deadline.court || "";
   editNotes.value = deadline.notes || "";
 
-  updateEditDepartmentVisibility();
+  updateEditJurisdictionDependentFields();
 
   deadlineDetailPanel.classList.add("hidden");
   deadlineEditPanel.classList.remove("hidden");
@@ -1329,13 +1356,33 @@ function getDayTypeLabelForPdf(dayType) {
 } 
 
 
+function getJurisdictionScopeTitle(deadline) {
+  if (deadline.jurisdiction === "pba") {
+    return "Departamento judicial";
+  }
+
+  if (deadline.jurisdiction === "national_federal" && deadline.court) {
+    return "Organismo específico";
+  }
+
+  if (deadline.jurisdiction === "national_federal") {
+    return "Ámbito";
+  }
+
+  return "Ámbito / jurisdicción";
+}
+
 function getJurisdictionScopeLabel(deadline) {
   if (deadline.jurisdiction === "pba") {
     return deadline.department || "Sin departamento judicial específico";
   }
 
   if (deadline.jurisdiction === "national_federal") {
-    return "No aplica departamento judicial provincial. Ámbito: Nacional / Federal.";
+    if (deadline.court) {
+      return deadline.court;
+    }
+
+    return "Nacional / Federal";
   }
 
   return "Ámbito no especificado.";
@@ -1365,6 +1412,10 @@ function getJurisdictionScopeTitleForPdf(deadline) {
     return "Departamento judicial";
   }
 
+  if (deadline.jurisdiction === "national_federal" && deadline.court) {
+    return "Organismo";
+  }
+
   if (deadline.jurisdiction === "national_federal") {
     return "Ámbito";
   }
@@ -1378,6 +1429,10 @@ function getJurisdictionScopeValueForPdf(deadline) {
   }
 
   if (deadline.jurisdiction === "national_federal") {
+    if (deadline.court) {
+      return deadline.court;
+    }
+
     return "Nacional / Federal";
   }
 
@@ -1455,7 +1510,8 @@ function getExcludedDaySourceLabel(source, type, reason = "") {
     manual: "Manual",
     argentina_datos: "ArgentinaDatos",
     scba: "SCBA",
-    csjn: "CSJN",
+    csjn: "CSJN", 
+    tribunal_fiscal: "Tribunal Fiscal",
     system: "Sistema",
   };
 

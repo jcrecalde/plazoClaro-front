@@ -145,22 +145,21 @@
           </select>
         </div>
 
-        <div class="result-actions">
-          <button id="importNationalHolidaysBtn" class="btn btn-primary" type="button">
-            Importar feriados nacionales
-          </button>
+        <button id="importScbaCalendarBtn" class="btn btn-secondary" type="button">
+          Importar calendario SCBA
+        </button>
 
-          <button id="importScbaCalendarBtn" class="btn btn-secondary" type="button">
-            Importar calendario SCBA
-          </button> 
+        <button id="importCsjnCalendarBtn" class="btn btn-secondary" type="button">
+          Importar calendario CSJN
+        </button>
 
-          <button id="importCsjnCalendarBtn" class="btn btn-secondary" type="button">
-            Importar calendario CSJN
-          </button>
+        <button id="importTribunalFiscalCalendarBtn" class="btn btn-secondary" type="button">
+          Importar calendario Tribunal Fiscal
+        </button>
 
-          <button id="refreshNonWorkingDaysBtn" class="btn btn-secondary" type="button">
-            Actualizar listado
-          </button>
+        <button id="refreshNonWorkingDaysBtn" class="btn btn-secondary" type="button">
+          Actualizar listado
+        </button>
         </div>
 
         <p class="result-empty" id="nonWorkingDaysSummary">
@@ -230,7 +229,8 @@
               <option value="manual">Manual</option>
               <option value="argentina_datos">ArgentinaDatos</option>
               <option value="scba">SCBA</option>
-              <option value="csjn">CSJN</option>
+              <option value="csjn">CSJN</option> 
+              <option value="tribunal_fiscal">Tribunal Fiscal</option>
             </select>
           </div>
 
@@ -421,6 +421,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=33"></script>
+  <script src="./js/non-working-days.js?v=35"></script>
 </body>
 </html>

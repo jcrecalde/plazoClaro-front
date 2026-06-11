@@ -75,6 +75,17 @@
           </small>
         </div>
 
+        <div class="form-group hidden" id="courtGroup">
+          <label for="court">Organismo específico</label>
+          <select id="court">
+            <option value="">Nacional / Federal general</option>
+            <option value="Tribunal Fiscal de la Nación">Tribunal Fiscal de la Nación</option>
+          </select>
+          <small class="field-help">
+            Solo aplica para calendarios propios de organismos específicos.
+          </small>
+        </div>
+
         <div class="form-group">
           <label for="actionType">Tipo de actuación</label>
           <select id="actionType">
@@ -117,7 +128,8 @@
             <div id="daysDetail" class="detail-item"></div>
             <div id="excludedDetail" class="detail-item"></div>
             <div id="jurisdictionDetail" class="detail-item"></div>
-            <div id="departmentDetail" class="detail-item"></div>
+            <div id="departmentDetail" class="detail-item"></div> 
+            <div id="courtDetail" class="detail-item"></div>
           </div>
 
           <div class="result-actions">
@@ -151,6 +163,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/calculator.js?v=32"></script>
+  <script src="./js/calculator.js?v=35"></script>
 </body>
 </html>

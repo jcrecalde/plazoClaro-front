@@ -16,7 +16,8 @@ const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn"); 
 const importScbaCalendarBtn = document.getElementById("importScbaCalendarBtn"); 
-const importCsjnCalendarBtn = document.getElementById("importCsjnCalendarBtn");
+const importCsjnCalendarBtn = document.getElementById("importCsjnCalendarBtn"); 
+const importTribunalFiscalCalendarBtn = document.getElementById("importTribunalFiscalCalendarBtn");
 
 const filterYear = document.getElementById("filterYear"); 
 const filterJurisdiction = document.getElementById("filterJurisdiction");
@@ -84,7 +85,15 @@ scope.addEventListener("change", updateDepartmentVisibilityForManualLoad);
 jurisdiction.addEventListener("change", updateDepartmentVisibilityForManualLoad); 
 
 filterScope.addEventListener("change", updateFilterDepartmentVisibility);
-filterJurisdiction.addEventListener("change", updateFilterDepartmentVisibility);
+filterJurisdiction.addEventListener("change", updateFilterDepartmentVisibility); 
+
+
+if (importTribunalFiscalCalendarBtn) {
+  importTribunalFiscalCalendarBtn.addEventListener(
+    "click",
+    importTribunalFiscalCalendar
+  );
+}
 
 function updateDepartmentVisibilityForManualLoad() {
   const shouldShowDepartment =
@@ -513,6 +522,71 @@ async function importScbaCalendar() {
     importScbaCalendarBtn.textContent = "Importar calendario SCBA";
   }
 } 
+
+
+async function importTribunalFiscalCalendar() {
+  const year = Number(importYear.value);
+
+  if (!year || year < 2016 || year > 2035) {
+    showMessage("Ingresá un año válido entre 2016 y 2035.", true);
+    return;
+  }
+
+  const confirmImport = confirm(
+    `Vas a importar el calendario del Tribunal Fiscal de la Nación para el año ${year}. Los registros quedarán pendientes de verificación. ¿Querés continuar?`
+  );
+
+  if (!confirmImport) {
+    return;
+  }
+
+  try {
+    importTribunalFiscalCalendarBtn.disabled = true;
+    importTribunalFiscalCalendarBtn.textContent = "Importando Tribunal Fiscal...";
+
+    const url = `${NON_WORKING_DAYS_API_URL}/import-tribunal-fiscal-calendar?year=${year}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.detail || "No se pudo importar el calendario Tribunal Fiscal."
+      );
+    }
+
+    filterYear.value = year;
+    filterJurisdiction.value = "national_federal";
+    filterSource.value = "tribunal_fiscal";
+    filterScope.value = "court";
+    filterVerified.value = "";
+    filterActive.value = "";
+    filterType.value = "";
+    filterDepartment.value = "";
+
+    updateFilterDepartmentVisibility();
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `Importación Tribunal Fiscal finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(
+      error.message || "No se pudo importar el calendario Tribunal Fiscal.",
+      true
+    );
+  } finally {
+    importTribunalFiscalCalendarBtn.disabled = false;
+    importTribunalFiscalCalendarBtn.textContent =
+      "Importar calendario Tribunal Fiscal";
+  }
+}
 
 
 async function importCsjnCalendar() {
@@ -946,6 +1020,8 @@ function getSourceLabel(source) {
     argentina_datos: "ArgentinaDatos",
     scba: "SCBA",
     csjn: "CSJN",
+    tribunal_fiscal: "Tribunal Fiscal",
+    system: "Sistema",
   };
 
   return labels[source] || source || "Sin fuente";

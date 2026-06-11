@@ -13,33 +13,50 @@ const excludedDetail = document.getElementById("excludedDetail");
 const jurisdictionDetail = document.getElementById("jurisdictionDetail"); 
 const calculatorMessage = document.getElementById("calculatorMessage");
 
-const clearResultBtn = document.getElementById("clearResultBtn"); 
+const clearResultBtn = document.getElementById("clearResultBtn");  
+
 const jurisdictionSelect = document.getElementById("jurisdiction");
 const departmentSelect = document.getElementById("department");
 const departmentGroup = document.getElementById("departmentGroup");
 const departmentDetail = document.getElementById("departmentDetail");
-const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");  
+
+const courtSelect = document.getElementById("court");
+const courtGroup = document.getElementById("courtGroup");
+const courtDetail = document.getElementById("courtDetail");
+
+const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");
 
 populatePbaDepartmentSelect(departmentSelect, {
   includeEmpty: true,
   emptyLabel: "Sin departamento específico",
 });
 
-jurisdictionSelect.addEventListener("change", updateDepartmentVisibility);
+jurisdictionSelect.addEventListener("change", updateJurisdictionDependentFields);
 
-function updateDepartmentVisibility() {
-  if (jurisdictionSelect.value === "pba") {
+function updateJurisdictionDependentFields() {
+  const isPba = jurisdictionSelect.value === "pba";
+  const isNationalFederal = jurisdictionSelect.value === "national_federal";
+
+  if (isPba) {
     departmentGroup.classList.remove("hidden");
     departmentGroup.style.display = "block";
-    return;
+  } else {
+    departmentSelect.value = "";
+    departmentGroup.classList.add("hidden");
+    departmentGroup.style.display = "none";
   }
 
-  departmentSelect.value = "";
-  departmentGroup.classList.add("hidden");
-  departmentGroup.style.display = "none";
+  if (isNationalFederal) {
+    courtGroup.classList.remove("hidden");
+    courtGroup.style.display = "block";
+  } else {
+    courtSelect.value = "";
+    courtGroup.classList.add("hidden");
+    courtGroup.style.display = "none";
+  }
 }
 
-updateDepartmentVisibility();
+updateJurisdictionDependentFields();
 
 let lastCalculationPayload = null;
 let lastCalculationResult = null;
@@ -51,7 +68,10 @@ form.addEventListener("submit", async function (event) {
   const startRule = document.getElementById("startRule").value;
   const daysCount = Number(document.getElementById("daysCount").value);
   const dayType = document.getElementById("dayType").value;
-  const selectedJurisdiction = jurisdictionSelect.value;
+  const selectedJurisdiction = jurisdictionSelect.value; 
+
+
+  const selectedCourt = selectedJurisdiction === "national_federal" ? courtSelect.value || null : null;
 
   if (!notificationDateValue || !daysCount || daysCount <= 0) {
     alert("Completá una fecha válida y una cantidad de días mayor a cero.");
@@ -66,7 +86,7 @@ form.addEventListener("submit", async function (event) {
     start_rule: startRule,
     department: selectedJurisdiction === "pba" ? departmentSelect.value || null : null,
     locality: null,
-    court: null,
+    court: selectedCourt,
   };
 
   try {
@@ -205,11 +225,15 @@ function getJurisdictionScopeDetail(result) {
   }
 
   if (result.jurisdiction === "national_federal") {
+    if (result.court) {
+      return `Organismo seleccionado: ${result.court}.`;
+    }
+
     return "Ámbito seleccionado: Nacional / Federal. No aplica departamento judicial provincial.";
   }
 
   return "Ámbito jurisdiccional no especificado.";
-} 
+}
 
 
 function getJurisdictionLabel(jurisdiction) {
@@ -249,7 +273,14 @@ function renderResult(result) {
 
   jurisdictionDetail.textContent = `Jurisdicción seleccionada: ${getJurisdictionLabel(result.jurisdiction)}.`;
 
-  departmentDetail.textContent = getJurisdictionScopeDetail(result);
+  departmentDetail.textContent = getJurisdictionScopeDetail(result); 
+
+  if (courtDetail) {
+    courtDetail.textContent =
+      result.jurisdiction === "national_federal" && result.court
+        ? `Calendario específico aplicado: ${result.court}.`
+        : "";
+  }
 }
 
 
@@ -264,8 +295,11 @@ function showCalculatorMessage(message, visible) {
   calculatorMessage.classList.remove("hidden");
 }
 
-clearResultBtn.addEventListener("click", function () {
-  form.reset();
+clearResultBtn.addEventListener("click", function () { 
+
+  form.reset(); 
+
+  updateJurisdictionDependentFields();
  
   lastCalculationPayload = null;
   lastCalculationResult = null;
@@ -283,7 +317,10 @@ clearResultBtn.addEventListener("click", function () {
   daysDetail.textContent = "";
   excludedDetail.textContent = "";
   jurisdictionDetail.textContent = ""; 
-  departmentDetail.textContent = "";
+  departmentDetail.textContent = ""; 
+  if (courtDetail) {
+  courtDetail.textContent = "";
+  }
 }); 
 
 
@@ -322,6 +359,7 @@ function getExcludedDaySourceLabel(source) {
     argentina_datos: "ArgentinaDatos",
     scba: "SCBA",
     csjn: "CSJN",
+    tribunal_fiscal: "Tribunal Fiscal",
     system: "Sistema",
   };
 
