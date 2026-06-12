@@ -232,6 +232,10 @@ function getJurisdictionScopeDetail(result) {
     return "Ámbito seleccionado: Nacional / Federal. No aplica departamento judicial provincial.";
   }
 
+  if (result.jurisdiction === "caba") {
+    return "Ámbito seleccionado: Ciudad Autónoma de Buenos Aires. No aplica departamento judicial provincial ni organismo específico.";
+  }
+
   return "Ámbito jurisdiccional no especificado.";
 }
 
@@ -239,6 +243,7 @@ function getJurisdictionScopeDetail(result) {
 function getJurisdictionLabel(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
   if (jurisdiction === "national_federal") return "Nacional / Federal";
+  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
 
   return "Jurisdicción no especificada";
 }
@@ -496,9 +501,11 @@ function renderExcludedDays(excludedDays) {
       hasUnverifiedDays
         ? `
           <div class="verification-warning">
-            <strong>Atención:</strong>
-            este cálculo incluye días inhábiles importados automáticamente que todavía no fueron verificados.
-            Revisá la fuente antes de usar este vencimiento como definitivo.
+            <strong>Aviso:</strong>
+            este cálculo es orientativo. El sistema excluye sábados, domingos y los días inhábiles
+            cargados o importados para la jurisdicción seleccionada. El resultado debe ser verificado
+            por el profesional conforme a la normativa aplicable, ferias, asuetos y particularidades
+            del expediente.
           </div>
         `
         : ""

@@ -1369,6 +1369,10 @@ function getJurisdictionScopeTitle(deadline) {
     return "Ámbito";
   }
 
+  if (deadline.jurisdiction === "caba") {
+    return "Ámbito";
+  }
+
   return "Ámbito / jurisdicción";
 }
 
@@ -1385,12 +1389,17 @@ function getJurisdictionScopeLabel(deadline) {
     return "Nacional / Federal";
   }
 
+  if (deadline.jurisdiction === "caba") {
+    return "Ciudad Autónoma de Buenos Aires";
+  }
+
   return "Ámbito no especificado.";
 }
 
 function getJurisdictionLabelForPdf(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
   if (jurisdiction === "national_federal") return "Nacional / Federal";
+  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
 
   return "Jurisdicción no especificada";
 }
@@ -1420,6 +1429,10 @@ function getJurisdictionScopeTitleForPdf(deadline) {
     return "Ámbito";
   }
 
+  if (deadline.jurisdiction === "caba") {
+    return "Ámbito";
+  }
+
   return "Ámbito / jurisdicción";
 }
 
@@ -1434,6 +1447,10 @@ function getJurisdictionScopeValueForPdf(deadline) {
     }
 
     return "Nacional / Federal";
+  }
+
+  if (deadline.jurisdiction === "caba") {
+    return "Ciudad Autónoma de Buenos Aires";
   }
 
   return "No especificado";

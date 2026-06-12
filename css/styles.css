@@ -1594,6 +1594,55 @@ textarea:focus {
 
 .source-status-table .btn-small {
   white-space: nowrap;
+} 
+
+/* Mejora visual tabla de días inhábiles */
+.non-working-days-table-card {
+  overflow-x: auto;
+}
+
+.non-working-days-table-card .deadlines-table {
+  min-width: 1250px;
+  table-layout: auto;
+}
+
+.non-working-days-table-card .deadlines-table th,
+.non-working-days-table-card .deadlines-table td {
+  vertical-align: top;
+}
+
+.non-working-days-table-card .deadlines-table td:nth-child(1) {
+  min-width: 105px;
+  white-space: nowrap;
+}
+
+.non-working-days-table-card .deadlines-table td:nth-child(2) {
+  min-width: 260px;
+}
+
+.non-working-days-table-card .deadlines-table td:nth-child(3) {
+  min-width: 190px;
+}
+
+.non-working-days-table-card .deadlines-table td:nth-child(4),
+.non-working-days-table-card .deadlines-table td:nth-child(5),
+.non-working-days-table-card .deadlines-table td:nth-child(6),
+.non-working-days-table-card .deadlines-table td:nth-child(7),
+.non-working-days-table-card .deadlines-table td:nth-child(8),
+.non-working-days-table-card .deadlines-table td:nth-child(9),
+.non-working-days-table-card .deadlines-table td:nth-child(10) {
+  min-width: 120px;
+}
+
+.non-working-days-table-card .deadlines-table td:nth-child(11) {
+  min-width: 180px;
+}
+
+.non-working-days-table-card .table-actions {
+  min-width: 170px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 @media (max-width: 900px) {

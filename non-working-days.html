@@ -56,6 +56,7 @@
           <select id="jurisdiction" required>
             <option value="pba">Provincia de Buenos Aires</option>
             <option value="national_federal">Nacional / Federal</option>
+            <option value="caba">Ciudad Autónoma de Buenos Aires</option>
           </select>
         </div> 
 
@@ -141,9 +142,14 @@
           <label for="importJurisdiction">Jurisdicción</label>
           <select id="importJurisdiction">
             <option value="pba">Provincia de Buenos Aires</option>
-            <option value="national_federal">Nacional / Federal</option>
+            <option value="national_federal">Nacional / Federal</option> 
+            <option value="caba">Ciudad Autónoma de Buenos Aires</option>
           </select>
-        </div>
+        </div> 
+
+        <button id="importNationalHolidaysBtn" class="btn btn-secondary" type="button">
+          Importar feriados nacionales
+        </button>
 
         <button id="importScbaCalendarBtn" class="btn btn-secondary" type="button">
           Importar calendario SCBA
@@ -184,7 +190,8 @@
             <label for="filterJurisdiction">Jurisdicción</label>
             <select id="filterJurisdiction">
               <option value="pba">Provincia de Buenos Aires</option>
-              <option value="national_federal">Nacional / Federal</option>
+              <option value="national_federal">Nacional / Federal</option> 
+              <option value="caba">Ciudad Autónoma de Buenos Aires</option>
             </select>
           </div>
 
@@ -421,6 +428,6 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/non-working-days.js?v=35"></script>
+  <script src="./js/non-working-days.js?v=37"></script>
 </body>
 </html>

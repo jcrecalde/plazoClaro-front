@@ -96,8 +96,13 @@ if (importTribunalFiscalCalendarBtn) {
 }
 
 function updateDepartmentVisibilityForManualLoad() {
-  const shouldShowDepartment =
-    jurisdiction.value === "pba" && scope.value === "department";
+  const isPba = jurisdiction.value === "pba";
+
+  if (!isPba && scope.value === "department") {
+    scope.value = "manual";
+  }
+
+  const shouldShowDepartment = isPba && scope.value === "department";
 
   if (shouldShowDepartment) {
     departmentGroup.classList.remove("hidden");
@@ -108,7 +113,7 @@ function updateDepartmentVisibilityForManualLoad() {
   department.value = "";
   departmentGroup.classList.add("hidden");
   departmentGroup.style.display = "none";
-} 
+}
 
 function resetNonWorkingDayFormMode() {
   editingNonWorkingDayId = null;
@@ -131,7 +136,9 @@ document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
 
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
-importNationalHolidaysBtn.addEventListener("click", importNationalHolidays); 
+if (importNationalHolidaysBtn) {
+  importNationalHolidaysBtn.addEventListener("click", importNationalHolidays);
+}
 importScbaCalendarBtn.addEventListener("click", importScbaCalendar); 
 importCsjnCalendarBtn.addEventListener("click", importCsjnCalendar);
 
@@ -396,8 +403,13 @@ function showNonWorkingDayHistory(nonWorkingDayId) {
 
 
 function updateFilterDepartmentVisibility() {
-  const shouldShowDepartment =
-    filterJurisdiction.value === "pba" && filterScope.value === "department";
+  const isPba = filterJurisdiction.value === "pba";
+
+  if (!isPba && filterScope.value === "department") {
+    filterScope.value = "";
+  }
+
+  const shouldShowDepartment = isPba && filterScope.value === "department";
 
   if (shouldShowDepartment) {
     filterDepartmentGroup.classList.remove("hidden");
@@ -448,6 +460,14 @@ async function importNationalHolidays() {
 
     filterYear.value = year;
     filterJurisdiction.value = selectedJurisdiction;
+    filterSource.value = "argentina_datos";
+    filterType.value = "";
+    filterScope.value = "";
+    filterVerified.value = "";
+    filterActive.value = "";
+    filterDepartment.value = "";
+
+    updateFilterDepartmentVisibility();
 
     await loadNonWorkingDays();
 
@@ -983,6 +1003,7 @@ function formatDate(dateString) {
 function getJurisdictionLabel(jurisdiction) {
   if (jurisdiction === "pba") return "Provincia de Buenos Aires";
   if (jurisdiction === "national_federal") return "Nacional / Federal";
+  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
 
   return "Jurisdicción no especificada";
 }
