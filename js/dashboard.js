@@ -1527,8 +1527,9 @@ function getExcludedDaySourceLabel(source, type, reason = "") {
     manual: "Manual",
     argentina_datos: "ArgentinaDatos",
     scba: "SCBA",
-    csjn: "CSJN", 
+    csjn: "CSJN",
     tribunal_fiscal: "Tribunal Fiscal",
+    caba: "CABA",
     system: "Sistema",
   };
 
@@ -1538,7 +1539,11 @@ function getExcludedDaySourceLabel(source, type, reason = "") {
 
   const normalizedReason = String(reason).toLowerCase();
 
-  if (type === "weekend" || normalizedReason.includes("sábado") || normalizedReason.includes("domingo")) {
+  if (
+    type === "weekend" ||
+    normalizedReason.includes("sábado") ||
+    normalizedReason.includes("domingo")
+  ) {
     return "Sistema";
   }
 
