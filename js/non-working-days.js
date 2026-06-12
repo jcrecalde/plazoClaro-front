@@ -17,7 +17,8 @@ const importJurisdiction = document.getElementById("importJurisdiction");
 const importNationalHolidaysBtn = document.getElementById("importNationalHolidaysBtn"); 
 const importScbaCalendarBtn = document.getElementById("importScbaCalendarBtn"); 
 const importCsjnCalendarBtn = document.getElementById("importCsjnCalendarBtn"); 
-const importTribunalFiscalCalendarBtn = document.getElementById("importTribunalFiscalCalendarBtn");
+const importTribunalFiscalCalendarBtn = document.getElementById("importTribunalFiscalCalendarBtn"); 
+const importCabaCalendarBtn = document.getElementById("importCabaCalendarBtn");
 
 const filterYear = document.getElementById("filterYear"); 
 const filterJurisdiction = document.getElementById("filterJurisdiction");
@@ -93,6 +94,10 @@ if (importTribunalFiscalCalendarBtn) {
     "click",
     importTribunalFiscalCalendar
   );
+} 
+
+if (importCabaCalendarBtn) {
+  importCabaCalendarBtn.addEventListener("click", importCabaCalendar);
 }
 
 function updateDepartmentVisibilityForManualLoad() {
@@ -606,6 +611,65 @@ async function importTribunalFiscalCalendar() {
     importTribunalFiscalCalendarBtn.textContent =
       "Importar calendario Tribunal Fiscal";
   }
+} 
+
+
+async function importCabaCalendar() {
+  const year = Number(importYear.value);
+
+  if (!year || year < 2016 || year > 2035) {
+    showMessage("Ingresá un año válido entre 2016 y 2035.", true);
+    return;
+  }
+
+  const confirmImport = confirm(
+    `Vas a importar el calendario judicial propio de CABA para el año ${year}. Por ahora el importador está preparado, pero puede no traer registros hasta validar una fuente oficial. ¿Querés continuar?`
+  );
+
+  if (!confirmImport) {
+    return;
+  }
+
+  try {
+    importCabaCalendarBtn.disabled = true;
+    importCabaCalendarBtn.textContent = "Importando CABA...";
+
+    const url = `${NON_WORKING_DAYS_API_URL}/import-caba-calendar?year=${year}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudo importar el calendario CABA.");
+    }
+
+    filterYear.value = year;
+    filterJurisdiction.value = "caba";
+    filterSource.value = "caba";
+    filterType.value = "";
+    filterScope.value = "";
+    filterVerified.value = "";
+    filterActive.value = "";
+    filterDepartment.value = "";
+
+    updateFilterDepartmentVisibility();
+
+    await loadNonWorkingDays();
+
+    showMessage(
+      `Importación CABA finalizada. Importados: ${result.imported}. Ya existentes: ${result.skipped_existing}. Total recibido: ${result.total_received}.`,
+      true
+    );
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message || "No se pudo importar el calendario CABA.", true);
+  } finally {
+    importCabaCalendarBtn.disabled = false;
+    importCabaCalendarBtn.textContent = "Importar calendario CABA";
+  }
 }
 
 
@@ -1041,7 +1105,8 @@ function getSourceLabel(source) {
     argentina_datos: "ArgentinaDatos",
     scba: "SCBA",
     csjn: "CSJN",
-    tribunal_fiscal: "Tribunal Fiscal",
+    tribunal_fiscal: "Tribunal Fiscal", 
+    caba: "CABA",
     system: "Sistema",
   };
 
