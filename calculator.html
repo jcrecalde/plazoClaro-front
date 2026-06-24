@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora de plazos | PlazoClaro</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/styles.css?v=49" />
 </head>
 <body>
 
@@ -14,7 +14,10 @@
 
       <nav class="nav-links">
         <a href="./index.html">Inicio</a>
-        <a href="./calculator.html">Calculadora</a> 
+        <a href="./calculator.html" class="active">Calculadora</a>
+        <a href="./cases.html">Causas</a>
+        <a href="./agenda.html">Agenda</a>
+        <a href="./dashboard.html">Dashboard</a>
         <a href="./non-working-days.html">Días inhábiles</a>
       </nav>
     </div>
@@ -44,6 +47,17 @@
             <option value="next_day">Al día siguiente de la notificación</option>
             <option value="same_day">El mismo día de la fecha indicada</option>
           </select>
+        </div> 
+
+
+        <div class="form-group">
+          <label for="actionType">Tipo de actuación</label>
+          <select id="actionType">
+            <option value="">Seleccionar opcionalmente</option>
+          </select>
+          <small id="actionTypeHint" class="field-help">
+            Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.
+          </small>
         </div>
 
         <div class="form-group">
@@ -57,15 +71,48 @@
             <option value="business">Días hábiles</option>
             <option value="calendar">Días corridos</option>
           </select>
+        </div> 
+
+        <div class="form-group">
+          <label for="caseSelect">Causa / carpeta</label>
+          <select id="caseSelect">
+            <option value="">Sin causa asociada</option>
+          </select>
+          <small class="field-help">
+            Opcional. Si seleccionás una causa, se usará para vincular el plazo al expediente.
+          </small>
         </div>
+         
         <div class="form-group">
           <label for="jurisdiction">Jurisdicción</label>
           <select id="jurisdiction" required>
             <option value="pba">Provincia de Buenos Aires</option>
-            <option value="national_federal">Nacional / Federal</option> 
+            <option value="national_federal">Nacional / Federal</option>
             <option value="caba">Ciudad Autónoma de Buenos Aires</option>
+            <option value="catamarca">Catamarca</option>
+            <option value="chaco">Chaco</option>
+            <option value="chubut">Chubut</option>
+            <option value="cordoba">Córdoba</option>
+            <option value="corrientes">Corrientes</option>
+            <option value="entre_rios">Entre Ríos</option>
+            <option value="formosa">Formosa</option>
+            <option value="jujuy">Jujuy</option>
+            <option value="la_pampa">La Pampa</option>
+            <option value="la_rioja">La Rioja</option>
+            <option value="mendoza">Mendoza</option>
+            <option value="misiones">Misiones</option>
+            <option value="neuquen">Neuquén</option>
+            <option value="rio_negro">Río Negro</option>
+            <option value="salta">Salta</option>
+            <option value="san_juan">San Juan</option>
+            <option value="san_luis">San Luis</option>
+            <option value="santa_cruz">Santa Cruz</option>
+            <option value="santa_fe">Santa Fe</option>
+            <option value="santiago_del_estero">Santiago del Estero</option>
+            <option value="tierra_del_fuego">Tierra del Fuego</option>
+            <option value="tucuman">Tucumán</option>
           </select>
-        </div> 
+        </div>
 
         <div class="form-group" id="departmentGroup">
           <label for="department">Departamento judicial</label>
@@ -86,16 +133,7 @@
           </small>
         </div>
 
-        <div class="form-group">
-          <label for="actionType">Tipo de actuación</label>
-          <select id="actionType">
-            <option value="">Seleccionar opcionalmente</option>
-            <option value="Contestación">Contestación</option>
-            <option value="Apelación">Apelación</option>
-            <option value="Documentación">Presentación de documentación</option>
-            <option value="Otro">Otro</option>
-          </select>
-        </div>
+
 
         <div class="form-group">
           <label for="caseName">Expediente</label>
@@ -149,9 +187,11 @@
     <section class="container">
       <div class="notice">
         <strong>Aviso:</strong>
-        este cálculo es orientativo. En esta primera versión se excluyen sábados, domingos
-        y los días inhábiles cargados manualmente. Todavía no contempla ferias judiciales,
-        asuetos especiales ni reglas particulares de cada organismo.
+        este cálculo es orientativo. El sistema excluye sábados, domingos y los días inhábiles
+        cargados o importados para la jurisdicción seleccionada. Algunas jurisdicciones cuentan
+        con cobertura avanzada y otras con cobertura básica, por lo que el resultado debe ser
+        verificado por el profesional conforme a la normativa aplicable, ferias, asuetos y
+        particularidades del expediente.
       </div>
     </section>
   </main>
@@ -163,6 +203,7 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/calculator.js?v=36"></script>
+  <script src="./js/action-types.js?v=1"></script>
+  <script src="./js/calculator.js?v=45"></script>
 </body>
 </html>

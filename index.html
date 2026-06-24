@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PlazoClaro | Control de plazos judiciales</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/styles.css?v=56" />
 </head>
 <body>
 
@@ -13,11 +13,14 @@
       <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
 
       <nav class="nav-links">
-        <a href="./index.html">Inicio</a>
+        <a href="./index.html" class="active">Inicio</a>
         <a href="./calculator.html">Calculadora</a>
+        <a href="./cases.html">Causas</a>
+        <a href="./agenda.html">Agenda</a>
         <a href="./dashboard.html">Dashboard</a>
         <a href="./non-working-days.html">Días inhábiles</a>
-      </nav>
+      </nav> 
+
     </div>
   </header>
 
@@ -27,46 +30,98 @@
         <div>
           <span class="badge">Herramienta para abogados y estudios jurídicos</span>
 
-          <h1>Calculá, guardá y recordá tus vencimientos judiciales con claridad.</h1>
+          <h1>Calculá, organizá y controlá tus vencimientos judiciales con claridad.</h1>
 
           <p>
-            Una herramienta simple para abogados y estudios jurídicos que necesitan controlar
-            plazos sin depender de cuentas manuales, Excel o recordatorios dispersos.
+            Una herramienta simple para abogados y estudios jurídicos que necesitan calcular plazos,
+            agruparlos por causa y controlar vencimientos desde una agenda clara.
           </p>
 
           <div class="hero-actions">
             <a href="./calculator.html" class="btn btn-primary">Calcular un plazo</a>
+            <a href="./agenda.html" class="btn btn-secondary">Ver agenda de vencimientos</a>
             <a href="#como-funciona" class="btn btn-secondary">Ver cómo funciona</a>
           </div>
         </div>
 
         <div class="hero-card">
-          <h3>Próximo vencimiento</h3>
+          <h3>Vencimiento más urgente</h3>
 
           <div class="deadline-preview">
             <div class="preview-row">
-              <span class="preview-label">Expediente</span>
-              <span class="preview-value">Pérez c/ Gómez</span>
+              <span class="preview-label">Causa / expediente</span>
+              <span id="heroDeadlineCase" class="preview-value">Cargando...</span>
             </div>
 
             <div class="preview-row">
-              <span class="preview-label">Tipo de plazo</span>
-              <span class="preview-value">Contestación</span>
+              <span class="preview-label">Actuación</span>
+              <span id="heroDeadlineAction" class="preview-value">-</span>
             </div>
 
             <div class="preview-row">
-              <span class="preview-label">Vencimiento estimado</span>
-              <span class="preview-value">28/05/2026</span>
+              <span class="preview-label">Vencimiento</span>
+              <span id="heroDeadlineDate" class="preview-value">-</span>
             </div>
 
             <div class="preview-row">
               <span class="preview-label">Estado</span>
-              <span class="preview-value status-warning">Próximo</span>
+              <span id="heroDeadlineStatus" class="preview-value status-warning">-</span>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <section id="homeAlertsSection" class="home-alerts-section">
+      <div class="home-alerts-header">
+        <div>
+          <span class="section-kicker">Panel rápido</span>
+          <h2>Alertas de vencimientos</h2>
+          <p>
+            Un resumen inicial para detectar vencidos, vencimientos de hoy y próximos plazos sin entrar causa por causa.
+          </p>
+        </div>
+
+        <div class="home-alerts-actions">
+          <a href="./agenda.html" class="btn btn-primary">Ver agenda</a>
+          <a href="./cases.html" class="btn btn-secondary">Ver causas</a>
+        </div>
+      </div>
+
+      <div id="homeAlertsMessage" class="home-alerts-message">
+        Cargando alertas...
+      </div>
+
+      <div class="home-alerts-grid">
+        <article class="home-alert-card home-alert-card-expired">
+          <span>Vencidos pendientes</span>
+          <strong id="homeExpiredCount">0</strong>
+        </article>
+
+        <article class="home-alert-card home-alert-card-today">
+          <span>Vencen hoy</span>
+          <strong id="homeTodayCount">0</strong>
+        </article>
+
+        <article class="home-alert-card home-alert-card-upcoming">
+          <span>Próximos 7 días</span>
+          <strong id="homeUpcomingCount">0</strong>
+        </article>
+
+        <article class="home-alert-card home-alert-card-pending">
+          <span>Pendientes totales</span>
+          <strong id="homeTotalPendingCount">0</strong>
+        </article>
+      </div>
+
+      <div class="home-urgent-list-wrapper">
+        <h3>Vencimientos que requieren atención</h3>
+        <div id="homeUrgentList" class="home-urgent-list">
+          <p class="result-empty">Cargando vencimientos...</p>
+        </div>
+      </div>
+    </section>
+
 
     <section id="como-funciona" class="section">
       <div class="container">
@@ -142,6 +197,7 @@
       PlazoClaro © 2026 — Herramienta de apoyo para el control de vencimientos judiciales.
     </div>
   </footer>
-
+ 
+<script src="./js/home-alerts.js?v=4"></script>
 </body>
 </html>

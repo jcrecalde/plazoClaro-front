@@ -1643,6 +1643,852 @@ textarea:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+} 
+
+
+.cases-card-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.case-card-placeholder {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 18px;
+  padding: 1.25rem;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.case-card {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-top: 4px solid #111827;
+  border-radius: 18px;
+  padding: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.case-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.case-card-header h3 {
+  margin: 0.25rem 0 0;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.case-card-kicker {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+}
+
+.case-card-status-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.case-card-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.case-card-meta-grid div,
+.case-card-deadline-summary div {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 14px;
+  padding: 0.75rem;
+  background: #f8fafc;
+}
+
+.case-card-meta-grid span,
+.case-card-deadline-summary span {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.case-card-meta-grid strong,
+.case-card-deadline-summary strong {
+  color: #111827;
+}
+
+.case-card-deadline-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.case-card-deadline-summary strong {
+  font-size: 1.15rem;
+}
+
+.case-card-actions { 
+  margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .case-card-header {
+    flex-direction: column;
+  }
+
+  .case-card-status-group {
+    justify-content: flex-start;
+  }
+
+  .case-card-meta-grid,
+  .case-card-deadline-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .case-card-actions {
+    justify-content: flex-start;
+  }
+} 
+
+
+.agenda-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.agenda-card {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-top: 4px solid #111827;
+  border-radius: 18px;
+  padding: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.agenda-card-expired {
+  border-top-color: #b91c1c;
+}
+
+.agenda-card-today,
+.agenda-card-upcoming {
+  border-top-color: #d97706;
+}
+
+.agenda-card-future {
+  border-top-color: #2563eb;
+}
+
+.agenda-card-completed {
+  border-top-color: #15803d;
+  opacity: 0.82;
+}
+
+.agenda-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.agenda-card-header h3 {
+  margin: 0.25rem 0 0;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.agenda-card-notes {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 14px;
+  padding: 0.75rem;
+  background: #f8fafc;
+  margin-bottom: 1rem;
+  color: #334155;
+} 
+
+
+.agenda-section {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.agenda-section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-left: 5px solid #111827;
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+.agenda-section-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.15rem;
+}
+
+.agenda-section-header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.agenda-section-count {
+  min-width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #111827;
+  font-weight: 800;
+}
+
+.agenda-section-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.agenda-section-expired .agenda-section-header {
+  border-left-color: #b91c1c;
+}
+
+.agenda-section-today .agenda-section-header,
+.agenda-section-upcoming .agenda-section-header {
+  border-left-color: #d97706;
+}
+
+.agenda-section-future .agenda-section-header {
+  border-left-color: #2563eb;
+}
+
+.agenda-section-completed .agenda-section-header {
+  border-left-color: #15803d;
+} 
+
+
+.case-card-alert-upcoming {
+  border-top-color: #d97706;
+  box-shadow: 0 14px 34px rgba(217, 119, 6, 0.16);
+}
+
+.case-card-alert-expired {
+  border-top-color: #b91c1c;
+  box-shadow: 0 14px 34px rgba(185, 28, 28, 0.14);
+}
+
+.case-card-alert-pending {
+  border-top-color: #2563eb;
+}
+
+.case-card-alert-completed {
+  border-top-color: #15803d;
+}
+
+.case-alert-badge {
+  position: relative;
+}
+
+.case-card-alert-upcoming .case-alert-badge {
+  animation: softDeadlinePulse 1.8s ease-in-out infinite;
+} 
+
+
+@keyframes softDeadlinePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.35);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(217, 119, 6, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+  }
+} 
+
+
+.home-alerts-section {
+  max-width: 1120px;
+  margin: 32px auto;
+  padding: 28px;
+  border: 1px solid #d8d2c4;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.08);
+}
+
+.home-alerts-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.home-alerts-header h2 {
+  margin: 6px 0 8px;
+}
+
+.home-alerts-header p {
+  margin: 0;
+  color: #5f6b7a;
+  max-width: 720px;
+}
+
+.home-alerts-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.home-alerts-message {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 1px solid #d8d2c4;
+  color: #374151;
+  background: #fafaf8;
+}
+
+.home-alerts-message-danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.home-alerts-message-warning {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.home-alerts-message-ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.home-alerts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.home-alert-card {
+  border: 1px solid #d8d2c4;
+  border-radius: 14px;
+  padding: 16px;
+  background: #fafaf8;
+}
+
+.home-alert-card span {
+  display: block;
+  color: #5f6b7a;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.home-alert-card strong {
+  display: block;
+  font-size: 32px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.home-alert-card-expired {
+  border-top: 4px solid #b91c1c;
+}
+
+.home-alert-card-today {
+  border-top: 4px solid #d97706;
+}
+
+.home-alert-card-upcoming {
+  border-top: 4px solid #2563eb;
+}
+
+.home-alert-card-pending {
+  border-top: 4px solid #111827;
+}
+
+.home-urgent-list-wrapper {
+  margin-top: 24px;
+  border-top: 1px solid #eee7d8;
+  padding-top: 18px;
+}
+
+.home-urgent-list-wrapper h3 {
+  margin-top: 0;
+}
+
+.home-urgent-list {
+  display: grid;
+  gap: 12px;
+}
+
+.home-urgent-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #d8d2c4;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.home-urgent-item h4 {
+  margin: 6px 0;
+}
+
+.home-urgent-item p {
+  margin: 0;
+  color: #5f6b7a;
+}
+
+.home-urgent-status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.home-urgent-expired {
+  border-left: 5px solid #b91c1c;
+}
+
+.home-urgent-expired .home-urgent-status {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.home-urgent-today {
+  border-left: 5px solid #d97706;
+}
+
+.home-urgent-today .home-urgent-status {
+  background: #fef3c7;
+  color: #92400e;
+  animation: softDeadlinePulse 1.8s ease-in-out infinite;
+}
+
+.home-urgent-upcoming {
+  border-left: 5px solid #2563eb;
+}
+
+.home-urgent-upcoming .home-urgent-status {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.home-urgent-date {
+  min-width: 130px;
+  text-align: right;
+}
+
+.home-urgent-date span {
+  display: block;
+  color: #5f6b7a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.home-urgent-date strong {
+  display: block;
+  margin-top: 4px;
+} 
+
+
+.status-danger {
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+.status-ok {
+  color: #15803d;
+  font-weight: 800;
+} 
+
+
+.case-status-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 22px;
+}
+
+.case-status-filter {
+  border: 1px solid #d8d2c4;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.case-status-filter:hover {
+  border-color: #111827;
+  transform: translateY(-1px);
+}
+
+.case-status-filter.active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.14);
+} 
+
+.case-archived-notice {
+  margin: 14px 0 18px;
+  border-color: #d8d2c4;
+  background: #fafaf8;
+  color: #5f4b2a;
+} 
+
+.btn:disabled,
+.btn-small:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+} 
+
+
+.case-card-finalized {
+  border-top-color: #d8d2c4;
+  box-shadow: none;
+  background: #fafaf8;
+}
+
+.case-card-finalized .case-alert-badge {
+  animation: none;
+}
+
+.case-finalized-operational-badge {
+  background: #f3efe7;
+  color: #5f4b2a;
+  border: 1px solid #d8d2c4;
+}
+
+.case-finalized-status-badge {
+  background: #f3efe7;
+  color: #5f4b2a;
+  border: 1px solid #d8d2c4;
+} 
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9999;
+}
+
+.confirm-modal {
+  width: min(560px, 100%);
+  background: #ffffff;
+  border: 1px solid #d8d2c4;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(17, 24, 39, 0.28);
+  padding: 24px;
+}
+
+.confirm-modal-header h3 {
+  margin: 10px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  color: #111827;
+}
+
+.confirm-modal-message {
+  margin: 18px 0 0;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+} 
+
+
+.dashboard-case-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-case-cell strong {
+  color: #111827;
+}
+
+.dashboard-case-badge {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+
+
+.dashboard-case-badge-linked {
+  background: #edf7ed;
+  color: #166534;
+  border: 1px solid #bbdfbb;
+} 
+
+
+.dashboard-case-badge {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dashboard-case-badge-linked {
+  background: #edf7ed;
+  color: #166534;
+  border: 1px solid #bbdfbb;
+}
+
+.dashboard-case-badge-general {
+  background: #f3efe7;
+  color: #5f4b2a;
+  border: 1px solid #d8d2c4;
+}
+
+.dashboard-case-badge-general {
+  background: #f3efe7;
+  color: #5f4b2a;
+  border: 1px solid #d8d2c4;
+} 
+ 
+.agenda-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.agenda-card-badges .case-card-kicker {
+  margin-bottom: 0;
+} 
+
+.agenda-case-filter-help {
+  display: block;
+  margin-top: 8px;
+  color: #5f6b7a;
+  font-size: 13px;
+  line-height: 1.45;
+} 
+
+.dashboard-operational-help {
+  display: block;
+  margin: 8px 0 18px;
+  color: #5f6b7a;
+  font-size: 13px;
+  line-height: 1.45;
+} 
+
+.nav-links a.active {
+  background: #111827;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.nav-links a.active:hover {
+  color: #ffffff;
+} 
+
+.status-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 18px;
+  padding: 12px 14px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.status-legend-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #374151;
+  margin-right: 2px;
+}
+
+.status-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.status-legend-badge {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.status-legend-expired {
+  background-color: #b91c1c;
+}
+
+.status-legend-pending {
+  background-color: #d97706;
+}
+
+.status-legend-completed {
+  background-color: #15803d;
+} 
+
+.case-judicial-review {
+  margin-top: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.case-judicial-review span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.case-judicial-review strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+  color: #0f172a;
+}
+
+.case-judicial-review small {
+  display: block;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.judicial-review-ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.judicial-review-ok strong {
+  color: #166534;
+}
+
+.judicial-review-warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.judicial-review-warning strong {
+  color: #92400e;
+}
+
+.judicial-review-alert {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.judicial-review-alert strong {
+  color: #991b1b;
+}
+
+
+@media (max-width: 900px) {
+  .home-alerts-header {
+    flex-direction: column;
+  }
+
+  .home-alerts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-urgent-item {
+    flex-direction: column;
+  }
+
+  .home-urgent-date {
+    text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .home-alerts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .agenda-section-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 700px) {
+  .agenda-card-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .case-card-meta-grid,
+  .case-card-deadline-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {

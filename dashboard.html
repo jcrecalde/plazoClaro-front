@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard de vencimientos | PlazoClaro</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/styles.css?v=57" />
 </head>
 <body>
 
@@ -15,11 +15,35 @@
       <nav class="nav-links">
         <a href="./index.html">Inicio</a>
         <a href="./calculator.html">Calculadora</a>
-        <a href="./dashboard.html">Dashboard</a>
+        <a href="./cases.html">Causas</a>
+        <a href="./agenda.html">Agenda</a>
+        <a href="./dashboard.html" class="active">Dashboard</a>
         <a href="./non-working-days.html">Días inhábiles</a>
       </nav>
     </div>
-  </header>
+  </header> 
+
+
+  <div id="dashboardConfirmModal" class="modal-backdrop hidden">
+    <div class="confirm-modal">
+      <div class="confirm-modal-header">
+        <span class="badge">Confirmación</span>
+        <h3 id="dashboardConfirmTitle">Eliminar plazo</h3>
+      </div>
+
+      <p id="dashboardConfirmMessage" class="confirm-modal-message"></p>
+
+      <div class="confirm-modal-actions">
+        <button id="dashboardConfirmCancelBtn" class="btn btn-secondary" type="button">
+          Cancelar
+        </button>
+
+        <button id="dashboardConfirmAcceptBtn" class="btn btn-primary" type="button">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <main>
     <section class="page-header">
@@ -92,6 +116,37 @@
         <button class="filter-btn" type="button" data-filter="completed">Completados</button>
         <button class="filter-btn" type="button" data-filter="expired">Vencidos</button> 
         <button class="filter-btn" type="button" data-filter="upcoming">Próximos 7 días</button>
+      </div> 
+
+      <p class="field-help dashboard-operational-help">
+        El Dashboard muestra solo plazos operativos. Los plazos de causas finalizadas se consultan desde la sección “Causas”, filtro “Finalizadas”.
+      </p> 
+
+      <div class="status-legend">
+        <span class="status-legend-title">Leyenda:</span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-expired"></span>
+          Vencido
+        </span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-pending"></span>
+          Pendiente
+        </span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-completed"></span>
+          Completado
+        </span>
+
+        <span class="status-legend-item">
+          <span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>
+        </span>
+
+        <span class="status-legend-item">
+          <span class="dashboard-case-badge dashboard-case-badge-general">Plazo general</span>
+        </span>
       </div>
 
       <div class="table-card">
@@ -171,7 +226,10 @@
             <span>Estado</span>
             <strong id="detailStatus">-</strong>
           </div>
-        </div>
+        </div> 
+
+
+        <div id="detailCoverageWarning" class="notice hidden"></div>
 
         <div class="detail-section">
           <h4>Días excluidos</h4>
@@ -221,12 +279,11 @@
             <label for="editActionType">Tipo de actuación</label>
             <select id="editActionType">
               <option value="">Seleccionar opcionalmente</option>
-              <option value="Contestación">Contestación</option>
-              <option value="Apelación">Apelación</option>
-              <option value="Documentación">Presentación de documentación</option>
-              <option value="Otro">Otro</option>
             </select>
-          </div> 
+            <small id="editActionTypeHint" class="field-help">
+              Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.
+            </small>
+          </div>
 
 
           <div class="form-group">
@@ -261,6 +318,29 @@
               <option value="pba">Provincia de Buenos Aires</option>
               <option value="national_federal">Nacional / Federal</option>
               <option value="caba">Ciudad Autónoma de Buenos Aires</option>
+
+              <option value="catamarca">Catamarca</option>
+              <option value="chaco">Chaco</option>
+              <option value="chubut">Chubut</option>
+              <option value="cordoba">Córdoba</option>
+              <option value="corrientes">Corrientes</option>
+              <option value="entre_rios">Entre Ríos</option>
+              <option value="formosa">Formosa</option>
+              <option value="jujuy">Jujuy</option>
+              <option value="la_pampa">La Pampa</option>
+              <option value="la_rioja">La Rioja</option>
+              <option value="mendoza">Mendoza</option>
+              <option value="misiones">Misiones</option>
+              <option value="neuquen">Neuquén</option>
+              <option value="rio_negro">Río Negro</option>
+              <option value="salta">Salta</option>
+              <option value="san_juan">San Juan</option>
+              <option value="san_luis">San Luis</option>
+              <option value="santa_cruz">Santa Cruz</option>
+              <option value="santa_fe">Santa Fe</option>
+              <option value="santiago_del_estero">Santiago del Estero</option>
+              <option value="tierra_del_fuego">Tierra del Fuego</option>
+              <option value="tucuman">Tucumán</option>
             </select>
           </div>
            
@@ -317,6 +397,7 @@
   </footer>
 
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/dashboard.js?v=34"></script>
+  <script src="./js/action-types.js?v=1"></script>
+  <script src="./js/dashboard.js?v=43"></script>
 </body>
 </html>

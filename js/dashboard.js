@@ -1,4 +1,5 @@
-const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines";
+const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
+const CASES_API_URL = "http://127.0.0.1:8000/cases";
 
 const deadlinesTableBody = document.getElementById("deadlinesTableBody");
 const dashboardSummary = document.getElementById("dashboardSummary");
@@ -28,7 +29,8 @@ const detailDeadlineDate = document.getElementById("detailDeadlineDate");
 const detailStatus = document.getElementById("detailStatus");
 const detailDepartment = document.getElementById("detailDepartment"); 
 const detailDepartmentLabel = detailDepartment?.previousElementSibling;
-const detailExcludedDays = document.getElementById("detailExcludedDays");
+const detailExcludedDays = document.getElementById("detailExcludedDays"); 
+const detailCoverageWarning = document.getElementById("detailCoverageWarning");
 const detailNotes = document.getElementById("detailNotes");
 const detailHistory = document.getElementById("detailHistory");
 
@@ -39,6 +41,7 @@ const cancelEditBtn = document.getElementById("cancelEditBtn");
 const editDeadlineId = document.getElementById("editDeadlineId");
 const editCaseName = document.getElementById("editCaseName");
 const editActionType = document.getElementById("editActionType");
+const editActionTypeHint = document.getElementById("editActionTypeHint");
 const editNotificationDate = document.getElementById("editNotificationDate");
 const editStartRule = document.getElementById("editStartRule");
 const editDaysCount = document.getElementById("editDaysCount");
@@ -56,7 +59,16 @@ const editNotes = document.getElementById("editNotes");
 
 const nonWorkingDaysTopScroll = document.getElementById("nonWorkingDaysTopScroll");
 const nonWorkingDaysTopScrollInner = document.getElementById("nonWorkingDaysTopScrollInner");
-const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll");
+const nonWorkingDaysTableScroll = document.getElementById("nonWorkingDaysTableScroll"); 
+
+const dashboardConfirmModal = document.getElementById("dashboardConfirmModal");
+const dashboardConfirmTitle = document.getElementById("dashboardConfirmTitle");
+const dashboardConfirmMessage = document.getElementById("dashboardConfirmMessage");
+const dashboardConfirmAcceptBtn = document.getElementById("dashboardConfirmAcceptBtn");
+const dashboardConfirmCancelBtn = document.getElementById("dashboardConfirmCancelBtn"); 
+
+
+
 
 populatePbaDepartmentSelect(editDepartment, {
   includeEmpty: true,
@@ -64,9 +76,10 @@ populatePbaDepartmentSelect(editDepartment, {
 });
 
 let allDeadlines = [];
+let allCases = [];
 let currentFilter = "all";
 let currentSearch = "";
-let selectedDeadlineForDetail = null;  
+let selectedDeadlineForDetail = null;
 
 let isSyncingHorizontalScroll = false;
 
@@ -90,7 +103,15 @@ if (nonWorkingDaysTopScroll && nonWorkingDaysTableScroll) {
 
 document.addEventListener("DOMContentLoaded", loadDeadlines);
 
-refreshDeadlinesBtn.addEventListener("click", loadDeadlines);
+refreshDeadlinesBtn.addEventListener("click", loadDeadlines); 
+
+
+if (editActionType) {
+  populateActionTypeSelect(editActionType);
+  updateEditActionTypeHint();
+
+  editActionType.addEventListener("change", handleEditActionTypeChange);
+}
 
 
 deadlineSearch.addEventListener("input", function () {
@@ -159,6 +180,53 @@ function updateEditJurisdictionDependentFields() {
     editCourtGroup.classList.add("hidden");
     editCourtGroup.style.display = "none";
   }
+}  
+
+
+function handleEditActionTypeChange() {
+  if (!editActionType) return;
+
+  const selectedRule = getActionTypeRule(editActionType.value);
+
+  if (!selectedRule) {
+    updateEditActionTypeHint();
+    return;
+  }
+
+  if (selectedRule.suggestedDays && editDaysCount) {
+    editDaysCount.value = selectedRule.suggestedDays;
+  }
+
+  if (selectedRule.defaultDayType && editDayType) {
+    editDayType.value = selectedRule.defaultDayType;
+  }
+
+  updateEditActionTypeHint();
+}
+
+function updateEditActionTypeHint() {
+  if (!editActionTypeHint || !editActionType) return;
+
+  const selectedRule = getActionTypeRule(editActionType.value);
+
+  if (!selectedRule) {
+    editActionTypeHint.textContent =
+      "Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.";
+    return;
+  }
+
+  if (!selectedRule.suggestedDays) {
+    editActionTypeHint.textContent =
+      "Este tipo de actuación no tiene una cantidad de días sugerida. Cargá el plazo manualmente.";
+    return;
+  }
+
+  const dayTypeLabel =
+    selectedRule.defaultDayType === "calendar" ? "días corridos" : "días hábiles";
+
+  editActionTypeHint.textContent =
+    `Sugerencia orientativa: ${selectedRule.suggestedDays} ${dayTypeLabel}. ` +
+    "El profesional puede modificarlo según el caso, fuero y normativa aplicable.";
 }
 
 
@@ -228,15 +296,25 @@ async function loadDeadlines() {
       </tr>
     `;
 
-    const response = await fetch(DEADLINES_API_URL);
+    const [deadlinesResponse, casesResponse] = await Promise.all([
+      fetch(DEADLINES_API_URL),
+      fetch(CASES_API_URL),
+    ]);
 
-    if (!response.ok) {
+    if (!deadlinesResponse.ok) {
       throw new Error("No se pudieron obtener los vencimientos.");
     }
 
-    const deadlines = await response.json();
+    if (!casesResponse.ok) {
+      throw new Error("No se pudieron obtener las causas.");
+    }
 
-    allDeadlines = sortDeadlines(deadlines);
+    const deadlines = await deadlinesResponse.json();
+    const cases = await casesResponse.json();
+
+    allCases = cases;
+    allDeadlines = sortDeadlines(getVisibleDashboardDeadlines(deadlines, cases));
+
     updateSummaryCards(allDeadlines);
     renderDeadlines(getFilteredDeadlines());
   } catch (error) {
@@ -250,6 +328,23 @@ async function loadDeadlines() {
       </tr>
     `;
   }
+} 
+
+
+function getVisibleDashboardDeadlines(deadlines, cases) {
+  const finalizedCaseIds = new Set(
+    cases
+      .filter((caseItem) => caseItem.status === "archived")
+      .map((caseItem) => String(caseItem.id))
+  );
+
+  return deadlines.filter((deadline) => {
+    if (!deadline.case_id) {
+      return true;
+    }
+
+    return !finalizedCaseIds.has(String(deadline.case_id));
+  });
 }
 
 function sortDeadlines(deadlines) {
@@ -359,22 +454,12 @@ function renderDeadlines(deadlines) {
     return;
   }
 
-  dashboardSummary.textContent = `${allDeadlines.length} plazo(s) guardado(s).`;
+  updateDashboardListSummary(deadlines.length);
 
   if (!deadlines.length) {
-    let emptyMessage = "No hay vencimientos para el filtro seleccionado.";
-
-    if (currentSearch) {
-      emptyMessage = "No hay vencimientos que coincidan con la búsqueda.";
-    }
-
-    if (currentFilter === "upcoming") {
-      emptyMessage = "No hay vencimientos pendientes dentro de los próximos 7 días.";
-    }
-
     deadlinesTableBody.innerHTML = `
       <tr>
-        <td colspan="7">${emptyMessage}</td>
+        <td colspan="7">${getDashboardEmptyMessage()}</td>
       </tr>
     `;
 
@@ -388,7 +473,7 @@ function renderDeadlines(deadlines) {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${escapeHTML(deadline.case_name || "Sin expediente")}</td>
+      <td>${renderDashboardCaseCell(deadline)}</td>
       <td>${escapeHTML(deadline.action_type || "Sin actuación")}</td>
       <td>${formatDate(deadline.notification_date)}</td>
       <td>${getStartRuleLabel(deadline.start_rule)}</td>
@@ -425,6 +510,92 @@ function renderDeadlines(deadlines) {
   attachActionEvents(); 
   updateNonWorkingDaysTopScrollWidth();
 } 
+
+
+function renderDashboardCaseCell(deadline) {
+  const caseTitle =
+    deadline.case_name ||
+    getDashboardCaseTitle(deadline.case_id) ||
+    "Sin causa asociada";
+
+  const badgeHtml = deadline.case_id
+    ? `<span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>`
+    : `<span class="dashboard-case-badge dashboard-case-badge-general">Plazo general</span>`;
+
+  return `
+    <div class="dashboard-case-cell">
+      <strong>${escapeHTML(caseTitle)}</strong>
+      ${badgeHtml}
+    </div>
+  `;
+}
+
+function getDashboardCaseTitle(caseId) {
+  if (!caseId) return null;
+
+  const selectedCase = allCases.find((item) => String(item.id) === String(caseId));
+
+  return selectedCase ? selectedCase.title : null;
+}
+
+function updateDashboardListSummary(displayedCount) {
+  if (currentSearch) {
+    dashboardSummary.textContent =
+      `${displayedCount} resultado(s) encontrado(s) en el Dashboard operativo.`;
+    return;
+  }
+
+  if (currentFilter === "pending") {
+    dashboardSummary.textContent =
+      `${displayedCount} plazo(s) pendiente(s) operativo(s).`;
+    return;
+  }
+
+  if (currentFilter === "completed") {
+    dashboardSummary.textContent =
+      `${displayedCount} plazo(s) completado(s).`;
+    return;
+  }
+
+  if (currentFilter === "expired") {
+    dashboardSummary.textContent =
+      `${displayedCount} plazo(s) vencido(s) pendiente(s).`;
+    return;
+  }
+
+  if (currentFilter === "upcoming") {
+    dashboardSummary.textContent =
+      `${displayedCount} plazo(s) próximo(s) dentro de los próximos 7 días.`;
+    return;
+  }
+
+  dashboardSummary.textContent =
+    `${displayedCount} plazo(s) operativo(s) guardado(s).`;
+}
+
+function getDashboardEmptyMessage() {
+  if (currentSearch) {
+    return "No hay plazos que coincidan con la búsqueda en el Dashboard operativo.";
+  }
+
+  if (currentFilter === "pending") {
+    return "No hay plazos pendientes operativos.";
+  }
+
+  if (currentFilter === "completed") {
+    return "No hay plazos completados.";
+  }
+
+  if (currentFilter === "expired") {
+    return "No hay plazos vencidos pendientes.";
+  }
+
+  if (currentFilter === "upcoming") {
+    return "No hay plazos pendientes dentro de los próximos 7 días.";
+  }
+
+  return "No hay plazos operativos guardados.";
+}
 
 
 function getExcludedDateKey(dateValue) {
@@ -595,6 +766,9 @@ function showDeadlineDetail(deadlineId) {
   }
 
   detailDepartment.textContent = getJurisdictionScopeLabel(deadline);
+
+  renderCoverageWarning(deadline);
+
   detailNotes.textContent = deadline.notes || "Sin observaciones cargadas.";
 
   renderExcludedDaysDetail(deadline.excluded_days || []); 
@@ -772,7 +946,8 @@ function showEditForm(deadlineId) {
 
   editDeadlineId.value = deadline.id;
   editCaseName.value = deadline.case_name || "";
-  editActionType.value = deadline.action_type || "";
+  editActionType.value = deadline.action_type || ""; 
+  updateEditActionTypeHint();
   editNotificationDate.value = deadline.notification_date;
   editStartRule.value = deadline.start_rule || "next_day";
   editDaysCount.value = deadline.days_count;
@@ -817,9 +992,9 @@ async function updateDeadlineStatus(deadlineId, status) {
 }
 
 async function deleteDeadline(deadlineId) {
-  const confirmDelete = confirm("¿Seguro que querés eliminar este plazo?");
+  const canDelete = await confirmDeleteDeadline(deadlineId);
 
-  if (!confirmDelete) {
+  if (!canDelete) {
     return;
   }
 
@@ -838,6 +1013,77 @@ async function deleteDeadline(deadlineId) {
     console.error(error);
     showMessage("No se pudo eliminar el plazo.", true);
   }
+} 
+
+async function confirmDeleteDeadline(deadlineId) {
+  const selectedDeadline = allDeadlines.find((item) => item.id === deadlineId);
+
+  if (!selectedDeadline) {
+    return false;
+  }
+
+  const computedStatus = getComputedStatus(selectedDeadline);
+
+  return openDashboardConfirmModal({
+    title: "Eliminar plazo",
+    message:
+      `Vas a eliminar el plazo de "${selectedDeadline.case_name || "Sin expediente"}".\n\n` +
+      `Actuación: ${selectedDeadline.action_type || "Sin actuación"}\n` +
+      `Vencimiento: ${formatDate(selectedDeadline.deadline_date)}\n` +
+      `Estado: ${getStatusLabel(computedStatus)}\n\n` +
+      "Eliminar un plazo borra el registro del Dashboard. Si solo querés sacarlo de pendientes, usá Completar.\n\n" +
+      "¿Querés eliminarlo definitivamente?",
+    acceptText: "Eliminar definitivamente",
+    cancelText: "Cancelar",
+  });
+} 
+
+function openDashboardConfirmModal({ title, message, acceptText, cancelText }) {
+  return new Promise((resolve) => {
+    if (
+      !dashboardConfirmModal ||
+      !dashboardConfirmTitle ||
+      !dashboardConfirmMessage ||
+      !dashboardConfirmAcceptBtn ||
+      !dashboardConfirmCancelBtn
+    ) {
+      resolve(confirm(message));
+      return;
+    }
+
+    dashboardConfirmTitle.textContent = title;
+    dashboardConfirmMessage.textContent = message;
+    dashboardConfirmAcceptBtn.textContent = acceptText || "Aceptar";
+    dashboardConfirmCancelBtn.textContent = cancelText || "Cancelar";
+
+    dashboardConfirmModal.classList.remove("hidden");
+
+    const closeModal = (result) => {
+      dashboardConfirmModal.classList.add("hidden");
+
+      dashboardConfirmAcceptBtn.onclick = null;
+      dashboardConfirmCancelBtn.onclick = null;
+      dashboardConfirmModal.onclick = null;
+
+      resolve(result);
+    };
+
+    dashboardConfirmAcceptBtn.onclick = function () {
+      closeModal(true);
+    };
+
+    dashboardConfirmCancelBtn.onclick = function () {
+      closeModal(false);
+    };
+
+    dashboardConfirmModal.onclick = function (event) {
+      if (event.target === dashboardConfirmModal) {
+        closeModal(false);
+      }
+    };
+
+    dashboardConfirmCancelBtn.focus();
+  });
 }
 
 function setActiveFilterButton(filter) {
@@ -990,7 +1236,9 @@ function getStatusClass(status) {
 function exportDeadlineDetailToPdf(deadline) {
   const computedStatus = getComputedStatus(deadline);
 
-  const excludedDaysHtml = getExcludedDaysHtmlForPdf(deadline.excluded_days || []);
+  const excludedDaysHtml = getExcludedDaysHtmlForPdf(deadline.excluded_days || []); 
+
+  const coverageWarningHtml = getCoverageWarningHtmlForPdf(deadline);
 
   const caseName = escapeHTML(deadline.case_name || "Sin expediente");
   const actionType = escapeHTML(deadline.action_type || "Sin actuación");
@@ -1257,7 +1505,9 @@ function exportDeadlineDetailToPdf(deadline) {
           <span class="label">Fecha de vencimiento</span>
           <span class="value deadline">${formatDate(deadline.deadline_date)}</span>
         </div>
-        </div>
+        </div> 
+
+        ${coverageWarningHtml}
 
         <div class="section">
           <h2>Días excluidos</h2>
@@ -1356,6 +1606,38 @@ function getDayTypeLabelForPdf(dayType) {
 } 
 
 
+function getJurisdictionLabel(jurisdiction) {
+  const labels = {
+    pba: "Provincia de Buenos Aires",
+    national_federal: "Nacional / Federal",
+    caba: "Ciudad Autónoma de Buenos Aires",
+    catamarca: "Catamarca",
+    chaco: "Chaco",
+    chubut: "Chubut",
+    cordoba: "Córdoba",
+    corrientes: "Corrientes",
+    entre_rios: "Entre Ríos",
+    formosa: "Formosa",
+    jujuy: "Jujuy",
+    la_pampa: "La Pampa",
+    la_rioja: "La Rioja",
+    mendoza: "Mendoza",
+    misiones: "Misiones",
+    neuquen: "Neuquén",
+    rio_negro: "Río Negro",
+    salta: "Salta",
+    san_juan: "San Juan",
+    san_luis: "San Luis",
+    santa_cruz: "Santa Cruz",
+    santa_fe: "Santa Fe",
+    santiago_del_estero: "Santiago del Estero",
+    tierra_del_fuego: "Tierra del Fuego",
+    tucuman: "Tucumán",
+  };
+
+  return labels[jurisdiction] || "Jurisdicción no especificada";
+}
+
 function getJurisdictionScopeTitle(deadline) {
   if (deadline.jurisdiction === "pba") {
     return "Departamento judicial";
@@ -1365,15 +1647,7 @@ function getJurisdictionScopeTitle(deadline) {
     return "Organismo específico";
   }
 
-  if (deadline.jurisdiction === "national_federal") {
-    return "Ámbito";
-  }
-
-  if (deadline.jurisdiction === "caba") {
-    return "Ámbito";
-  }
-
-  return "Ámbito / jurisdicción";
+  return "Ámbito";
 }
 
 function getJurisdictionScopeLabel(deadline) {
@@ -1389,32 +1663,12 @@ function getJurisdictionScopeLabel(deadline) {
     return "Nacional / Federal";
   }
 
-  if (deadline.jurisdiction === "caba") {
-    return "Ciudad Autónoma de Buenos Aires";
-  }
-
-  return "Ámbito no especificado.";
+  return getJurisdictionLabel(deadline.jurisdiction);
 }
 
 function getJurisdictionLabelForPdf(jurisdiction) {
-  if (jurisdiction === "pba") return "Provincia de Buenos Aires";
-  if (jurisdiction === "national_federal") return "Nacional / Federal";
-  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
-
-  return "Jurisdicción no especificada";
+  return getJurisdictionLabel(jurisdiction);
 }
-
-function showMessage(message, visible) {
-  if (!visible || !message) {
-    dashboardMessage.classList.add("hidden");
-    dashboardMessage.textContent = "";
-    return;
-  }
-
-  dashboardMessage.textContent = message;
-  dashboardMessage.classList.remove("hidden");
-} 
-
 
 function getJurisdictionScopeTitleForPdf(deadline) {
   if (deadline.jurisdiction === "pba") {
@@ -1425,15 +1679,7 @@ function getJurisdictionScopeTitleForPdf(deadline) {
     return "Organismo";
   }
 
-  if (deadline.jurisdiction === "national_federal") {
-    return "Ámbito";
-  }
-
-  if (deadline.jurisdiction === "caba") {
-    return "Ámbito";
-  }
-
-  return "Ámbito / jurisdicción";
+  return "Ámbito";
 }
 
 function getJurisdictionScopeValueForPdf(deadline) {
@@ -1449,16 +1695,66 @@ function getJurisdictionScopeValueForPdf(deadline) {
     return "Nacional / Federal";
   }
 
-  if (deadline.jurisdiction === "caba") {
-    return "Ciudad Autónoma de Buenos Aires";
+  return getJurisdictionLabel(deadline.jurisdiction);
+} 
+
+
+function isBasicCoverageJurisdiction(jurisdiction) {
+  return !["pba", "national_federal", "caba"].includes(jurisdiction);
+}
+
+function getBasicCoverageWarningText(deadline) {
+  const jurisdictionLabel = getJurisdictionLabel(deadline.jurisdiction);
+
+  return (
+    `Cobertura básica para ${jurisdictionLabel}: ` +
+    "el sistema excluye fines de semana y feriados nacionales cargados o importados. " +
+    "Las ferias judiciales, asuetos, suspensiones de términos o días inhábiles provinciales " +
+    "no se encuentran verificados automáticamente y deben ser revisados o cargados manualmente " +
+    "por el profesional."
+  );
+}
+
+function renderCoverageWarning(deadline) {
+  if (!detailCoverageWarning) return;
+
+  if (!isBasicCoverageJurisdiction(deadline.jurisdiction)) {
+    detailCoverageWarning.classList.add("hidden");
+    detailCoverageWarning.textContent = "";
+    return;
   }
 
-  return "No especificado";
+  detailCoverageWarning.textContent = getBasicCoverageWarningText(deadline);
+  detailCoverageWarning.classList.remove("hidden");
+}
+
+function getCoverageWarningHtmlForPdf(deadline) {
+  if (!isBasicCoverageJurisdiction(deadline.jurisdiction)) {
+    return "";
+  }
+
+  return `
+    <div class="warning">
+      ${escapeHTML(getBasicCoverageWarningText(deadline))}
+    </div>
+  `;
 }
 
 function getDepartmentLabelForPdf(department) {
   return department || "Sin departamento específico";
 } 
+ 
+
+function showMessage(message, visible) {
+  if (!visible || !message) {
+    dashboardMessage.classList.add("hidden");
+    dashboardMessage.textContent = "";
+    return;
+  }
+
+  dashboardMessage.textContent = message;
+  dashboardMessage.classList.remove("hidden");
+}
 
 
 function getExcludedDayTypeLabel(type, reason = "") {

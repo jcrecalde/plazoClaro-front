@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda | PlazoClaro</title>
+  <link rel="stylesheet" href="./css/styles.css?v=56" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+
+      <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
+        <a href="./calculator.html">Calculadora</a>
+        <a href="./cases.html">Causas</a>
+        <a href="./agenda.html" class="active">Agenda</a>
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./non-working-days.html">Días inhábiles</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Agenda de vencimientos</h1>
+        <p>
+          Visualizá vencimientos vencidos, próximos y futuros en un solo lugar.
+        </p>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span>Vencidos pendientes</span>
+          <strong id="expiredCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Vencen hoy</span>
+          <strong id="todayCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Próximos 7 días</span>
+          <strong id="upcomingCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Más adelante</span>
+          <strong id="futureCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Completados</span>
+          <strong id="completedCount">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="container dashboard-layout">
+      <div class="dashboard-header">
+        <div>
+          <h2>Vencimientos</h2>
+          <p id="agendaSummary">Cargando agenda...</p>
+        </div>
+
+        <div class="dashboard-actions">
+          <button id="refreshAgendaBtn" class="btn btn-secondary" type="button">
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="filters-grid">
+        <div class="form-group">
+          <label for="agendaSearch">Buscar</label>
+          <input
+            type="text"
+            id="agendaSearch"
+            placeholder="Buscar por causa, actuación, jurisdicción o notas..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="agendaStatusFilter">Estado</label>
+          <select id="agendaStatusFilter">
+            <option value="">Todos</option>
+            <option value="expired">Vencidos pendientes</option>
+            <option value="today">Vencen hoy</option>
+            <option value="upcoming">Próximos 7 días</option>
+            <option value="future">Más adelante</option>
+            <option value="completed">Completados</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="agendaCaseFilter">Causa</label>
+          <select id="agendaCaseFilter">
+            <option value="">Todas las causas activas</option>
+          </select>
+          <small class="field-help agenda-case-filter-help">
+            La agenda muestra solo vencimientos operativos de causas activas. Las causas finalizadas se consultan desde la sección “Causas”, filtro “Finalizadas”.
+          </small> 
+
+          <div class="status-legend">
+            <span class="status-legend-title">Leyenda:</span>
+
+            <span class="status-legend-item">
+              <span class="status-legend-badge status-legend-expired"></span>
+              Vencido
+            </span>
+
+            <span class="status-legend-item">
+              <span class="status-legend-badge status-legend-pending"></span>
+              Pendiente
+            </span>
+
+            <span class="status-legend-item">
+              <span class="status-legend-badge status-legend-completed"></span>
+              Completado
+            </span>
+
+            <span class="status-legend-item">
+              <span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>
+            </span>
+
+            <span class="status-legend-item">
+              <span class="dashboard-case-badge dashboard-case-badge-general">Plazo general</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div id="agendaList" class="agenda-list">
+        <div class="case-card-placeholder">
+          Cargando vencimientos...
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      PlazoClaro © 2026 — Agenda de vencimientos judiciales.
+    </div>
+  </footer>
+
+  <script src="./js/agenda.js?v=11"></script>
+</body>
+</html>

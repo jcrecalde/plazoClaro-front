@@ -1065,11 +1065,35 @@ function formatDate(dateString) {
 }
 
 function getJurisdictionLabel(jurisdiction) {
-  if (jurisdiction === "pba") return "Provincia de Buenos Aires";
-  if (jurisdiction === "national_federal") return "Nacional / Federal";
-  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
+  const labels = {
+    pba: "Provincia de Buenos Aires",
+    national_federal: "Nacional / Federal",
+    caba: "Ciudad Autónoma de Buenos Aires",
+    catamarca: "Catamarca",
+    chaco: "Chaco",
+    chubut: "Chubut",
+    cordoba: "Córdoba",
+    corrientes: "Corrientes",
+    entre_rios: "Entre Ríos",
+    formosa: "Formosa",
+    jujuy: "Jujuy",
+    la_pampa: "La Pampa",
+    la_rioja: "La Rioja",
+    mendoza: "Mendoza",
+    misiones: "Misiones",
+    neuquen: "Neuquén",
+    rio_negro: "Río Negro",
+    salta: "Salta",
+    san_juan: "San Juan",
+    san_luis: "San Luis",
+    santa_cruz: "Santa Cruz",
+    santa_fe: "Santa Fe",
+    santiago_del_estero: "Santiago del Estero",
+    tierra_del_fuego: "Tierra del Fuego",
+    tucuman: "Tucumán",
+  };
 
-  return "Jurisdicción no especificada";
+  return labels[jurisdiction] || "Jurisdicción no especificada";
 }
 
 function getTypeLabel(type) {

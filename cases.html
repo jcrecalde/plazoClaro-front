@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Causas / Carpetas | PlazoClaro</title>
+  <link rel="stylesheet" href="./css/styles.css?v=53" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+
+      <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
+        <a href="./calculator.html">Calculadora</a>
+        <a href="./cases.html" class="active">Causas</a>
+        <a href="./agenda.html">Agenda</a>
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./non-working-days.html">Días inhábiles</a>
+      </nav>
+    </div>
+  </header> 
+
+  <div id="caseConfirmModal" class="modal-backdrop hidden">
+    <div class="confirm-modal">
+      <div class="confirm-modal-header">
+        <span class="badge">Confirmación</span>
+        <h3 id="caseConfirmTitle">Finalizar causa</h3>
+      </div>
+
+      <p id="caseConfirmMessage" class="confirm-modal-message"></p>
+
+      <div class="confirm-modal-actions">
+        <button id="caseConfirmCancelBtn" class="btn btn-secondary" type="button">
+          Cancelar
+        </button>
+
+        <button id="caseConfirmAcceptBtn" class="btn btn-primary" type="button">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Causas y carpetas</h1>
+        <p>
+          Administrá expedientes, clientes y materias para luego asociar plazos a cada causa.
+        </p>
+      </div>
+    </section>
+
+    <section class="container calculator-layout">
+      <form id="caseForm" class="form-card">
+        <span class="badge" id="caseFormBadge">Nueva causa</span>
+
+        <input type="hidden" id="caseId" />
+
+        <div class="form-group">
+          <label for="caseTitle">Nombre de la causa</label>
+          <input
+            type="text"
+            id="caseTitle"
+            placeholder="Ej: Martínez s/ sucesión ab-intestato"
+            required
+          />
+        </div> 
+
+        <div class="form-group">
+          <label for="caseNumber">Número de expediente</label>
+          <input
+            type="text"
+            id="caseNumber"
+            placeholder="Ej: 12345/2026"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="caseJudicialLink">Link al expediente judicial</label>
+          <input
+            type="url"
+            id="caseJudicialLink"
+            placeholder="Ej: https://mev.scba.gov.ar/ o link PJN"
+          />
+          <small class="field-help">
+            Opcional. Sirve para abrir el expediente en PJN, MEV u otro portal judicial desde PlazoClaro.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="clientName">Cliente</label>
+          <input
+            type="text"
+            id="clientName"
+            placeholder="Ej: Martínez"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="matterType">Materia</label>
+          <select id="matterType">
+            <option value="">Seleccionar opcionalmente</option>
+            <option value="Sucesión">Sucesión</option>
+            <option value="Daños y perjuicios">Daños y perjuicios</option>
+            <option value="Laboral">Laboral</option>
+            <option value="Familia">Familia</option>
+            <option value="Civil">Civil</option>
+            <option value="Comercial">Comercial</option>
+            <option value="Contencioso administrativo">Contencioso administrativo</option>
+            <option value="Tributario">Tributario</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="caseJurisdiction">Jurisdicción</label>
+          <select id="caseJurisdiction" required>
+            <option value="pba">Provincia de Buenos Aires</option>
+            <option value="national_federal">Nacional / Federal</option>
+            <option value="caba">Ciudad Autónoma de Buenos Aires</option>
+
+            <option value="catamarca">Catamarca</option>
+            <option value="chaco">Chaco</option>
+            <option value="chubut">Chubut</option>
+            <option value="cordoba">Córdoba</option>
+            <option value="corrientes">Corrientes</option>
+            <option value="entre_rios">Entre Ríos</option>
+            <option value="formosa">Formosa</option>
+            <option value="jujuy">Jujuy</option>
+            <option value="la_pampa">La Pampa</option>
+            <option value="la_rioja">La Rioja</option>
+            <option value="mendoza">Mendoza</option>
+            <option value="misiones">Misiones</option>
+            <option value="neuquen">Neuquén</option>
+            <option value="rio_negro">Río Negro</option>
+            <option value="salta">Salta</option>
+            <option value="san_juan">San Juan</option>
+            <option value="san_luis">San Luis</option>
+            <option value="santa_cruz">Santa Cruz</option>
+            <option value="santa_fe">Santa Fe</option>
+            <option value="santiago_del_estero">Santiago del Estero</option>
+            <option value="tierra_del_fuego">Tierra del Fuego</option>
+            <option value="tucuman">Tucumán</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="caseDepartmentGroup">
+          <label for="caseDepartment">Departamento judicial</label>
+          <select id="caseDepartment"></select>
+          <small class="field-help">
+            Solo aplica para Provincia de Buenos Aires.
+          </small>
+        </div>
+
+        <div class="form-group hidden" id="caseCourtGroup">
+          <label for="caseCourt">Organismo específico</label>
+          <select id="caseCourt">
+            <option value="">Nacional / Federal general</option>
+            <option value="Tribunal Fiscal de la Nación">Tribunal Fiscal de la Nación</option>
+          </select>
+          <small class="field-help">
+            Solo aplica para calendarios propios de organismos específicos.
+          </small>
+        </div>
+
+        <div class="form-group" id="caseStatusGroup">
+          <label for="caseStatus">Estado</label>
+          <select id="caseStatus">
+            <option value="active">Activa</option>
+            <option value="archived">Finalizada</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="caseNotes">Observaciones</label>
+          <textarea
+            id="caseNotes"
+            placeholder="Notas internas sobre la causa, cliente o estrategia..."
+          ></textarea>
+        </div>
+
+        <div class="result-actions">
+          <button type="submit" class="btn btn-primary" id="submitCaseBtn">
+            Guardar causa
+          </button>
+
+          <button type="button" class="btn btn-secondary hidden" id="cancelCaseEditBtn">
+            Cancelar edición
+          </button>
+        </div>
+      </form>
+
+      <aside class="result-card">
+        <h2>Resumen</h2>
+
+        <div id="caseMessage" class="notice hidden"></div>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <span>Total</span>
+            <strong id="totalCases">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>Activas</span>
+            <strong id="activeCases">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>Finalizadas</span>
+            <strong id="archivedCases">0</strong>
+          </div>
+        </div>
+
+        <p class="result-empty">
+          Las causas permiten agrupar expedientes, clientes y plazos vinculados para tener una visión clara del trabajo pendiente.
+        </p>
+      </aside>
+    </section>
+
+    <section class="container dashboard-layout">
+      <div class="dashboard-header">
+        <div>
+          <h2>Listado de causas</h2>
+          <p id="casesSummary">Cargando causas...</p>
+        </div>
+
+        <div class="dashboard-actions">
+          <button id="refreshCasesBtn" class="btn btn-secondary" type="button">
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <label for="caseSearch">Buscar causa</label>
+        <input
+          type="text"
+          id="caseSearch"
+          placeholder="Buscar por causa, cliente, expediente, materia o jurisdicción..."
+        />
+      </div> 
+
+            <div class="case-status-filters">
+              <button type="button" class="case-status-filter active" data-status-filter="active">
+                Activas
+              </button>
+
+              <button type="button" class="case-status-filter" data-status-filter="archived">
+                Finalizadas
+              </button>
+
+              <button type="button" class="case-status-filter" data-status-filter="all">
+                Todas
+              </button>
+            </div>
+
+            <div id="casesCards" class="cases-card-list">
+              <div class="case-card-placeholder">
+                Cargando causas...
+              </div>
+            </div>
+
+            <div id="caseDeadlinesPanel" class="deadline-detail-panel hidden">
+              <div class="detail-panel-header">
+                <div>
+                  <span class="badge">Plazos de la causa</span>
+                  <h3 id="caseDeadlinesTitle">Causa seleccionada</h3>
+                </div>
+
+                <div class="detail-panel-actions">
+                  <button id="calculateDeadlineForCaseBtn" class="btn btn-primary" type="button">
+                    Calcular nuevo plazo para esta causa
+                  </button>
+
+                  <button id="closeCaseDeadlinesBtn" class="btn btn-secondary" type="button">
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+
+              <p id="caseDeadlinesSummary" class="detail-notes">
+                Cargando plazos vinculados...
+              </p>
+
+              <div id="caseArchivedNotice" class="notice case-archived-notice hidden">
+                <strong>Causa finalizada:</strong>
+                sus plazos permanecen guardados, pero no aparecen en Inicio, Agenda ni Dashboard operativo.
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-card">
+                  <span>Total</span>
+                  <strong id="caseDeadlinesTotal">0</strong>
+                </div>
+
+                <div class="summary-card">
+                  <span>Pendientes</span>
+                  <strong id="caseDeadlinesPending">0</strong>
+                </div>
+
+                <div class="summary-card">
+                  <span>Vencidos</span>
+                  <strong id="caseDeadlinesExpired">0</strong>
+                </div>
+
+                <div class="summary-card">
+                  <span>Completados</span>
+                  <strong id="caseDeadlinesCompleted">0</strong>
+                </div>
+
+                <div class="summary-card">
+                  <span>Próximos 7 días</span>
+                  <strong id="caseDeadlinesUpcoming">0</strong>
+                </div>
+              </div>
+
+              <div class="table-card">
+                <table class="deadlines-table">
+                  <thead>
+                    <tr>
+                      <th>Actuación</th>
+                      <th>Notificación</th>
+                      <th>Inicio</th>
+                      <th>Vencimiento</th>
+                      <th>Estado</th>
+                      <th>Notas</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="caseDeadlinesTableBody">
+                    <tr>
+                      <td colspan="6">Seleccioná una causa para ver sus plazos.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section> 
+
+    <section class="container">
+      <div class="notice">
+        <strong>Aviso:</strong>
+        las causas funcionan como carpetas de trabajo. En la siguiente etapa se podrán asociar plazos guardados a cada causa.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      PlazoClaro © 2026 — Gestión de causas y vencimientos judiciales.
+    </div>
+  </footer>
+
+  <script src="./js/pba-departments.js?v=5"></script>
+  <script src="./js/cases.js?v=19"></script>
+</body>
+</html>

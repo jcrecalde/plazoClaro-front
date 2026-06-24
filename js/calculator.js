@@ -1,5 +1,6 @@
 const API_URL = "http://127.0.0.1:8000/calculator/deadline";
-const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines";
+const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
+const CASES_API_URL = "http://127.0.0.1:8000/cases";
 
 const form = document.getElementById("deadlineForm");
 
@@ -24,7 +25,16 @@ const courtSelect = document.getElementById("court");
 const courtGroup = document.getElementById("courtGroup");
 const courtDetail = document.getElementById("courtDetail");
 
-const saveDeadlineBtn = document.getElementById("saveDeadlineBtn");
+const saveDeadlineBtn = document.getElementById("saveDeadlineBtn"); 
+
+const caseSelect = document.getElementById("caseSelect"); 
+
+const actionTypeSelect = document.getElementById("actionType");
+const actionTypeHint = document.getElementById("actionTypeHint");
+const daysCountInput = document.getElementById("daysCount");
+const dayTypeSelect = document.getElementById("dayType");
+
+let availableCases = [];
 
 populatePbaDepartmentSelect(departmentSelect, {
   includeEmpty: true,
@@ -54,12 +64,152 @@ function updateJurisdictionDependentFields() {
     courtGroup.classList.add("hidden");
     courtGroup.style.display = "none";
   }
+} 
+
+
+async function loadCasesForCalculator() {
+  if (!caseSelect) return;
+
+  try {
+    const response = await fetch(CASES_API_URL);
+    const cases = await response.json();
+
+    if (!response.ok) {
+      throw new Error("No se pudieron cargar las causas.");
+    }
+
+    availableCases = cases;
+
+    caseSelect.innerHTML = '<option value="">Sin causa asociada</option>';
+
+    cases
+      .filter((item) => item.status === "active")
+      .forEach((item) => {
+        const option = document.createElement("option");
+
+        option.value = item.id;
+        option.textContent = item.case_number
+          ? `${item.title} (${item.case_number})`
+          : item.title;
+
+        caseSelect.appendChild(option);
+      });   
+
+    preselectCaseFromStorage(); 
+
+  } catch (error) {
+    console.error(error);
+    caseSelect.innerHTML = '<option value="">Sin causa asociada</option>';
+  }
 }
 
-updateJurisdictionDependentFields();
+function handleCaseSelectionChange() {
+  if (!caseSelect || !caseSelect.value) {
+    return;
+  }
+
+  const selectedCase = availableCases.find((item) => item.id === caseSelect.value);
+
+  if (!selectedCase) {
+    caseSelect.value = "";
+    return;
+  }
+
+  if (selectedCase.status !== "active") {
+    caseSelect.value = "";
+
+    showCalculatorMessage(
+      "No se puede vincular un plazo a una causa finalizada. Primero reactivá la causa.",
+      true
+    );
+
+    return;
+  }
+
+  const caseNameInput = document.getElementById("caseName");
+
+  if (caseNameInput) {
+    caseNameInput.value = selectedCase.title || "";
+  }
+
+  jurisdictionSelect.value = selectedCase.jurisdiction || "pba";
+
+  updateJurisdictionDependentFields();
+
+  if (selectedCase.jurisdiction === "pba") {
+    departmentSelect.value = selectedCase.department || "";
+  }
+
+  if (selectedCase.jurisdiction === "national_federal") {
+    courtSelect.value = selectedCase.court || "";
+  }
+}
+
+updateJurisdictionDependentFields(); 
+
+
+loadCasesForCalculator();
+
+if (caseSelect) {
+  caseSelect.addEventListener("change", handleCaseSelectionChange);
+} 
+
+if (actionTypeSelect) {
+  populateActionTypeSelect(actionTypeSelect);
+  updateActionTypeHint();
+
+  actionTypeSelect.addEventListener("change", handleActionTypeChange);
+}
 
 let lastCalculationPayload = null;
-let lastCalculationResult = null;
+let lastCalculationResult = null; 
+
+
+function handleActionTypeChange() {
+  if (!actionTypeSelect) return;
+
+  const selectedRule = getActionTypeRule(actionTypeSelect.value);
+
+  if (!selectedRule) {
+    updateActionTypeHint();
+    return;
+  }
+
+  if (selectedRule.suggestedDays) {
+    daysCountInput.value = selectedRule.suggestedDays;
+  }
+
+  if (selectedRule.defaultDayType) {
+    dayTypeSelect.value = selectedRule.defaultDayType;
+  }
+
+  updateActionTypeHint();
+}
+
+function updateActionTypeHint() {
+  if (!actionTypeHint || !actionTypeSelect) return;
+
+  const selectedRule = getActionTypeRule(actionTypeSelect.value);
+
+  if (!selectedRule) {
+    actionTypeHint.textContent =
+      "Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.";
+    return;
+  }
+
+  if (!selectedRule.suggestedDays) {
+    actionTypeHint.textContent =
+      "Este tipo de actuación no tiene una cantidad de días sugerida. Cargá el plazo manualmente.";
+    return;
+  }
+
+  const dayTypeLabel =
+    selectedRule.defaultDayType === "calendar" ? "días corridos" : "días hábiles";
+
+  actionTypeHint.textContent =
+    `Sugerencia orientativa: ${selectedRule.suggestedDays} ${dayTypeLabel}. ` +
+    "El profesional puede modificarlo según el caso, fuero y normativa aplicable.";
+}
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -113,7 +263,44 @@ form.addEventListener("submit", async function (event) {
     console.error(error);
     alert("No se pudo conectar con el servidor. Verificá que el backend esté levantado.");
   }
-});
+}); 
+
+
+function preselectCaseFromStorage() {
+  if (!caseSelect) return;
+
+  const selectedCaseId = localStorage.getItem("plazoclaro_selected_case_id");
+
+  if (!selectedCaseId) {
+    return;
+  }
+
+  const selectedCase = availableCases.find((item) => item.id === selectedCaseId);
+
+  localStorage.removeItem("plazoclaro_selected_case_id");
+
+  if (!selectedCase) {
+    showCalculatorMessage(
+      "La causa seleccionada ya no está disponible. Se cargará el plazo sin causa asociada.",
+      true
+    );
+    return;
+  }
+
+  if (selectedCase.status !== "active") {
+    caseSelect.value = "";
+
+    showCalculatorMessage(
+      "La causa seleccionada está finalizada. Para cargarle un nuevo plazo, primero reactivala.",
+      true
+    );
+
+    return;
+  }
+
+  caseSelect.value = selectedCaseId;
+  handleCaseSelectionChange();
+}
 
 saveDeadlineBtn.addEventListener("click", async function () {
   if (!lastCalculationPayload) {
@@ -123,9 +310,23 @@ saveDeadlineBtn.addEventListener("click", async function () {
 
   const caseName = document.getElementById("caseName").value.trim();
   const actionType = document.getElementById("actionType").value;
-  const notes = document.getElementById("notes").value.trim();
+  const notes = document.getElementById("notes").value.trim(); 
+  const selectedCaseId = caseSelect ? caseSelect.value || null : null;
 
-  const payloadToSave = {
+  if (selectedCaseId) {
+    const selectedCase = availableCases.find((item) => item.id === selectedCaseId);
+
+    if (!selectedCase || selectedCase.status !== "active") {
+      showCalculatorMessage(
+        "No se puede guardar un plazo vinculado a una causa finalizada. Primero reactivá la causa.",
+        true
+      );
+      return;
+    }
+  }
+
+  const payloadToSave = { 
+    case_id: selectedCaseId,
     case_name: caseName || null,
     action_type: actionType || null,
     notification_date: lastCalculationPayload.notification_date,
@@ -236,16 +437,44 @@ function getJurisdictionScopeDetail(result) {
     return "Ámbito seleccionado: Ciudad Autónoma de Buenos Aires. No aplica departamento judicial provincial ni organismo específico.";
   }
 
-  return "Ámbito jurisdiccional no especificado.";
+  return (
+    `Ámbito seleccionado: ${getJurisdictionLabel(result.jurisdiction)}. ` +
+    "Cobertura básica: se excluyen fines de semana y feriados nacionales cargados. " +
+    "Las ferias judiciales, asuetos o suspensiones provinciales deben verificarse o cargarse manualmente."
+  );
 }
 
 
 function getJurisdictionLabel(jurisdiction) {
-  if (jurisdiction === "pba") return "Provincia de Buenos Aires";
-  if (jurisdiction === "national_federal") return "Nacional / Federal";
-  if (jurisdiction === "caba") return "Ciudad Autónoma de Buenos Aires";
+  const labels = {
+    pba: "Provincia de Buenos Aires",
+    national_federal: "Nacional / Federal",
+    caba: "Ciudad Autónoma de Buenos Aires",
+    catamarca: "Catamarca",
+    chaco: "Chaco",
+    chubut: "Chubut",
+    cordoba: "Córdoba",
+    corrientes: "Corrientes",
+    entre_rios: "Entre Ríos",
+    formosa: "Formosa",
+    jujuy: "Jujuy",
+    la_pampa: "La Pampa",
+    la_rioja: "La Rioja",
+    mendoza: "Mendoza",
+    misiones: "Misiones",
+    neuquen: "Neuquén",
+    rio_negro: "Río Negro",
+    salta: "Salta",
+    san_juan: "San Juan",
+    san_luis: "San Luis",
+    santa_cruz: "Santa Cruz",
+    santa_fe: "Santa Fe",
+    santiago_del_estero: "Santiago del Estero",
+    tierra_del_fuego: "Tierra del Fuego",
+    tucuman: "Tucumán",
+  };
 
-  return "Jurisdicción no especificada";
+  return labels[jurisdiction] || "Jurisdicción no especificada";
 }
 
 function renderResult(result) {
@@ -302,7 +531,11 @@ function showCalculatorMessage(message, visible) {
 
 clearResultBtn.addEventListener("click", function () { 
 
-  form.reset(); 
+  form.reset();
+
+  if (caseSelect) {
+    caseSelect.value = "";
+  }
 
   updateJurisdictionDependentFields();
  
@@ -365,6 +598,7 @@ function getExcludedDaySourceLabel(source) {
     scba: "SCBA",
     csjn: "CSJN",
     tribunal_fiscal: "Tribunal Fiscal",
+    caba: "CABA",
     system: "Sistema",
   };
 
