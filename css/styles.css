@@ -2445,6 +2445,59 @@ textarea:focus {
 
 .judicial-review-alert strong {
   color: #991b1b;
+} 
+
+
+/* Usuario autenticado / cerrar sesión */
+
+.authenticated-user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 18px;
+}
+
+.authenticated-user-label {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #5f6b7a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.authenticated-logout-btn {
+  border: 1px solid #d8d2c4;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.authenticated-logout-btn:hover {
+  border-color: #991b1b;
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+@media (max-width: 880px) {
+  .navbar-content {
+    gap: 12px;
+  }
+
+  .authenticated-user-box {
+    margin-left: auto;
+  }
+
+  .authenticated-user-label {
+    display: none;
+  }
 }
 
 
@@ -2464,7 +2517,8 @@ textarea:focus {
   .home-urgent-date {
     text-align: left;
   }
-}
+} 
+
 
 @media (max-width: 520px) {
   .home-alerts-grid {
