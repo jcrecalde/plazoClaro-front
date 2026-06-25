@@ -1,5 +1,34 @@
 const CASES_API_URL = "http://127.0.0.1:8000/cases"; 
-const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines";
+const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function getJsonAuthHeaders() {
+  return {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const caseForm = document.getElementById("caseForm");
 const caseId = document.getElementById("caseId");
@@ -158,13 +187,16 @@ caseForm.addEventListener("submit", async function (event) {
 
     const response = await fetch(url, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payload),
     });
 
-    const result = await response.json();
+    const result = await response.json();  
+
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo guardar la causa.");
@@ -220,12 +252,18 @@ async function loadCases() {
     `;
 
     const [casesResponse, deadlinesResponse] = await Promise.all([
-      fetch(CASES_API_URL),
+      fetch(CASES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
       fetch(DEADLINES_API_URL),
     ]);
 
     const cases = await casesResponse.json();
-    const deadlines = await deadlinesResponse.json();
+    const deadlines = await deadlinesResponse.json(); 
+
+    if (handleUnauthorizedResponse(casesResponse)) {
+      return;
+    }
 
     if (!casesResponse.ok) {
       throw new Error(cases.detail || "No se pudieron cargar las causas.");
@@ -652,13 +690,15 @@ async function updateCaseStatus(selectedCaseId, status) {
   try {
     const response = await fetch(`${CASES_API_URL}/${selectedCaseId}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify({ status }),
     });
 
-    const result = await response.json();
+    const result = await response.json();   
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    } 
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo actualizar el estado de la causa.");
@@ -773,9 +813,13 @@ async function deleteCase(selectedCaseId) {
   try {
     const response = await fetch(`${CASES_API_URL}/${selectedCaseId}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     });
+    const result = await response.json();   
 
-    const result = await response.json();
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo eliminar la causa.");
@@ -1497,9 +1541,15 @@ async function registerCaseReviewToday(selectedCaseId) {
   try {
     const response = await fetch(`${CASES_API_URL}/${selectedCaseId}/review-today`, {
       method: "PATCH",
+      headers: getAuthHeaders(),
     });
 
-    const result = await response.json();
+    const result = await response.json();  
+
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo registrar la revisión.");
