@@ -1,6 +1,34 @@
 const API_URL = "http://127.0.0.1:8000/calculator/deadline";
 const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
-const CASES_API_URL = "http://127.0.0.1:8000/cases";
+const CASES_API_URL = "http://127.0.0.1:8000/cases"; 
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function getJsonAuthHeaders() {
+  return {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const form = document.getElementById("deadlineForm");
 
@@ -71,12 +99,20 @@ async function loadCasesForCalculator() {
   if (!caseSelect) return;
 
   try {
-    const response = await fetch(CASES_API_URL);
+    const response = await fetch(CASES_API_URL, {
+      headers: getAuthHeaders(),
+    });
+
     const cases = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error("No se pudieron cargar las causas.");
     }
+    
 
     availableCases = cases;
 
@@ -346,17 +382,20 @@ saveDeadlineBtn.addEventListener("click", async function () {
 
     const response = await fetch(DEADLINES_API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payloadToSave),
-    });
-
-    if (!response.ok) {
-      throw new Error("No se pudo guardar el plazo.");
-    }
+    }); 
 
     const savedDeadline = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(savedDeadline.detail || "No se pudo guardar el plazo.");
+    }
+
 
     console.log("Plazo guardado:", savedDeadline);
     showCalculatorMessage("Plazo guardado correctamente. Podés verlo desde el dashboard.", true);

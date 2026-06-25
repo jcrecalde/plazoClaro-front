@@ -255,13 +255,19 @@ async function loadCases() {
       fetch(CASES_API_URL, {
         headers: getAuthHeaders(),
       }),
-      fetch(DEADLINES_API_URL),
+      fetch(DEADLINES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
     ]);
 
     const cases = await casesResponse.json();
     const deadlines = await deadlinesResponse.json(); 
 
     if (handleUnauthorizedResponse(casesResponse)) {
+      return;
+    }
+
+    if (handleUnauthorizedResponse(deadlinesResponse)) {
       return;
     }
 
@@ -1182,8 +1188,15 @@ async function loadCaseDeadlines(selectedCaseId) {
 
     caseDeadlinesPanel.classList.remove("hidden");
 
-    const response = await fetch(`${DEADLINES_API_URL}?case_id=${selectedCaseId}`);
+    const response = await fetch(`${DEADLINES_API_URL}?case_id=${selectedCaseId}`, {
+      headers: getAuthHeaders(),
+    });
+
     const deadlines = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(deadlines.detail || "No se pudieron cargar los plazos de la causa.");
