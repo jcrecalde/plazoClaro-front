@@ -1,5 +1,34 @@
 const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines";
-const CASES_API_URL = "http://127.0.0.1:8000/cases";
+const CASES_API_URL = "http://127.0.0.1:8000/cases"; 
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function getJsonAuthHeaders() {
+  return {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const agendaList = document.getElementById("agendaList");
 const agendaSummary = document.getElementById("agendaSummary");
@@ -47,12 +76,24 @@ async function loadAgenda() {
     `;
 
     const [deadlinesResponse, casesResponse] = await Promise.all([
-      fetch(DEADLINES_API_URL),
-      fetch(CASES_API_URL),
+      fetch(DEADLINES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
+      fetch(CASES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
     ]);
 
     const deadlines = await deadlinesResponse.json();
     const cases = await casesResponse.json();
+
+    if (handleUnauthorizedResponse(deadlinesResponse)) {
+      return;
+    }
+
+    if (handleUnauthorizedResponse(casesResponse)) {
+      return;
+    }
 
     if (!deadlinesResponse.ok) {
       throw new Error(deadlines.detail || "No se pudieron cargar los vencimientos.");
@@ -495,13 +536,15 @@ async function updateDeadlineStatus(deadlineId, status) {
   try {
     const response = await fetch(`${DEADLINES_API_URL}/${deadlineId}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify({ status }),
     });
 
     const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo actualizar el vencimiento.");
@@ -510,7 +553,10 @@ async function updateDeadlineStatus(deadlineId, status) {
     await loadAgenda();
   } catch (error) {
     console.error(error);
-    alert("No se pudo actualizar el vencimiento. Verificá que el backend esté funcionando.");
+    alert(
+      error.message ||
+        "No se pudo actualizar el vencimiento. Verificá que el backend esté funcionando."
+    );
   }
 }
 
