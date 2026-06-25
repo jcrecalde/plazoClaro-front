@@ -1,5 +1,34 @@
 const DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
-const CASES_API_URL = "http://127.0.0.1:8000/cases";
+const CASES_API_URL = "http://127.0.0.1:8000/cases"; 
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function getJsonAuthHeaders() {
+  return {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const deadlinesTableBody = document.getElementById("deadlinesTableBody");
 const dashboardSummary = document.getElementById("dashboardSummary");
@@ -235,7 +264,10 @@ deadlineEditForm.addEventListener("submit", async function (event) {
 
   const deadlineId = editDeadlineId.value;
 
+  const currentDeadline = allDeadlines.find((item) => item.id === deadlineId);
+
   const payload = {
+    case_id: currentDeadline?.case_id || null,
     case_name: editCaseName.value.trim() || null,
     action_type: editActionType.value || null,
     notification_date: editNotificationDate.value,
@@ -265,14 +297,18 @@ deadlineEditForm.addEventListener("submit", async function (event) {
   try {
     const response = await fetch(`${DEADLINES_API_URL}/${deadlineId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payload),
     });
 
+    const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error("No se pudo editar el plazo.");
+      throw new Error(result.detail || "No se pudo editar el plazo.");
     }
 
     showMessage("Plazo editado y recalculado correctamente.", true);
@@ -282,7 +318,7 @@ deadlineEditForm.addEventListener("submit", async function (event) {
     await loadDeadlines();
   } catch (error) {
     console.error(error);
-    showMessage("No se pudo editar el plazo. Verificá que el backend esté funcionando.", true);
+    showMessage(error.message || "No se pudo editar el plazo. Verificá que el backend esté funcionando.", true);
   }
 });
 
@@ -297,20 +333,32 @@ async function loadDeadlines() {
     `;
 
     const [deadlinesResponse, casesResponse] = await Promise.all([
-      fetch(DEADLINES_API_URL),
-      fetch(CASES_API_URL),
+      fetch(DEADLINES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
+      fetch(CASES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
     ]);
-
-    if (!deadlinesResponse.ok) {
-      throw new Error("No se pudieron obtener los vencimientos.");
-    }
-
-    if (!casesResponse.ok) {
-      throw new Error("No se pudieron obtener las causas.");
-    }
 
     const deadlines = await deadlinesResponse.json();
     const cases = await casesResponse.json();
+
+    if (handleUnauthorizedResponse(deadlinesResponse)) {
+      return;
+    }
+
+    if (handleUnauthorizedResponse(casesResponse)) {
+      return;
+    }
+
+    if (!deadlinesResponse.ok) {
+      throw new Error(deadlines.detail || "No se pudieron obtener los vencimientos.");
+    }
+
+    if (!casesResponse.ok) {
+      throw new Error(cases.detail || "No se pudieron obtener las causas.");
+    }
 
     allCases = cases;
     allDeadlines = sortDeadlines(getVisibleDashboardDeadlines(deadlines, cases));
@@ -973,23 +1021,31 @@ async function updateDeadlineStatus(deadlineId, status) {
   try {
     const response = await fetch(`${DEADLINES_API_URL}/${deadlineId}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify({ status }),
     });
 
+    const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error("No se pudo actualizar el estado.");
+      throw new Error(result.detail || "No se pudo actualizar el estado.");
     }
 
     showMessage("Estado actualizado correctamente.", true);
     loadDeadlines();
   } catch (error) {
     console.error(error);
-    showMessage("No se pudo actualizar el estado del plazo.", true);
+    showMessage(
+      error.message || "No se pudo actualizar el estado del plazo.",
+      true
+    );
   }
-}
+} 
+
 
 async function deleteDeadline(deadlineId) {
   const canDelete = await confirmDeleteDeadline(deadlineId);
@@ -1001,19 +1057,30 @@ async function deleteDeadline(deadlineId) {
   try {
     const response = await fetch(`${DEADLINES_API_URL}/${deadlineId}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     });
 
+    const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error("No se pudo eliminar el plazo.");
+      throw new Error(result.detail || "No se pudo eliminar el plazo.");
     }
 
     showMessage("Plazo eliminado correctamente.", true);
     loadDeadlines();
   } catch (error) {
     console.error(error);
-    showMessage("No se pudo eliminar el plazo.", true);
+    showMessage(
+      error.message || "No se pudo eliminar el plazo.",
+      true
+    );
   }
 } 
+
 
 async function confirmDeleteDeadline(deadlineId) {
   const selectedDeadline = allDeadlines.find((item) => item.id === deadlineId);
