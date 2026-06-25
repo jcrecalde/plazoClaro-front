@@ -1,5 +1,25 @@
 const HOME_DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
-const HOME_CASES_API_URL = "http://127.0.0.1:8000/cases";
+const HOME_CASES_API_URL = "http://127.0.0.1:8000/cases"; 
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const homeExpiredCount = document.getElementById("homeExpiredCount");
 const homeTodayCount = document.getElementById("homeTodayCount");
@@ -20,20 +40,32 @@ async function loadHomeAlerts() {
 
   try {
     const [deadlinesResponse, casesResponse] = await Promise.all([
-      fetch(HOME_DEADLINES_API_URL),
-      fetch(HOME_CASES_API_URL),
+      fetch(HOME_DEADLINES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
+      fetch(HOME_CASES_API_URL, {
+        headers: getAuthHeaders(),
+      }),
     ]);
-
-    if (!deadlinesResponse.ok) {
-      throw new Error("No se pudieron cargar los vencimientos.");
-    }
-
-    if (!casesResponse.ok) {
-      throw new Error("No se pudieron cargar las causas.");
-    }
 
     const deadlines = await deadlinesResponse.json();
     const cases = await casesResponse.json();
+
+    if (handleUnauthorizedResponse(deadlinesResponse)) {
+      return;
+    }
+
+    if (handleUnauthorizedResponse(casesResponse)) {
+      return;
+    }
+
+    if (!deadlinesResponse.ok) {
+      throw new Error(deadlines.detail || "No se pudieron cargar los vencimientos.");
+    }
+
+    if (!casesResponse.ok) {
+      throw new Error(cases.detail || "No se pudieron cargar las causas.");
+    }
 
     const visibleDeadlines = getVisibleHomeDeadlines(deadlines, cases);
 
@@ -55,11 +87,11 @@ async function loadHomeAlerts() {
     console.error(error);
 
     homeAlertsMessage.textContent =
-      "No se pudieron cargar las alertas. Verificá que el backend esté funcionando.";
+      error.message || "No se pudieron cargar las alertas. Verificá que el backend esté funcionando.";
 
     homeUrgentList.innerHTML = `
       <p class="result-empty">
-        No se pudieron cargar los vencimientos.
+        ${error.message || "No se pudieron cargar los vencimientos."}
       </p>
     `;
   }
