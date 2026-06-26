@@ -1,4 +1,33 @@
-const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days";
+const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days"; 
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("plazoclaro_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+
+function getJsonAuthHeaders() {
+  return {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  };
+}
+
+
+function handleUnauthorizedResponse(response) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("plazoclaro_token");
+    localStorage.removeItem("plazoclaro_user");
+    window.location.href = "./auth.html";
+    return true;
+  }
+
+  return false;
+}
 
 const form = document.getElementById("nonWorkingDayForm");
 const nonWorkingDate = document.getElementById("nonWorkingDate");
@@ -254,11 +283,13 @@ form.addEventListener("submit", async function (event) {
 
     const response = await fetch(url, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payload),
-    });
+    }); 
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -453,15 +484,21 @@ async function importNationalHolidays() {
 
     const url = `${NON_WORKING_DAYS_API_URL}/import-national-holidays?year=${year}&jurisdiction=${selectedJurisdiction}`;
 
+
     const response = await fetch(url, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
 
     const result = await response.json();
 
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
+
     if (!response.ok) {
       throw new Error(result.detail || "No se pudieron importar los feriados nacionales.");
-    }
+    } 
 
     filterYear.value = year;
     filterJurisdiction.value = selectedJurisdiction;
@@ -511,11 +548,17 @@ async function importScbaCalendar() {
 
     const url = `${NON_WORKING_DAYS_API_URL}/import-scba-calendar?year=${year}`;
 
+
     const response = await fetch(url, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
 
     const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo importar el calendario SCBA.");
@@ -573,15 +616,18 @@ async function importTribunalFiscalCalendar() {
 
     const response = await fetch(url, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
 
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        result.detail || "No se pudo importar el calendario Tribunal Fiscal."
-      );
+    if (handleUnauthorizedResponse(response)) {
+      return;
     }
+
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudo importar el calendario Tribunal Fiscal.");
+    } 
 
     filterYear.value = year;
     filterJurisdiction.value = "national_federal";
@@ -638,9 +684,14 @@ async function importCabaCalendar() {
 
     const response = await fetch(url, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
 
     const result = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(result.detail || "No se pudo importar el calendario CABA.");
@@ -697,14 +748,19 @@ async function importCsjnCalendar() {
 
     const response = await fetch(url, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
 
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.detail || "No se pudo importar el calendario CSJN.");
+    if (handleUnauthorizedResponse(response)) {
+      return;
     }
 
+    if (!response.ok) {
+      throw new Error(result.detail || "No se pudo importar el calendario CSJN.");
+    } 
+    
     filterYear.value = year;
     filterJurisdiction.value = "national_federal";
     filterSource.value = "csjn";
@@ -743,13 +799,21 @@ async function loadNonWorkingDays() {
 
     const url = buildNonWorkingDaysUrl();
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
 
-    if (!response.ok) {
-      throw new Error("No se pudieron cargar los días inhábiles.");
+    const nonWorkingDays = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
     }
 
-    const nonWorkingDays = await response.json(); 
+    if (!response.ok) {
+      throw new Error(
+        nonWorkingDays.detail || "No se pudieron cargar los días inhábiles."
+      );
+    }
 
     await loadSourceStatus();
 
@@ -974,11 +1038,13 @@ async function verifyVisiblePendingDays() {
     for (const day of pendingVisibleDays) {
       const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${day.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getJsonAuthHeaders(),
         body: JSON.stringify({ verified: true }),
       });
+
+      if (handleUnauthorizedResponse(response)) {
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`No se pudo verificar el día ${formatDate(day.date)}.`);
@@ -1004,11 +1070,13 @@ async function updateNonWorkingDay(nonWorkingDayId, payload, successMessage) {
   try {
     const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${nonWorkingDayId}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payload),
     });
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -1033,7 +1101,12 @@ async function deleteNonWorkingDay(nonWorkingDayId) {
   try {
     const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${nonWorkingDayId}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     });
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error("No se pudo eliminar el día inhábil.");
@@ -1311,8 +1384,15 @@ async function loadSourceStatus() {
 
     const url = `${NON_WORKING_DAYS_API_URL}/source-status?year=${year}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+
     const sourceStatus = await response.json();
+
+    if (handleUnauthorizedResponse(response)) {
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(sourceStatus.detail || "No se pudo cargar el estado de fuentes.");
