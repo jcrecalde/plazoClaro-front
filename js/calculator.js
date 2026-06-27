@@ -276,19 +276,22 @@ form.addEventListener("submit", async function (event) {
   };
 
   try {
-    const response = await fetch(API_URL, {
+   const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getJsonAuthHeaders(),
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      throw new Error("No se pudo calcular el vencimiento.");
+    if (handleUnauthorizedResponse(response)) {
+      return;
     }
 
     const apiResult = await response.json();
+
+    if (!response.ok) {
+      throw new Error(apiResult.detail || "No se pudo calcular el vencimiento.");
+    } 
+    
     const result = normalizeApiResult(apiResult);
 
     lastCalculationPayload = payload;
