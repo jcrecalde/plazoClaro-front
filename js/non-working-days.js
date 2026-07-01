@@ -1,4 +1,6 @@
-const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days"; 
+const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days";  
+
+const AUTH_API_URL = "http://127.0.0.1:8000/auth";
 
 
 function getAuthHeaders() {
@@ -19,7 +21,7 @@ function getJsonAuthHeaders() {
 
 
 function handleUnauthorizedResponse(response) {
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401) {
     localStorage.removeItem("plazoclaro_token");
     localStorage.removeItem("plazoclaro_user");
     window.location.href = "./auth.html";
@@ -39,7 +41,9 @@ const scope = document.getElementById("scope");
 const department = document.getElementById("department");
 const departmentGroup = document.getElementById("departmentGroup");
 const sourceReference = document.getElementById("sourceReference");
-const nonWorkingNotes = document.getElementById("nonWorkingNotes");
+const nonWorkingNotes = document.getElementById("nonWorkingNotes"); 
+
+const adminImportPanel = document.getElementById("adminImportPanel");
  
 const importYear = document.getElementById("importYear");
 const importJurisdiction = document.getElementById("importJurisdiction");
@@ -99,7 +103,75 @@ const refreshSourceStatusBtn = document.getElementById("refreshSourceStatusBtn")
 
 let editingNonWorkingDayId = null; 
 let editingNonWorkingDayData = null;
-let currentNonWorkingDays = [];
+let currentNonWorkingDays = []; 
+
+
+let currentAuthenticatedUser = getStoredAuthenticatedUser();
+
+function getStoredAuthenticatedUser() {
+  try {
+    return JSON.parse(localStorage.getItem("plazoclaro_user")) || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function isCurrentUserAdmin() {
+  return currentAuthenticatedUser?.role === "admin";
+}
+
+function canModifyNonWorkingDay(day) {
+  if (!day) return false;
+
+  if (isCurrentUserAdmin()) {
+    return true;
+  }
+
+  return day.source === "manual";
+}
+
+async function loadAuthenticatedUserForPage() {
+  try {
+    const response = await fetch(`${AUTH_API_URL}/me`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("plazoclaro_token");
+      localStorage.removeItem("plazoclaro_user");
+      window.location.href = "./auth.html";
+      return;
+    }
+
+    const user = await response.json();
+
+    if (!response.ok) {
+      throw new Error("No se pudo validar el usuario actual.");
+    }
+
+    currentAuthenticatedUser = user;
+    localStorage.setItem("plazoclaro_user", JSON.stringify(user));
+  } catch (error) {
+    console.error("No se pudo cargar el usuario actual.", error);
+    currentAuthenticatedUser = getStoredAuthenticatedUser();
+  }
+}
+
+function setupRoleBasedUi() {
+  if (isCurrentUserAdmin()) {
+    return;
+  }
+
+  if (adminImportPanel) {
+    adminImportPanel.classList.add("hidden");
+    adminImportPanel.style.display = "none";
+  }
+
+  if (verifyVisiblePendingDaysBtn) {
+    verifyVisiblePendingDaysBtn.classList.add("hidden");
+    verifyVisiblePendingDaysBtn.style.display = "none";
+  }
+}
 
 populatePbaDepartmentSelect(department, {
   includeEmpty: true,
@@ -166,7 +238,13 @@ function resetNonWorkingDayFormMode() {
 updateDepartmentVisibilityForManualLoad(); 
 updateFilterDepartmentVisibility();
 
-document.addEventListener("DOMContentLoaded", loadNonWorkingDays);
+document.addEventListener("DOMContentLoaded", initializeNonWorkingDaysPage);
+
+async function initializeNonWorkingDaysPage() {
+  await loadAuthenticatedUserForPage();
+  setupRoleBasedUi();
+  await loadNonWorkingDays();
+}
 
 refreshNonWorkingDaysBtn.addEventListener("click", loadNonWorkingDays);
 
@@ -334,6 +412,11 @@ function startEditingNonWorkingDay(nonWorkingDayId) {
 
   if (!selectedDay) {
     showMessage("No se encontró el día inhábil seleccionado.", true);
+    return;
+  } 
+
+  if (!canModifyNonWorkingDay(selectedDay)) {
+    showMessage("No tenés permisos para editar este día inhábil global.", true);
     return;
   }
 
@@ -913,7 +996,31 @@ function renderNonWorkingDays(nonWorkingDays) {
   nonWorkingDaysTableBody.innerHTML = "";
 
   nonWorkingDays.forEach((item) => {
-    const row = document.createElement("tr");
+    const row = document.createElement("tr"); 
+
+    const canModifyDay = canModifyNonWorkingDay(item);
+
+    const editButton = canModifyDay
+      ? `
+        <button class="btn-small btn-edit btn-edit-day" data-id="${item.id}">
+          Editar
+        </button>
+      `
+      : "";
+
+    const verifyButton = canModifyDay && !item.verified
+      ? `<button class="btn-small btn-complete btn-verify-day" data-id="${item.id}">Verificar</button>`
+      : "";
+
+    const toggleButton = canModifyDay
+      ? item.active
+        ? `<button class="btn-small btn-pending btn-toggle-day" data-id="${item.id}" data-active="false">Desactivar</button>`
+        : `<button class="btn-small btn-complete btn-toggle-day" data-id="${item.id}" data-active="true">Activar</button>`
+      : "";
+
+    const deleteButton = canModifyDay
+      ? `<button class="btn-small btn-delete" data-id="${item.id}">Eliminar</button>`
+      : "";
 
     row.innerHTML = `
       <td><strong>${formatDate(item.date)}</strong></td>
@@ -936,29 +1043,15 @@ function renderNonWorkingDays(nonWorkingDays) {
       </td>
       <td>
         <div class="table-actions">
-          <button class="btn-small btn-edit btn-edit-day" data-id="${item.id}">
-            Editar
-          </button>  
+          ${editButton}
 
           <button class="btn-small btn-detail btn-history-day" data-id="${item.id}">
             Historial
           </button>
 
-          ${
-            !item.verified
-              ? `<button class="btn-small btn-complete btn-verify-day" data-id="${item.id}">Verificar</button>`
-              : ""
-          }
-
-          ${
-            item.active
-              ? `<button class="btn-small btn-pending btn-toggle-day" data-id="${item.id}" data-active="false">Desactivar</button>`
-              : `<button class="btn-small btn-complete btn-toggle-day" data-id="${item.id}" data-active="true">Activar</button>`
-          }
-
-          <button class="btn-small btn-delete" data-id="${item.id}">
-            Eliminar
-          </button>
+          ${verifyButton}
+          ${toggleButton}
+          ${deleteButton}
         </div>
       </td>
     `;
@@ -1016,7 +1109,12 @@ function attachActionEvents() {
 async function verifyVisiblePendingDays() {
   const pendingVisibleDays = currentNonWorkingDays.filter(
     (day) => day.verified === false
-  );
+  ); 
+
+  if (!isCurrentUserAdmin()) {
+    showMessage("Solo un administrador puede verificar días globales en bloque.", true);
+    return;
+  }
 
   if (!pendingVisibleDays.length) {
     showMessage("No hay días pendientes visibles para verificar.", true);
@@ -1067,6 +1165,15 @@ async function verifyVisiblePendingDays() {
 }
 
 async function updateNonWorkingDay(nonWorkingDayId, payload, successMessage) {
+  const selectedDay = currentNonWorkingDays.find(
+    (item) => item.id === nonWorkingDayId
+  );
+
+  if (selectedDay && !canModifyNonWorkingDay(selectedDay)) {
+    showMessage("No tenés permisos para modificar este día inhábil global.", true);
+    return;
+  }
+
   try {
     const response = await fetch(`${NON_WORKING_DAYS_API_URL}/${nonWorkingDayId}`, {
       method: "PATCH",
@@ -1092,6 +1199,15 @@ async function updateNonWorkingDay(nonWorkingDayId, payload, successMessage) {
 }
 
 async function deleteNonWorkingDay(nonWorkingDayId) {
+  const selectedDay = currentNonWorkingDays.find(
+    (item) => item.id === nonWorkingDayId
+  );
+
+  if (selectedDay && !canModifyNonWorkingDay(selectedDay)) {
+    showMessage("No tenés permisos para eliminar este día inhábil global.", true);
+    return;
+  }
+
   const confirmDelete = confirm("¿Seguro que querés eliminar este día inhábil?");
 
   if (!confirmDelete) {
@@ -1109,32 +1225,16 @@ async function deleteNonWorkingDay(nonWorkingDayId) {
     }
 
     if (!response.ok) {
-      throw new Error("No se pudo eliminar el día inhábil.");
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || "No se pudo eliminar el día inhábil.");
     }
 
     await loadNonWorkingDays();
     showMessage("Día inhábil eliminado correctamente.", true);
   } catch (error) {
     console.error(error);
-    showMessage("No se pudo eliminar el día inhábil.", true);
+    showMessage(error.message || "No se pudo eliminar el día inhábil.", true);
   }
-}
-
-function formatDate(dateString) {
-  if (!dateString) return "-";
-
-  const [year, month, day] = dateString.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
 }
 
 function getJurisdictionLabel(jurisdiction) {
@@ -1409,6 +1509,30 @@ async function loadSourceStatus() {
     `;
   }
 } 
+
+
+function formatDate(dateString) {
+  if (!dateString) return "-";
+
+  const cleanDateString = String(dateString).split("T")[0];
+  const [year, month, day] = cleanDateString.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return "-";
+  }
+
+  const date = new Date(year, month - 1, day);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
 
 
 function renderSourceStatus(sourceStatus) {
