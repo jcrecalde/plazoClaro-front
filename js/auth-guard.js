@@ -28,10 +28,34 @@ async function validateCurrentSession() {
     localStorage.setItem("plazoclaro_user", JSON.stringify(user));
 
     renderAuthenticatedUser(user);
+    applyAdminVisibility(user);
   } catch (error) {
     console.error("No se pudo validar la sesión.", error);
     clearSessionAndRedirect();
   }
+}
+
+
+function isAdminUser(user) {
+  if (!user) {
+    return false;
+  }
+
+  return user.role === "admin";
+}
+
+
+function applyAdminVisibility(user) {
+  const admin = isAdminUser(user);
+  const adminOnlyElements = document.querySelectorAll(".admin-only");
+
+  adminOnlyElements.forEach(function (element) {
+    if (admin) {
+      element.classList.remove("admin-only");
+    } else {
+      element.classList.add("admin-only");
+    }
+  });
 }
 
 

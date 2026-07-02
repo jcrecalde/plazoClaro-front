@@ -87,53 +87,41 @@
         </div>
 
         <div class="form-group">
-          <label for="agendaStatusFilter">Estado</label>
-          <select id="agendaStatusFilter">
-            <option value="">Todos</option>
-            <option value="expired">Vencidos pendientes</option>
-            <option value="today">Vencen hoy</option>
-            <option value="upcoming">Próximos 7 días</option>
-            <option value="future">Más adelante</option>
-            <option value="completed">Completados</option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label for="agendaCaseFilter">Causa</label>
           <select id="agendaCaseFilter">
             <option value="">Todas las causas activas</option>
           </select>
           <small class="field-help agenda-case-filter-help">
             La agenda muestra solo vencimientos operativos de causas activas. Las causas finalizadas se consultan desde la sección “Causas”, filtro “Finalizadas”.
-          </small> 
-
-          <div class="status-legend">
-            <span class="status-legend-title">Leyenda:</span>
-
-            <span class="status-legend-item">
-              <span class="status-legend-badge status-legend-expired"></span>
-              Vencido
-            </span>
-
-            <span class="status-legend-item">
-              <span class="status-legend-badge status-legend-pending"></span>
-              Pendiente
-            </span>
-
-            <span class="status-legend-item">
-              <span class="status-legend-badge status-legend-completed"></span>
-              Completado
-            </span>
-
-            <span class="status-legend-item">
-              <span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>
-            </span>
-
-            <span class="status-legend-item">
-              <span class="dashboard-case-badge dashboard-case-badge-general">Plazo general</span>
-            </span>
-          </div>
+          </small>
         </div>
+      </div>
+
+      <div class="status-legend">
+        <span class="status-legend-title">Leyenda:</span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-expired"></span>
+          Vencido
+        </span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-pending"></span>
+          Pendiente
+        </span>
+
+        <span class="status-legend-item">
+          <span class="status-legend-badge status-legend-completed"></span>
+          Completado
+        </span>
+
+        <span class="status-legend-item">
+          <span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>
+        </span>
+
+        <span class="status-legend-item">
+          <span class="dashboard-case-badge dashboard-case-badge-general">Plazo general</span>
+        </span>
       </div>
 
       <div id="agendaList" class="agenda-list">

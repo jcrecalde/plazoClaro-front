@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ingresar | PlazoClaro</title>
-  <link rel="stylesheet" href="./css/styles.css?v=53" />
+  <link rel="stylesheet" href="./css/styles.css?v=59" />
 </head>
 <body>
 
   <header class="navbar">
     <div class="container navbar-content">
-      <a href="./auth.html" class="logo">Plazo<span>Claro</span></a>
+      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
 
       <nav class="nav-links">
+        <a href="./index.html">Inicio</a>
         <a href="./auth.html" class="active">Ingresar</a>
       </nav>
     </div>
@@ -23,83 +24,110 @@
       <div class="container">
         <h1>Ingresar a PlazoClaro</h1>
         <p>
-          Accedé a tu espacio de trabajo para gestionar causas, plazos y vencimientos judiciales.
+          Accedé a tu espacio de trabajo jurídico para calcular plazos, organizar causas
+          y controlar vencimientos desde una agenda clara.
         </p>
       </div>
     </section>
 
-    <section class="container calculator-layout">
-      <form id="loginForm" class="form-card">
-        <span class="badge">Iniciar sesión</span>
+    <section class="container auth-layout">
+      <div class="auth-switch" role="tablist" aria-label="Acceso a PlazoClaro">
+        <button id="authLoginTab" class="auth-tab active" type="button">
+          Iniciar sesión
+        </button>
 
-        <div class="form-group">
-          <label for="loginEmail">Email</label>
-          <input
-            type="email"
-            id="loginEmail"
-            placeholder="tuemail@estudio.com"
-            required
-          />
-        </div>
+        <button id="authRegisterTab" class="auth-tab" type="button">
+          Crear cuenta
+        </button>
+      </div>
 
-        <div class="form-group">
-          <label for="loginPassword">Contraseña</label>
-          <input
-            type="password"
-            id="loginPassword"
-            placeholder="Tu contraseña"
-            required
-          />
-        </div>
+      <div class="auth-card-wrapper">
+        <form id="loginForm" class="form-card auth-card">
+          <span class="badge">Iniciar sesión</span>
 
-        <div class="result-actions">
-          <button type="submit" class="btn btn-primary" id="loginBtn">
-            Ingresar
-          </button>
-        </div>
-      </form>
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="tuemail@estudio.com"
+              required
+            />
+          </div>
 
-      <form id="registerForm" class="form-card">
-        <span class="badge">Crear cuenta</span>
+          <div class="form-group">
+            <label for="loginPassword">Contraseña</label>
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Tu contraseña"
+              required
+            />
+          </div>
 
-        <div class="form-group">
-          <label for="registerFullName">Nombre</label>
-          <input
-            type="text"
-            id="registerFullName"
-            placeholder="Ej: Juan Recalde"
-          />
-        </div>
+          <div class="result-actions">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              Ingresar
+            </button>
+          </div>
 
-        <div class="form-group">
-          <label for="registerEmail">Email</label>
-          <input
-            type="email"
-            id="registerEmail"
-            placeholder="tuemail@estudio.com"
-            required
-          />
-        </div>
+          <p class="auth-helper-text">
+            ¿Todavía no tenés cuenta?
+            <button type="button" class="auth-link-button" id="goToRegisterBtn">
+              Crear cuenta
+            </button>
+          </p>
+        </form>
 
-        <div class="form-group">
-          <label for="registerPassword">Contraseña</label>
-          <input
-            type="password"
-            id="registerPassword"
-            placeholder="Mínimo 6 caracteres"
-            required
-          />
-          <small class="field-help">
-            Para esta versión inicial, usá una contraseña de al menos 6 caracteres.
-          </small>
-        </div>
+        <form id="registerForm" class="form-card auth-card auth-form-hidden">
+          <span class="badge">Crear cuenta</span>
 
-        <div class="result-actions">
-          <button type="submit" class="btn btn-secondary" id="registerBtn">
-            Crear cuenta
-          </button>
-        </div>
-      </form>
+          <div class="form-group">
+            <label for="registerFullName">Nombre</label>
+            <input
+              type="text"
+              id="registerFullName"
+              placeholder="Ej: Juan Recalde"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input
+              type="email"
+              id="registerEmail"
+              placeholder="tuemail@estudio.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="registerPassword">Contraseña</label>
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+            <small class="field-help">
+              Para esta versión inicial, usá una contraseña de al menos 6 caracteres.
+            </small>
+          </div>
+
+          <div class="result-actions">
+            <button type="submit" class="btn btn-primary" id="registerBtn">
+              Crear cuenta
+            </button>
+          </div>
+
+          <p class="auth-helper-text">
+            ¿Ya tenés cuenta?
+            <button type="button" class="auth-link-button" id="goToLoginBtn">
+              Iniciar sesión
+            </button>
+          </p>
+        </form>
+      </div>
     </section>
 
     <section class="container">
@@ -113,6 +141,6 @@
     </div>
   </footer>
 
-  <script src="./js/auth.js?v=2"></script>
+  <script src="./js/auth.js?v=4"></script>
 </body>
 </html>

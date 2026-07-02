@@ -13,6 +13,30 @@ const registerBtn = document.getElementById("registerBtn");
 
 const authMessage = document.getElementById("authMessage");
 
+const authLoginTab = document.getElementById("authLoginTab");
+const authRegisterTab = document.getElementById("authRegisterTab");
+const goToRegisterBtn = document.getElementById("goToRegisterBtn");
+const goToLoginBtn = document.getElementById("goToLoginBtn");
+
+document.addEventListener("DOMContentLoaded", setupInitialAuthMode);
+
+authLoginTab.addEventListener("click", function () {
+  setAuthMode("login", true);
+});
+
+authRegisterTab.addEventListener("click", function () {
+  setAuthMode("register", true);
+});
+
+goToRegisterBtn.addEventListener("click", function () {
+  setAuthMode("register", true);
+});
+
+goToLoginBtn.addEventListener("click", function () {
+  setAuthMode("login", true);
+});
+
+window.addEventListener("hashchange", setupInitialAuthMode);
 
 loginForm.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -49,7 +73,7 @@ loginForm.addEventListener("submit", async function (event) {
 
     showAuthMessage("Ingreso correcto. Redirigiendo...", true);
 
-    window.location.href = "./index.html";
+    window.location.href = "./app.html";
   } catch (error) {
     console.error(error);
     showAuthMessage(error.message || "No se pudo iniciar sesión.", true);
@@ -58,7 +82,6 @@ loginForm.addEventListener("submit", async function (event) {
     loginBtn.textContent = "Ingresar";
   }
 });
-
 
 registerForm.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -101,7 +124,7 @@ registerForm.addEventListener("submit", async function (event) {
 
     showAuthMessage("Cuenta creada correctamente. Redirigiendo...", true);
 
-    window.location.href = "./index.html";
+    window.location.href = "./app.html";
   } catch (error) {
     console.error(error);
     showAuthMessage(error.message || "No se pudo crear la cuenta.", true);
@@ -111,12 +134,38 @@ registerForm.addEventListener("submit", async function (event) {
   }
 });
 
+function setupInitialAuthMode() {
+  const hash = window.location.hash;
+
+  if (hash === "#registerForm" || hash === "#crear-cuenta") {
+    setAuthMode("register", false);
+    return;
+  }
+
+  setAuthMode("login", false);
+}
+
+function setAuthMode(mode, updateUrl) {
+  showAuthMessage("", false);
+
+  const isRegisterMode = mode === "register";
+
+  loginForm.classList.toggle("auth-form-hidden", isRegisterMode);
+  registerForm.classList.toggle("auth-form-hidden", !isRegisterMode);
+
+  authLoginTab.classList.toggle("active", !isRegisterMode);
+  authRegisterTab.classList.toggle("active", isRegisterMode);
+
+  if (updateUrl) {
+    const newHash = isRegisterMode ? "#registerForm" : "#loginForm";
+    history.replaceState(null, "", newHash);
+  }
+}
 
 function saveSession(result) {
   localStorage.setItem("plazoclaro_token", result.access_token);
   localStorage.setItem("plazoclaro_user", JSON.stringify(result.user));
 }
-
 
 function showAuthMessage(message, visible) {
   if (!visible || !message) {

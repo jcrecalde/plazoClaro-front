@@ -1,14 +1,25 @@
 :root {
-  --color-primary: #0F172A;
-  --color-secondary: #B0893B;
-  --color-bg: #F8FAFC;
+  /* Paleta final (antes vivía repartida en dos bloques :root distintos) */
+  --color-primary: #111827;
+  --color-secondary: #9A6A1F;
+  --color-bg: #F7F4EF;
   --color-card: #FFFFFF;
-  --color-text: #1E293B;
-  --color-muted: #64748B;
-  --color-border: #E2E8F0;
+  --color-text: #1F2933;
+  --color-muted: #5F6B7A;
+  --color-border: #D8D2C4;
   --color-success: #166534;
   --color-warning: #D97706;
   --color-danger: #B91C1C;
+
+  /* Tipografía */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", Arial, sans-serif;
+
+  /* Radios reutilizables (antes 7px/8px/9px/12px sueltos por todos lados) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
 }
 
 * {
@@ -200,6 +211,16 @@ a {
   padding: 64px 0;
 }
 
+.section-kicker {
+  display: inline-block;
+  color: var(--color-secondary);
+  font-weight: 800;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
 .section-title {
   font-size: 2rem;
   color: var(--color-primary);
@@ -374,6 +395,12 @@ textarea {
   display: none !important;
 }
 
+/* Se aplica desde JS (auth-guard / non-working-days.js) al panel de
+   "Calendarios y fuentes externas" cuando el usuario logueado no es admin. */
+.admin-only {
+  display: none !important;
+}
+
 @media (max-width: 880px) {
   .hero-grid,
   .calculator-layout {
@@ -488,28 +515,62 @@ textarea {
   flex-wrap: wrap;
 }
 
+/* Botones chicos de acción: sistema de 3 tonos.
+   Antes había 5 colores sólidos (violeta/azul/verde/amarillo/rojo) del mismo peso
+   visual compitiendo entre sí en cada fila. Ahora todos arrancan neutros
+   (blanco + borde) y el color solo aparece con intención en el hover o como
+   acento sutil de borde, para que la jerarquía la den la posición y el texto,
+   no un semáforo de colores. Las clases .btn-detail / .btn-edit / .btn-complete /
+   .btn-pending / .btn-delete se mantienen (las usa el JS existente); solo cambia
+   su estilo. */
+
 .btn-small {
-  border: none;
-  border-radius: 9px;
+  border: 1px solid var(--color-border);
+  background: #FFFFFF;
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.82rem;
+  transition: all 0.15s ease;
+}
+
+.btn-detail,
+.btn-edit,
+.btn-pending {
+  background: #FFFFFF;
+  color: var(--color-primary);
+  border-color: var(--color-border);
+}
+
+.btn-detail:hover,
+.btn-edit:hover,
+.btn-pending:hover {
+  border-color: var(--color-primary);
+  background: #F8FAFC;
 }
 
 .btn-complete {
-  background: #DCFCE7;
-  color: #166534;
+  background: #FFFFFF;
+  color: var(--color-success);
+  border-color: #BBDFBB;
 }
 
-.btn-pending {
-  background: #FEF3C7;
-  color: #92400E;
+.btn-complete:hover {
+  background: #F0FDF4;
 }
 
 .btn-delete {
-  background: #FEE2E2;
-  color: #991B1B;
+  background: #FFFFFF;
+  color: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.btn-delete:hover {
+  color: var(--color-danger);
+  border-color: #FECACA;
+  background: #FEF2F2;
 }
 
 @media (max-width: 880px) {
@@ -524,7 +585,7 @@ textarea {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 18px;
   margin-bottom: 22px;
 }
@@ -583,36 +644,7 @@ textarea {
   color: white;
 }
 
-@media (max-width: 1080px) {
-  .summary-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 880px) {
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 560px) {
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-
 /* Legal visual identity refinement */
-
-:root {
-  --color-primary: #111827;
-  --color-secondary: #9A6A1F;
-  --color-bg: #F7F4EF;
-  --color-card: #FFFFFF;
-  --color-text: #1F2933;
-  --color-muted: #5F6B7A;
-  --color-border: #D8D2C4;
-}
 
 body {
   background:
@@ -625,7 +657,7 @@ h1,
 h2,
 .section-title,
 .page-header h1 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   letter-spacing: -0.035em;
 }
 
@@ -735,7 +767,7 @@ textarea:focus {
 }
 
 .result-date {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   color: var(--color-primary);
 } 
 
@@ -762,7 +794,7 @@ textarea:focus {
 
 .detail-panel-header h3 {
   color: var(--color-primary);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.6rem;
   margin-top: 8px;
 }
@@ -824,11 +856,6 @@ textarea:focus {
   padding: 14px;
 }
 
-.btn-detail {
-  background: #EDE9FE;
-  color: #4C1D95;
-}
-
 @media (max-width: 880px) {
   .detail-panel-header {
     flex-direction: column;
@@ -850,11 +877,6 @@ textarea:focus {
 
 .edit-form .full-width {
   grid-column: 1 / -1;
-}
-
-.btn-edit {
-  background: #DBEAFE;
-  color: #1E3A8A;
 }
 
 @media (max-width: 880px) {
@@ -1012,6 +1034,21 @@ textarea:focus {
   margin-top: 22px;
 } 
 
+/* Grilla de filtros de agenda (clase usada en agenda.html, faltaba en el CSS) */
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 880px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Calendar filters */
 
 .calendar-filter-grid {
@@ -1073,12 +1110,6 @@ textarea:focus {
   border-radius: 12px;
 }
 
-/* Tabla más compacta */
-.non-working-days-table-card .deadlines-table {
-  min-width: 1120px;
-  table-layout: fixed;
-}
-
 /* Encabezado fijo al scrollear verticalmente dentro de la tabla */
 .non-working-days-table-card thead th {
   position: sticky;
@@ -1091,74 +1122,18 @@ textarea:focus {
 .non-working-days-table-card td {
   padding: 12px 11px;
   font-size: 0.88rem;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
-/* Evita que casi todo se parta en mil líneas */
-.non-working-days-table-card th,
-.non-working-days-table-card td {
-  white-space: nowrap;
-}
-
-/* Motivo y referencia sí pueden ocupar varias líneas */
+/* Motivo y referencia pueden ocupar varias líneas; el resto no se parte */
 .non-working-days-table-card th:nth-child(2),
 .non-working-days-table-card td:nth-child(2) {
-  width: 250px;
   white-space: normal;
 }
-
 
 .non-working-days-table-card th:nth-child(8),
 .non-working-days-table-card td:nth-child(8) {
-  width: 180px;
   white-space: normal;
-}
-
-/* Anchos por columna */
-.non-working-days-table-card th:nth-child(1),
-.non-working-days-table-card td:nth-child(1) {
-  width: 90px;
-}
-
-.non-working-days-table-card th:nth-child(3),
-.non-working-days-table-card td:nth-child(3) {
-  width: 180px;
-}
-
-.non-working-days-table-card th:nth-child(4),
-.non-working-days-table-card td:nth-child(4) {
-  width: 170px;
-  white-space: normal;
-}
-
-
-.non-working-days-table-card th:nth-child(5),
-.non-working-days-table-card td:nth-child(5) {
-  width: 180px;
-  white-space: normal;
-}
-
-.non-working-days-table-card th:nth-child(6),
-.non-working-days-table-card td:nth-child(6) {
-  width: 145px;
-}
-
-
-.non-working-days-table-card th:nth-child(7),
-.non-working-days-table-card td:nth-child(7) {
-  width: 100px;
-}
-
-.non-working-days-table-card th:nth-child(9),
-.non-working-days-table-card td:nth-child(9),
-.non-working-days-table-card th:nth-child(10),
-.non-working-days-table-card td:nth-child(10) {
-  width: 95px;
-}
-
-.non-working-days-table-card th:nth-child(11),
-.non-working-days-table-card td:nth-child(11) {
-  width: 165px;
 }
 
 /* Acciones más compactas */
@@ -1166,6 +1141,7 @@ textarea:focus {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
+  min-width: 170px;
 }
 
 .non-working-days-table-card .btn-small {
@@ -1335,34 +1311,6 @@ textarea:focus {
   margin: 24px 0;
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.summary-card {
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
-}
-
-.summary-card span {
-  display: block;
-  color: var(--color-muted);
-  font-size: 0.86rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.summary-card strong {
-  color: var(--color-primary);
-  font-family: var(--font-serif);
-  font-size: 2rem;
-} 
-
 .non-working-summary-actions {
   margin-bottom: 18px;
 } 
@@ -1518,7 +1466,7 @@ textarea:focus {
 
 .source-status-header h2 {
   margin: 8px 0 6px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   color: var(--color-primary);
 }
 
@@ -1596,7 +1544,7 @@ textarea:focus {
   white-space: nowrap;
 } 
 
-/* Mejora visual tabla de días inhábiles */
+/* Tabla de días inhábiles: anchos por columna (bloque único, ya no duplicado) */
 .non-working-days-table-card {
   overflow-x: auto;
 }
@@ -1606,14 +1554,18 @@ textarea:focus {
   table-layout: auto;
 }
 
-.non-working-days-table-card .deadlines-table th,
-.non-working-days-table-card .deadlines-table td {
-  vertical-align: top;
-}
-
+.non-working-days-table-card .deadlines-table th:nth-child(1),
 .non-working-days-table-card .deadlines-table td:nth-child(1) {
   min-width: 105px;
   white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #FFFFFF;
+}
+
+.non-working-days-table-card .deadlines-table thead th:nth-child(1) {
+  z-index: 3;
 }
 
 .non-working-days-table-card .deadlines-table td:nth-child(2) {
@@ -1637,13 +1589,6 @@ textarea:focus {
 .non-working-days-table-card .deadlines-table td:nth-child(11) {
   min-width: 180px;
 }
-
-.non-working-days-table-card .table-actions {
-  min-width: 170px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-} 
 
 
 .cases-card-list {
@@ -2018,7 +1963,7 @@ textarea:focus {
 .home-alert-card strong {
   display: block;
   font-size: 32px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
 }
 
 .home-alert-card-expired {
@@ -2227,7 +2172,7 @@ textarea:focus {
 
 .confirm-modal-header h3 {
   margin: 10px 0 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 24px;
   color: #111827;
 }
@@ -2267,34 +2212,10 @@ textarea:focus {
   line-height: 1;
 }
 
-
-
 .dashboard-case-badge-linked {
   background: #edf7ed;
   color: #166534;
   border: 1px solid #bbdfbb;
-} 
-
-
-.dashboard-case-badge {
-  width: fit-content;
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.dashboard-case-badge-linked {
-  background: #edf7ed;
-  color: #166534;
-  border: 1px solid #bbdfbb;
-}
-
-.dashboard-case-badge-general {
-  background: #f3efe7;
-  color: #5f4b2a;
-  border: 1px solid #d8d2c4;
 }
 
 .dashboard-case-badge-general {
@@ -2484,6 +2405,344 @@ textarea:focus {
   border-color: #991b1b;
   color: #991b1b;
   background: #fef2f2;
+} 
+
+
+/* Landing pública PlazoClaro */
+
+.public-login-btn {
+  padding: 0.65rem 1rem;
+}
+
+.landing-hero {
+  padding: 5rem 0 4rem;
+}
+
+.landing-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 3rem;
+  align-items: center;
+}
+
+.landing-hero h1 {
+  max-width: 820px;
+  margin: 1rem 0;
+  font-size: clamp(2.6rem, 5vw, 5rem);
+  line-height: 0.96;
+  color: var(--color-primary);
+  font-family: var(--font-serif);
+  letter-spacing: -0.045em;
+}
+
+.landing-hero-subtitle {
+  max-width: 690px;
+  font-size: 1.1rem;
+  color: var(--color-muted);
+}
+
+.landing-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.landing-trust-row span,
+.landing-proof-list span {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-muted);
+}
+
+.landing-hero-card,
+.landing-proof-card,
+.landing-cta-panel {
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 18px;
+  background: var(--color-card);
+  box-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
+  padding: 2rem;
+}
+
+.landing-hero-card h3,
+.landing-proof-card h3,
+.landing-cta-panel h2 {
+  margin-top: 1rem;
+  color: var(--color-primary);
+  font-family: var(--font-serif);
+}
+
+.landing-flow-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.landing-flow-list div {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg);
+}
+
+.landing-flow-list p {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted);
+}
+
+.landing-section {
+  padding: 4rem 0;
+}
+
+.landing-section-soft {
+  background: rgba(216, 210, 196, 0.22);
+}
+
+.landing-section-header {
+  max-width: 850px;
+  margin-bottom: 2rem;
+}
+
+.landing-section-header h2,
+.landing-split h2 {
+  margin: 0.5rem 0 0.75rem;
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  line-height: 1;
+  color: var(--color-primary);
+  font-family: var(--font-serif);
+  letter-spacing: -0.04em;
+}
+
+.landing-section-header p,
+.landing-split p {
+  color: var(--color-muted);
+  font-size: 1.05rem;
+}
+
+.landing-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.landing-feature-card {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card);
+  padding: 1.5rem;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.045);
+}
+
+.landing-feature-card span {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  color: var(--color-secondary);
+  font-weight: 900;
+}
+
+.landing-feature-card h3 {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.landing-feature-card p {
+  color: var(--color-muted);
+}
+
+.landing-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 2rem;
+  align-items: center;
+}
+
+.landing-check-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.landing-check-list li {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card);
+  padding: 0.85rem 1rem;
+  font-weight: 800;
+}
+
+.landing-check-list li::before {
+  content: "✓";
+  color: var(--color-success);
+  font-weight: 900;
+  margin-right: 0.5rem;
+}
+
+.landing-proof-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.landing-cta-panel {
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.landing-cta-panel p {
+  max-width: 680px;
+  margin: 1rem auto 0;
+  color: var(--color-muted);
+}
+
+.landing-cta-actions {
+  justify-content: center;
+} 
+
+
+/* Auth limpio con pestañas */
+
+.auth-layout {
+  max-width: 760px;
+  padding: 24px 0 80px;
+}
+
+.auth-switch {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 22px;
+  padding: 5px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.045);
+}
+
+.auth-tab {
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.auth-tab.active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.auth-card-wrapper {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  width: 100%;
+}
+
+.auth-form-hidden {
+  display: none !important;
+}
+
+.auth-helper-text {
+  margin-top: 18px;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.auth-link-button {
+  border: none;
+  background: transparent;
+  color: var(--color-secondary);
+  font-weight: 900;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.auth-link-button:hover {
+  text-decoration: underline;
+}
+ 
+/* Ajustes visuales Días inhábiles */
+
+/* Fuente + chip siempre ordenados en columna */
+.source-status-table td:first-child {
+  vertical-align: top;
+}
+
+.source-status-table td:first-child strong,
+.source-status-table td:first-child .source-status-name {
+  display: block;
+}
+
+.source-status-table td:first-child .source-status-chip {
+  display: flex;
+  width: fit-content;
+  margin-left: 0;
+  margin-top: 6px;
+}
+
+/* Resumen de días inhábiles: número debajo del título */
+.non-working-summary-grid .summary-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 112px;
+}
+
+.non-working-summary-grid .summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.non-working-summary-grid .summary-card strong {
+  display: block;
+  color: var(--color-primary);
+  font-size: 2rem;
+  line-height: 1;
+} 
+
+@media (max-width: 900px) {
+  .landing-hero-grid,
+  .landing-split {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero {
+    padding-top: 3rem;
+  }
 }
 
 @media (max-width: 880px) {
@@ -2564,17 +2823,5 @@ textarea:focus {
 
   .non-working-summary-actions {
     justify-content: flex-start;
-  }
-} 
-
-@media (max-width: 900px) {
-  .summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-} 
-
-@media (max-width: 520px) {
-  .summary-grid {
-    grid-template-columns: 1fr;
   }
 }

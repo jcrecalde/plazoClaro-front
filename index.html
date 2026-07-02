@@ -3,190 +3,253 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlazoClaro | Control de plazos judiciales</title>
-  <link rel="stylesheet" href="./css/styles.css?v=56" />
+  <title>PlazoClaro | Control de vencimientos judiciales</title>
+  <link rel="stylesheet" href="./css/styles.css?v=58" />
 </head>
-<body>
 
+<body>
   <header class="navbar">
     <div class="container navbar-content">
       <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
 
       <nav class="nav-links">
-        <a href="./index.html" class="active">Inicio</a>
-        <a href="./calculator.html">Calculadora</a>
-        <a href="./cases.html">Causas</a>
-        <a href="./agenda.html">Agenda</a>
-        <a href="./dashboard.html">Dashboard</a>
-        <a href="./non-working-days.html">Días inhábiles</a>
-      </nav> 
-
+        <a href="#problema">Qué resuelve</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#para-quien">Para quién es</a>
+        <a href="./auth.html" class="btn btn-primary public-login-btn">Ingresar</a>
+      </nav>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="container hero-grid">
+    <section class="landing-hero">
+      <div class="container landing-hero-grid">
         <div>
-          <span class="badge">Herramienta para abogados y estudios jurídicos</span>
+          <span class="badge">Beta privada para abogados y estudios jurídicos</span>
 
-          <h1>Calculá, organizá y controlá tus vencimientos judiciales con claridad.</h1>
+          <h1>Menos planillas, menos dudas y más control sobre tus vencimientos judiciales.</h1>
 
-          <p>
-            Una herramienta simple para abogados y estudios jurídicos que necesitan calcular plazos,
-            agruparlos por causa y controlar vencimientos desde una agenda clara.
+          <p class="landing-hero-subtitle">
+            PlazoClaro ayuda a calcular plazos, organizar causas, registrar vencimientos y consultar
+            una agenda operativa con detalle de los días excluidos y el criterio utilizado.
           </p>
 
           <div class="hero-actions">
-            <a href="./calculator.html" class="btn btn-primary">Calcular un plazo</a>
-            <a href="./agenda.html" class="btn btn-secondary">Ver agenda de vencimientos</a>
-            <a href="#como-funciona" class="btn btn-secondary">Ver cómo funciona</a>
+            <a href="./auth.html#registerForm" class="btn btn-primary">Probar PlazoClaro</a>
+            <a href="./auth.html" class="btn btn-secondary">Ya tengo cuenta</a>
+          </div>
+
+          <div class="landing-trust-row">
+            <span>Calculadora de plazos</span>
+            <span>Agenda operativa</span>
+            <span>Historial por causa</span>
           </div>
         </div>
 
-        <div class="hero-card">
-          <h3>Vencimiento más urgente</h3>
+        <div class="landing-hero-card">
+          <span class="badge">Flujo de trabajo</span>
 
-          <div class="deadline-preview">
-            <div class="preview-row">
-              <span class="preview-label">Causa / expediente</span>
-              <span id="heroDeadlineCase" class="preview-value">Cargando...</span>
+          <h3>De la notificación al vencimiento controlado</h3>
+
+          <div class="landing-flow-list">
+            <div>
+              <strong>1. Cargá la causa</strong>
+              <p>Expediente, cliente, materia, jurisdicción y observaciones.</p>
             </div>
 
-            <div class="preview-row">
-              <span class="preview-label">Actuación</span>
-              <span id="heroDeadlineAction" class="preview-value">-</span>
+            <div>
+              <strong>2. Calculá el plazo</strong>
+              <p>Fecha de notificación, días, tipo de plazo y calendario aplicable.</p>
             </div>
 
-            <div class="preview-row">
-              <span class="preview-label">Vencimiento</span>
-              <span id="heroDeadlineDate" class="preview-value">-</span>
-            </div>
-
-            <div class="preview-row">
-              <span class="preview-label">Estado</span>
-              <span id="heroDeadlineStatus" class="preview-value status-warning">-</span>
+            <div>
+              <strong>3. Controlá la agenda</strong>
+              <p>Vencidos, vencimientos próximos, pendientes y causas finalizadas.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="homeAlertsSection" class="home-alerts-section">
-      <div class="home-alerts-header">
-        <div>
-          <span class="section-kicker">Panel rápido</span>
-          <h2>Alertas de vencimientos</h2>
+    <section id="problema" class="landing-section">
+      <div class="container">
+        <div class="landing-section-header">
+          <span class="section-kicker">Problema real</span>
+          <h2>El problema no es solo calcular una fecha.</h2>
           <p>
-            Un resumen inicial para detectar vencidos, vencimientos de hoy y próximos plazos sin entrar causa por causa.
+            En el trabajo jurídico diario, los vencimientos se mezclan entre notificaciones,
+            expedientes, feriados, ferias judiciales, asuetos, notas sueltas, planillas y recordatorios manuales.
           </p>
         </div>
 
-        <div class="home-alerts-actions">
-          <a href="./agenda.html" class="btn btn-primary">Ver agenda</a>
-          <a href="./cases.html" class="btn btn-secondary">Ver causas</a>
-        </div>
-      </div>
-
-      <div id="homeAlertsMessage" class="home-alerts-message">
-        Cargando alertas...
-      </div>
-
-      <div class="home-alerts-grid">
-        <article class="home-alert-card home-alert-card-expired">
-          <span>Vencidos pendientes</span>
-          <strong id="homeExpiredCount">0</strong>
-        </article>
-
-        <article class="home-alert-card home-alert-card-today">
-          <span>Vencen hoy</span>
-          <strong id="homeTodayCount">0</strong>
-        </article>
-
-        <article class="home-alert-card home-alert-card-upcoming">
-          <span>Próximos 7 días</span>
-          <strong id="homeUpcomingCount">0</strong>
-        </article>
-
-        <article class="home-alert-card home-alert-card-pending">
-          <span>Pendientes totales</span>
-          <strong id="homeTotalPendingCount">0</strong>
-        </article>
-      </div>
-
-      <div class="home-urgent-list-wrapper">
-        <h3>Vencimientos que requieren atención</h3>
-        <div id="homeUrgentList" class="home-urgent-list">
-          <p class="result-empty">Cargando vencimientos...</p>
-        </div>
-      </div>
-    </section>
-
-
-    <section id="como-funciona" class="section">
-      <div class="container">
-        <h2 class="section-title">Cómo funciona</h2>
-        <p class="section-subtitle">
-          La primera versión está pensada para resolver el flujo más importante:
-          calcular un vencimiento de forma clara y dejar constancia del criterio utilizado.
-        </p>
-
         <div class="cards-grid">
           <div class="card">
-            <div class="card-number">1</div>
-            <h3>Cargá la fecha</h3>
-            <p>Ingresá la fecha de notificación o el punto de partida del plazo.</p>
+            <h3>Información dispersa</h3>
+            <p>
+              Un plazo puede quedar anotado en una planilla, otro en una agenda y otro en una nota interna.
+            </p>
           </div>
 
           <div class="card">
-            <div class="card-number">2</div>
-            <h3>Definí el plazo</h3>
-            <p>Indicá la cantidad de días y si deben computarse como hábiles o corridos.</p>
+            <h3>Dudas sobre el cálculo</h3>
+            <p>
+              No siempre queda claro qué días se excluyeron, desde cuándo empezó el cómputo o qué criterio se usó.
+            </p>
           </div>
 
           <div class="card">
-            <div class="card-number">3</div>
-            <h3>Obtené el resultado</h3>
-            <p>La app muestra una fecha estimada de vencimiento y el detalle del cálculo.</p>
+            <h3>Riesgo operativo</h3>
+            <p>
+              Un vencimiento mal controlado puede generar pérdida de tiempo, estrés y errores evitables.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section id="como-funciona" class="landing-section landing-section-soft">
       <div class="container">
-        <h2 class="section-title">Pensado para el trabajo jurídico diario</h2>
-        <p class="section-subtitle">
-          No busca reemplazar el criterio profesional. Busca ahorrar tiempo, ordenar vencimientos
-          y brindar una segunda verificación clara.
-        </p>
+        <div class="landing-section-header">
+          <span class="section-kicker">Solución</span>
+          <h2>PlazoClaro ordena el flujo completo del vencimiento.</h2>
+          <p>
+            No es solo una calculadora. Es un espacio de trabajo simple para calcular, guardar,
+            revisar y seguir vencimientos judiciales por causa.
+          </p>
+        </div>
+
+        <div class="landing-feature-grid">
+          <article class="landing-feature-card">
+            <span>01</span>
+            <h3>Calculá plazos</h3>
+            <p>
+              Ingresá fecha de notificación, cantidad de días, tipo de plazo, jurisdicción y ámbito aplicable.
+            </p>
+          </article>
+
+          <article class="landing-feature-card">
+            <span>02</span>
+            <h3>Documentá el criterio</h3>
+            <p>
+              Visualizá fecha de inicio, vencimiento, días excluidos, fuente y estado de verificación.
+            </p>
+          </article>
+
+          <article class="landing-feature-card">
+            <span>03</span>
+            <h3>Organizá por causa</h3>
+            <p>
+              Agrupá plazos por expediente, cliente, materia, jurisdicción y estado de la causa.
+            </p>
+          </article>
+
+          <article class="landing-feature-card">
+            <span>04</span>
+            <h3>Controlá la agenda</h3>
+            <p>
+              Detectá vencidos, vencimientos de hoy, próximos 7 días y pendientes operativos.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="container landing-split">
+        <div>
+          <span class="section-kicker">Diferencial</span>
+          <h2>No pierdas el historial cuando una causa termina.</h2>
+          <p>
+            Las causas finalizadas salen del flujo operativo, pero conservan sus plazos como historial.
+            Si se reactivan, vuelven a agenda, dashboard e inicio.
+          </p>
+
+          <ul class="landing-check-list">
+            <li>Plazos activos visibles en agenda operativa.</li>
+            <li>Causas finalizadas fuera del ruido diario.</li>
+            <li>Historial disponible para consulta posterior.</li>
+            <li>Ediciones de plazos con registro de cambios.</li>
+          </ul>
+        </div>
+
+        <div class="landing-proof-card">
+          <h3>Qué busca resolver</h3>
+          <p>
+            Que el abogado pueda responder rápido:
+          </p>
+
+          <div class="landing-proof-list">
+            <span>¿Qué vence?</span>
+            <span>¿Cuándo vence?</span>
+            <span>¿De qué causa es?</span>
+            <span>¿Qué días se excluyeron?</span>
+            <span>¿Está pendiente o completado?</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="para-quien" class="landing-section landing-section-soft">
+      <div class="container">
+        <div class="landing-section-header">
+          <span class="section-kicker">Usuarios</span>
+          <h2>Pensado para el trabajo jurídico diario.</h2>
+          <p>
+            PlazoClaro está diseñado como una herramienta de apoyo: no reemplaza el criterio profesional,
+            pero ayuda a trabajar con más orden y trazabilidad.
+          </p>
+        </div>
 
         <div class="cards-grid">
           <div class="card">
             <h3>Abogados independientes</h3>
-            <p>Para ordenar vencimientos por expediente sin depender de notas sueltas.</p>
+            <p>
+              Para ordenar vencimientos por expediente sin depender de notas sueltas o memoria.
+            </p>
           </div>
 
           <div class="card">
             <h3>Estudios jurídicos</h3>
-            <p>Para centralizar plazos y reducir errores de coordinación interna.</p>
+            <p>
+              Para centralizar causas, plazos y agenda operativa en un mismo flujo de trabajo.
+            </p>
           </div>
 
           <div class="card">
             <h3>Jóvenes profesionales</h3>
-            <p>Para calcular con mayor claridad y aprender el criterio aplicado.</p>
+            <p>
+              Para calcular con mayor claridad y revisar el criterio aplicado en cada vencimiento.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="aviso-legal" class="section">
+    <section class="landing-section">
+      <div class="container">
+        <div class="landing-cta-panel">
+          <span class="badge">Beta inicial</span>
+          <h2>Probá PlazoClaro con una causa real o de prueba.</h2>
+          <p>
+            Cargá una causa, calculá un plazo, guardalo y revisá cómo queda organizado en agenda,
+            dashboard e historial.
+          </p>
+
+          <div class="hero-actions landing-cta-actions">
+            <a href="./auth.html#registerForm" class="btn btn-primary">Crear cuenta</a>
+            <a href="./auth.html" class="btn btn-secondary">Ingresar</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aviso-legal" class="landing-section">
       <div class="container">
         <div class="notice">
           <strong>Aviso legal:</strong>
-          esta herramienta brinda un cálculo orientativo basado en la información ingresada.
-          El profesional debe verificar el resultado conforme a la normativa aplicable,
-          resoluciones judiciales, ferias, asuetos y particularidades del expediente.
+          PlazoClaro brinda cálculos orientativos basados en la información ingresada y en los calendarios cargados.
+          El profesional debe verificar el resultado conforme a la normativa aplicable, resoluciones judiciales,
+          ferias, asuetos y particularidades del expediente.
         </div>
       </div>
     </section>
@@ -197,8 +260,5 @@
       PlazoClaro © 2026 — Herramienta de apoyo para el control de vencimientos judiciales.
     </div>
   </footer>
-  
-<script src="./js/auth-guard.js?v=2"></script>
-<script src="./js/home-alerts.js?v=7"></script>
 </body>
 </html>
