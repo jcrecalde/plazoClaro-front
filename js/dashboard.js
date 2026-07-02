@@ -444,6 +444,7 @@ function getFilteredDeadlines() {
       const computedStatus = getComputedStatus(deadline);
 
       const searchableText = [
+        getDashboardDeadlineTitle(deadline),
         deadline.case_name,
         deadline.action_type,
         deadline.notes,
@@ -561,10 +562,7 @@ function renderDeadlines(deadlines) {
 
 
 function renderDashboardCaseCell(deadline) {
-  const caseTitle =
-    deadline.case_name ||
-    getDashboardCaseTitle(deadline.case_id) ||
-    "Sin causa asociada";
+  const caseTitle = getDashboardDeadlineTitle(deadline);
 
   const badgeHtml = deadline.case_id
     ? `<span class="dashboard-case-badge dashboard-case-badge-linked">Con causa</span>`
@@ -576,7 +574,8 @@ function renderDashboardCaseCell(deadline) {
       ${badgeHtml}
     </div>
   `;
-}
+} 
+
 
 function getDashboardCaseTitle(caseId) {
   if (!caseId) return null;
@@ -619,6 +618,19 @@ function updateDashboardListSummary(displayedCount) {
 
   dashboardSummary.textContent =
     `${displayedCount} plazo(s) operativo(s) guardado(s).`;
+} 
+
+
+function getDashboardDeadlineTitle(deadline) {
+  if (deadline.case_id) {
+    return (
+      getDashboardCaseTitle(deadline.case_id) ||
+      deadline.case_name ||
+      "Sin causa asociada"
+    );
+  }
+
+  return deadline.case_name || "Sin causa asociada";
 }
 
 function getDashboardEmptyMessage() {
@@ -801,7 +813,7 @@ function showDeadlineDetail(deadlineId) {
   const computedStatus = getComputedStatus(deadline); 
   selectedDeadlineForDetail = deadline;
 
-  detailCaseName.textContent = deadline.case_name || "Sin expediente";
+  detailCaseName.textContent = getDashboardDeadlineTitle(deadline);
   detailActionType.textContent = deadline.action_type || "Sin actuación";
   detailNotificationDate.textContent = formatDate(deadline.notification_date);
   detailStartRule.textContent = getStartRuleLabel(deadline.start_rule);
@@ -993,7 +1005,7 @@ function showEditForm(deadlineId) {
   }
 
   editDeadlineId.value = deadline.id;
-  editCaseName.value = deadline.case_name || "";
+  editCaseName.value = getDashboardDeadlineTitle(deadline);
   editActionType.value = deadline.action_type || ""; 
   updateEditActionTypeHint();
   editNotificationDate.value = deadline.notification_date;

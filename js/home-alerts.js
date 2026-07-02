@@ -33,7 +33,9 @@ const heroDeadlineAction = document.getElementById("heroDeadlineAction");
 const heroDeadlineDate = document.getElementById("heroDeadlineDate");
 const heroDeadlineStatus = document.getElementById("heroDeadlineStatus");
 
-document.addEventListener("DOMContentLoaded", loadHomeAlerts);
+document.addEventListener("DOMContentLoaded", loadHomeAlerts); 
+
+let homeCases = [];
 
 async function loadHomeAlerts() {
   if (!homeUrgentList) return;
@@ -65,7 +67,9 @@ async function loadHomeAlerts() {
 
     if (!casesResponse.ok) {
       throw new Error(cases.detail || "No se pudieron cargar las causas.");
-    }
+    } 
+
+    homeCases = cases;
 
     const visibleDeadlines = getVisibleHomeDeadlines(deadlines, cases);
 
@@ -164,7 +168,31 @@ function renderHomeAlertMessage(counts, totalPending) {
   homeAlertsMessage.textContent =
     "No hay vencimientos urgentes en los próximos 7 días.";
   homeAlertsMessage.className = "home-alerts-message home-alerts-message-ok";
+} 
+
+
+function getHomeCaseTitle(caseId) {
+  if (!caseId) return null;
+
+  const selectedCase = homeCases.find(
+    (item) => String(item.id) === String(caseId)
+  );
+
+  return selectedCase ? selectedCase.title : null;
 }
+
+function getHomeDeadlineTitle(deadline) {
+  if (deadline.case_id) {
+    return (
+      getHomeCaseTitle(deadline.case_id) ||
+      deadline.case_name ||
+      "Sin causa asociada"
+    );
+  }
+
+  return deadline.case_name || "Sin causa asociada";
+} 
+
 
 function renderHomeUrgentDeadlines(deadlines) {
   const urgentDeadlines = deadlines
@@ -196,7 +224,7 @@ function renderHomeUrgentDeadlines(deadlines) {
               ${getHomeUrgencyLabel(deadline.daysUntil)}
             </span>
 
-            <h4>${escapeHomeHTML(deadline.case_name || "Sin causa asociada")}</h4>
+            <h4>${escapeHomeHTML(getHomeDeadlineTitle(deadline))}</h4>
 
             <p>
               ${escapeHomeHTML(deadline.action_type || "Sin actuación")}
@@ -244,8 +272,7 @@ function renderHeroUrgentDeadline(deadlines) {
     return;
   }
 
-  heroDeadlineCase.textContent =
-    urgentDeadline.case_name || "Sin causa asociada";
+  heroDeadlineCase.textContent = getHomeDeadlineTitle(urgentDeadline);
 
   heroDeadlineAction.textContent =
     urgentDeadline.action_type || "Sin actuación";
