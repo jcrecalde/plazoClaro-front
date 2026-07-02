@@ -450,11 +450,24 @@ function formatDate(date) {
     month: "2-digit",
     year: "numeric",
   }).format(date);
+} 
+
+
+function getDayTypeLabel(dayType, count) {
+  const isSingle = Number(count) === 1;
+
+  if (dayType === "business") {
+    return isSingle ? "día hábil" : "días hábiles";
+  }
+
+  return isSingle ? "día corrido" : "días corridos";
 }
 
-function getDayTypeLabel(dayType) {
-  if (dayType === "business") return "días hábiles";
-  return "días corridos";
+function getCountedDaysSentence(countedDays, dayType) {
+  const isSingle = Number(countedDays) === 1;
+  const verb = isSingle ? "Se computó" : "Se computaron";
+
+  return `${verb} ${countedDays} ${getDayTypeLabel(dayType, countedDays)}.`;
 } 
  
 
@@ -535,7 +548,10 @@ function renderResult(result) {
 
   startDateDetail.textContent = `${startRuleText}: ${formatDate(result.startDate)}.`;
 
-  daysDetail.textContent = `Se computaron ${result.countedDays} ${getDayTypeLabel(result.dayType)}.`;
+  daysDetail.textContent = getCountedDaysSentence(
+    result.countedDays,
+    result.dayType
+  );
 
   if (result.dayType === "business") {
     excludedDetail.innerHTML = renderExcludedDays(result.excludedDays);

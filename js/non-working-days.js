@@ -171,6 +171,102 @@ function setupRoleBasedUi() {
     verifyVisiblePendingDaysBtn.classList.add("hidden");
     verifyVisiblePendingDaysBtn.style.display = "none";
   }
+
+  configureRegularUserManualForm();
+} 
+
+
+function configureRegularUserManualForm() {
+  addRegularUserManualNotice();
+
+  setSelectOptions(
+    nonWorkingDayType,
+    [
+      {
+        value: "special_non_working_day",
+        label: "Inhábil especial",
+      },
+      {
+        value: "court_holiday",
+        label: "Asueto judicial",
+      },
+      {
+        value: "term_suspension",
+        label: "Suspensión de términos",
+      },
+      {
+        value: "provincial_holiday",
+        label: "Feriado local / provincial",
+      },
+      {
+        value: "judicial_recess",
+        label: "Feria judicial",
+      },
+    ],
+    nonWorkingDayType.value
+  );
+
+  setSelectOptions(
+    scope,
+    [
+      {
+        value: "manual",
+        label: "General / Manual",
+      },
+      {
+        value: "department",
+        label: "Departamento judicial",
+      },
+    ],
+    scope.value
+  );
+
+  updateDepartmentVisibilityForManualLoad();
+}
+
+function addRegularUserManualNotice() {
+  if (document.getElementById("regularUserManualNotice")) {
+    return;
+  }
+
+  const notice = document.createElement("p");
+
+  notice.id = "regularUserManualNotice";
+  notice.className = "field-help";
+  notice.textContent =
+    "Los días cargados manualmente son privados de tu cuenta y solo se aplican a tus cálculos. Los calendarios oficiales son administrados por PlazoClaro.";
+
+  nonWorkingDayFormBadge.insertAdjacentElement("afterend", notice);
+}
+
+function setSelectOptions(selectElement, options, selectedValue) {
+  if (!selectElement) {
+    return;
+  }
+
+  const previousValue = selectedValue || selectElement.value;
+
+  selectElement.innerHTML = "";
+
+  options.forEach((item) => {
+    const option = document.createElement("option");
+
+    option.value = item.value;
+    option.textContent = item.label;
+
+    selectElement.appendChild(option);
+  });
+
+  const hasPreviousValue = options.some((item) => item.value === previousValue);
+
+  if (hasPreviousValue) {
+    selectElement.value = previousValue;
+    return;
+  }
+
+  if (options.length > 0) {
+    selectElement.value = options[0].value;
+  }
 }
 
 populatePbaDepartmentSelect(department, {
