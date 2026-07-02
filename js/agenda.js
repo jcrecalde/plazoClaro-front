@@ -201,6 +201,7 @@ function getFilteredDeadlines() {
     }
 
     const searchableText = [
+      getAgendaDeadlineTitle(deadline),
       deadline.case_name,
       deadline.action_type,
       deadline.notes,
@@ -416,7 +417,7 @@ function createAgendaCard(deadline) {
           ${renderAgendaCaseBadge(deadline)}
         </div>
 
-        <h3>${escapeHTML(deadline.case_name || getCaseTitle(deadline.case_id) || "Sin causa")}</h3>
+        <h3>${escapeHTML(getAgendaDeadlineTitle(deadline))}</h3>
       </div>
 
       <span class="status-badge ${getDeadlineStatusClass(agendaStatus)}">
@@ -659,6 +660,14 @@ function getCaseTitle(caseId) {
   const selectedCase = allCases.find((item) => item.id === caseId);
 
   return selectedCase ? selectedCase.title : null;
+} 
+
+function getAgendaDeadlineTitle(deadline) {
+  if (deadline.case_id) {
+    return getCaseTitle(deadline.case_id) || deadline.case_name || "Sin causa";
+  }
+
+  return deadline.case_name || "Sin causa";
 }
 
 function getToday() {
