@@ -1,5 +1,5 @@
-const HOME_DEADLINES_API_URL = "http://127.0.0.1:8000/deadlines"; 
-const HOME_CASES_API_URL = "http://127.0.0.1:8000/cases"; 
+const HOME_DEADLINES_API_URL = `${API_BASE_URL}/deadlines`;
+const HOME_CASES_API_URL = `${API_BASE_URL}/cases`; 
 
 function getAuthHeaders() {
   const token = localStorage.getItem("plazoclaro_token");

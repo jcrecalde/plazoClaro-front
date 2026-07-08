@@ -1,4 +1,4 @@
-const AUTH_API_URL = "http://127.0.0.1:8000/auth";
+const AUTH_API_URL = `${API_BASE_URL}/auth`;
 
 const loginForm = document.getElementById("loginForm");
 const loginEmail = document.getElementById("loginEmail");

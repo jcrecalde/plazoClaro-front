@@ -1,4 +1,4 @@
-const AUTH_GUARD_API_URL = "http://127.0.0.1:8000/auth";
+const AUTH_GUARD_API_URL = `${API_BASE_URL}/auth`;
 
 const token = localStorage.getItem("plazoclaro_token");
 

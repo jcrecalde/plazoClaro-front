@@ -1,6 +1,5 @@
-const NON_WORKING_DAYS_API_URL = "http://127.0.0.1:8000/non-working-days";  
-
-const AUTH_API_URL = "http://127.0.0.1:8000/auth";
+const NON_WORKING_DAYS_API_URL = `${API_BASE_URL}/non-working-days`;
+const AUTH_API_URL = `${API_BASE_URL}/auth`;
 
 
 function getAuthHeaders() {
