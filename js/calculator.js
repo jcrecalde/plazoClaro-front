@@ -98,46 +98,73 @@ function updateJurisdictionDependentFields() {
 async function loadCasesForCalculator() {
   if (!caseSelect) return;
 
+  caseSelect.innerHTML = '<option value="">Cargando causas...</option>';
+  caseSelect.disabled = true;
+
   try {
     const response = await fetch(CASES_API_URL, {
       headers: getAuthHeaders(),
     });
 
-    const cases = await response.json();
-
     if (handleUnauthorizedResponse(response)) {
       return;
     }
 
+    const cases = await response.json();
+
     if (!response.ok) {
       throw new Error("No se pudieron cargar las causas.");
     }
-    
 
-    availableCases = cases;
+    availableCases = Array.isArray(cases) ? cases : [];
+
+    const activeCases = availableCases.filter((item) => item.status === "active");
 
     caseSelect.innerHTML = '<option value="">Sin causa asociada</option>';
 
-    cases
-      .filter((item) => item.status === "active")
-      .forEach((item) => {
-        const option = document.createElement("option");
+    if (!activeCases.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No tenés causas activas cargadas";
+      option.disabled = true;
+      caseSelect.appendChild(option);
 
-        option.value = item.id;
-        option.textContent = item.case_number
-          ? `${item.title} (${item.case_number})`
-          : item.title;
+      showCalculatorMessage(
+        "No se encontraron causas activas. Podés calcular igual el plazo y, si querés vincularlo a una causa, primero cargala desde Causas.",
+        true
+      );
 
-        caseSelect.appendChild(option);
-      });   
+      return;
+    }
 
-    preselectCaseFromStorage(); 
+    activeCases.forEach((item) => {
+      const option = document.createElement("option");
 
+      option.value = item.id;
+      option.textContent = item.case_number
+        ? `${item.title} (${item.case_number})`
+        : item.title;
+
+      caseSelect.appendChild(option);
+    });
+
+    caseSelect.disabled = false;
+
+    preselectCaseFromStorage();
   } catch (error) {
     console.error(error);
+
+    availableCases = [];
     caseSelect.innerHTML = '<option value="">Sin causa asociada</option>';
+    caseSelect.disabled = false;
+
+    showCalculatorMessage(
+      "No se pudieron cargar las causas. Podés calcular el plazo igual, pero para guardarlo vinculado a una causa revisá tu sesión o la conexión.",
+      true
+    );
   }
-}
+} 
+
 
 function handleCaseSelectionChange() {
   if (!caseSelect || !caseSelect.value) {
@@ -178,7 +205,12 @@ function handleCaseSelectionChange() {
 
   if (selectedCase.jurisdiction === "national_federal") {
     courtSelect.value = selectedCase.court || "";
-  }
+  } 
+
+  showCalculatorMessage(
+    "Causa seleccionada. Se completaron automáticamente expediente, jurisdicción y datos vinculados.",
+    true
+  );
 }
 
 updateJurisdictionDependentFields(); 
