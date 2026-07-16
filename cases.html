@@ -10,10 +10,10 @@
 
   <header class="navbar">
     <div class="container navbar-content">
-      <a href="./index.html" class="logo">Plazo<span>Claro</span></a>
+      <a href="./app.html" class="logo">Plazo<span>Claro</span></a>
 
       <nav class="nav-links">
-        <a href="./index.html">Inicio</a>
+        <a href="./app.html">Inicio</a>
         <a href="./calculator.html">Calculadora</a>
         <a href="./cases.html" class="active">Causas</a>
         <a href="./agenda.html">Agenda</a>
@@ -102,18 +102,38 @@
 
         <div class="form-group">
           <label for="matterType">Materia</label>
-          <select id="matterType">
-            <option value="">Seleccionar opcionalmente</option>
-            <option value="Sucesión">Sucesión</option>
-            <option value="Daños y perjuicios">Daños y perjuicios</option>
-            <option value="Laboral">Laboral</option>
-            <option value="Familia">Familia</option>
-            <option value="Civil">Civil</option>
-            <option value="Comercial">Comercial</option>
-            <option value="Contencioso administrativo">Contencioso administrativo</option>
-            <option value="Tributario">Tributario</option>
-            <option value="Otro">Otro</option>
-          </select>
+          <input
+            type="text"
+            id="matterType"
+            list="matterTypeOptions"
+            placeholder="Ej: Despido, daños y perjuicios, sucesión, alimentos..."
+          />
+
+          <datalist id="matterTypeOptions">
+            <option value="Civil y Comercial"></option>
+            <option value="Daños y perjuicios"></option>
+            <option value="Laboral"></option>
+            <option value="Despido"></option>
+            <option value="Accidente de trabajo"></option>
+            <option value="Familia"></option>
+            <option value="Alimentos"></option>
+            <option value="Régimen de comunicación"></option>
+            <option value="Divorcio"></option>
+            <option value="Sucesión"></option>
+            <option value="Ejecución"></option>
+            <option value="Ejecución de honorarios"></option>
+            <option value="Cobro ejecutivo"></option>
+            <option value="Amparo"></option>
+            <option value="Medida cautelar"></option>
+            <option value="Contencioso administrativo"></option>
+            <option value="Tributario"></option>
+            <option value="Comercial"></option>
+            <option value="Penal"></option>
+          </datalist>
+
+          <small class="field-help">
+            Podés elegir una sugerencia o escribir la materia exacta de la carpeta.
+          </small>
         </div>
 
         <div class="form-group">
@@ -156,14 +176,31 @@
           </small>
         </div>
 
-        <div class="form-group hidden" id="caseCourtGroup">
-          <label for="caseCourt">Organismo específico</label>
-          <select id="caseCourt">
-            <option value="">Nacional / Federal general</option>
-            <option value="Tribunal Fiscal de la Nación">Tribunal Fiscal de la Nación</option>
-          </select>
+        <div class="form-group" id="caseCourtGroup">
+          <label for="caseCourt">Organismo / juzgado</label>
+          <input
+            type="text"
+            id="caseCourt"
+            list="caseCourtOptions"
+            placeholder="Ej: Juzgado Civil y Comercial N° 1 de Azul"
+          />
+
+          <datalist id="caseCourtOptions">
+            <option value="Juzgado Civil y Comercial N° 1"></option>
+            <option value="Juzgado Civil y Comercial N° 2"></option>
+            <option value="Juzgado de Familia N° 1"></option>
+            <option value="Juzgado de Familia N° 2"></option>
+            <option value="Tribunal de Trabajo N° 1"></option>
+            <option value="Tribunal de Trabajo N° 2"></option>
+            <option value="Cámara Civil y Comercial"></option>
+            <option value="Cámara de Apelaciones"></option>
+            <option value="Juzgado Federal"></option>
+            <option value="Tribunal Fiscal de la Nación"></option>
+            <option value="Juzgado Contencioso Administrativo"></option>
+          </datalist>
+
           <small class="field-help">
-            Solo aplica para calendarios propios de organismos específicos.
+            Opcional. Escribí el organismo como lo uses en tu estudio: tribunal, juzgado, cámara o dependencia.
           </small>
         </div>
 
@@ -359,6 +396,6 @@
   <script src="./js/config.js?v=1"></script>
   <script src="./js/pba-departments.js?v=5"></script> 
   <script src="./js/auth-guard.js?v=2"></script>
-  <script src="./js/cases.js?v=22"></script>
+  <script src="./js/cases.js?v=23"></script>
 </body>
 </html>

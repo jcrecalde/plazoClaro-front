@@ -161,11 +161,11 @@ caseForm.addEventListener("submit", async function (event) {
     case_number: caseNumber.value.trim() || null,
     judicial_link: caseJudicialLink.value.trim() || null,
     client_name: clientName.value.trim() || null,
-    matter_type: matterType.value || null,
+    matter_type: matterType.value.trim() || null,
     jurisdiction: caseJurisdiction.value,
     department: caseJurisdiction.value === "pba" ? caseDepartment.value || null : null,
     locality: null,
-    court: caseJurisdiction.value === "national_federal" ? caseCourt.value || null : null,
+    court: caseCourt.value.trim() || null,
     notes: caseNotes.value.trim() || null,
   };
 
@@ -220,7 +220,6 @@ caseForm.addEventListener("submit", async function (event) {
 
 function updateJurisdictionDependentFields() {
   const isPba = caseJurisdiction.value === "pba";
-  const isNationalFederal = caseJurisdiction.value === "national_federal";
 
   if (isPba) {
     caseDepartmentGroup.classList.remove("hidden");
@@ -231,13 +230,21 @@ function updateJurisdictionDependentFields() {
     caseDepartmentGroup.style.display = "none";
   }
 
-  if (isNationalFederal) {
+  if (caseCourtGroup) {
     caseCourtGroup.classList.remove("hidden");
     caseCourtGroup.style.display = "block";
-  } else {
-    caseCourt.value = "";
-    caseCourtGroup.classList.add("hidden");
-    caseCourtGroup.style.display = "none";
+  }
+
+  if (caseCourt) {
+    if (caseJurisdiction.value === "pba") {
+      caseCourt.placeholder = "Ej: Juzgado Civil y Comercial N° 1 de Azul";
+    } else if (caseJurisdiction.value === "national_federal") {
+      caseCourt.placeholder = "Ej: Juzgado Federal, Cámara Federal o Tribunal Fiscal";
+    } else if (caseJurisdiction.value === "caba") {
+      caseCourt.placeholder = "Ej: Juzgado Nacional, Cámara o fuero correspondiente";
+    } else {
+      caseCourt.placeholder = "Ej: Juzgado, tribunal, cámara u organismo";
+    }
   }
 }
 
@@ -891,15 +898,25 @@ function resetForm() {
 
 function getCaseScopeLabel(item) {
   if (item.jurisdiction === "pba") {
-    return item.department || "Sin departamento específico";
+    const departmentLabel = item.department || "Sin departamento específico";
+
+    if (item.court) {
+      return `${departmentLabel} · ${item.court}`;
+    }
+
+    return departmentLabel;
   }
 
   if (item.jurisdiction === "national_federal") {
     return item.court || "Nacional / Federal";
   }
 
+  if (item.court) {
+    return `${getJurisdictionLabel(item.jurisdiction)} · ${item.court}`;
+  }
+
   return getJurisdictionLabel(item.jurisdiction);
-} 
+}
 
 
 function getFinalizedCaseBadgeHtml() {
