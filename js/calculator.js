@@ -56,6 +56,8 @@ const courtDetail = document.getElementById("courtDetail");
 const saveDeadlineBtn = document.getElementById("saveDeadlineBtn"); 
 
 const caseSelect = document.getElementById("caseSelect"); 
+const caseCourtInfoGroup = document.getElementById("caseCourtInfoGroup");
+const caseCourtInfo = document.getElementById("caseCourtInfo");
 
 const actionTypeSelect = document.getElementById("actionType");
 const actionTypeHint = document.getElementById("actionTypeHint");
@@ -127,7 +129,9 @@ async function loadCasesForCalculator() {
       option.value = "";
       option.textContent = "No tenés causas activas cargadas";
       option.disabled = true;
-      caseSelect.appendChild(option);
+      caseSelect.appendChild(option); 
+
+      caseSelect.disabled = false;
 
       showCalculatorMessage(
         "No se encontraron causas activas. Podés calcular igual el plazo y, si querés vincularlo a una causa, primero cargala desde Causas.",
@@ -168,6 +172,12 @@ async function loadCasesForCalculator() {
 
 function handleCaseSelectionChange() {
   if (!caseSelect || !caseSelect.value) {
+    if (caseCourtInfoGroup && caseCourtInfo) {
+      caseCourtInfo.value = "";
+      caseCourtInfoGroup.classList.add("hidden");
+      caseCourtInfoGroup.style.display = "none";
+    }
+
     return;
   }
 
@@ -175,11 +185,24 @@ function handleCaseSelectionChange() {
 
   if (!selectedCase) {
     caseSelect.value = "";
+
+    if (caseCourtInfoGroup && caseCourtInfo) {
+      caseCourtInfo.value = "";
+      caseCourtInfoGroup.classList.add("hidden");
+      caseCourtInfoGroup.style.display = "none";
+    }
+
     return;
   }
 
   if (selectedCase.status !== "active") {
     caseSelect.value = "";
+
+    if (caseCourtInfoGroup && caseCourtInfo) {
+      caseCourtInfo.value = "";
+      caseCourtInfoGroup.classList.add("hidden");
+      caseCourtInfoGroup.style.display = "none";
+    }
 
     showCalculatorMessage(
       "No se puede vincular un plazo a una causa finalizada. Primero reactivá la causa.",
@@ -205,13 +228,26 @@ function handleCaseSelectionChange() {
 
   if (selectedCase.jurisdiction === "national_federal") {
     courtSelect.value = selectedCase.court || "";
-  } 
+  }
+
+  if (caseCourtInfoGroup && caseCourtInfo) {
+    if (selectedCase.court) {
+      caseCourtInfo.value = selectedCase.court;
+      caseCourtInfoGroup.classList.remove("hidden");
+      caseCourtInfoGroup.style.display = "block";
+    } else {
+      caseCourtInfo.value = "";
+      caseCourtInfoGroup.classList.add("hidden");
+      caseCourtInfoGroup.style.display = "none";
+    }
+  }
 
   showCalculatorMessage(
     "Causa seleccionada. Se completaron automáticamente expediente, jurisdicción y datos vinculados.",
     true
   );
-}
+} 
+
 
 updateJurisdictionDependentFields(); 
 
@@ -407,7 +443,10 @@ saveDeadlineBtn.addEventListener("click", async function () {
     start_rule: lastCalculationPayload.start_rule, 
     department: lastCalculationResult?.department || null,
     locality: lastCalculationResult?.locality || null,
-    court: lastCalculationResult?.court || null,
+    court:
+      lastCalculationResult?.court ||
+      availableCases.find((item) => item.id === selectedCaseId)?.court ||
+      null,
     notes: notes || null,
   };
 
@@ -648,7 +687,14 @@ clearResultBtn.addEventListener("click", function () {
   departmentDetail.textContent = ""; 
   if (courtDetail) {
   courtDetail.textContent = "";
-  }
+  } 
+
+  if (caseCourtInfoGroup && caseCourtInfo) {
+  caseCourtInfo.value = "";
+  caseCourtInfoGroup.classList.add("hidden");
+  caseCourtInfoGroup.style.display = "none";
+} 
+
 }); 
 
 
