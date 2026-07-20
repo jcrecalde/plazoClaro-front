@@ -262,6 +262,7 @@ if (actionTypeSelect) {
   populateActionTypeSelect(actionTypeSelect);
   updateActionTypeHint();
 
+  actionTypeSelect.addEventListener("input", handleActionTypeChange);
   actionTypeSelect.addEventListener("change", handleActionTypeChange);
 }
 
@@ -296,8 +297,16 @@ function updateActionTypeHint() {
   const selectedRule = getActionTypeRule(actionTypeSelect.value);
 
   if (!selectedRule) {
+    const typedActionType = actionTypeSelect.value.trim();
+
+    if (typedActionType) {
+      actionTypeHint.textContent =
+        "Actuación personalizada. Cargá manualmente la cantidad de días según corresponda.";
+      return;
+    }
+
     actionTypeHint.textContent =
-      "Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.";
+      "Opcional. Podés elegir una sugerencia o escribir la actuación exacta. Si la app reconoce la actuación, sugerirá una cantidad de días editable.";
     return;
   }
 

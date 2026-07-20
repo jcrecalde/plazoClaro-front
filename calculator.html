@@ -52,11 +52,17 @@
 
         <div class="form-group">
           <label for="actionType">Tipo de actuación</label>
-          <select id="actionType">
-            <option value="">Seleccionar opcionalmente</option>
-          </select>
+          <input
+            type="text"
+            id="actionType"
+            list="actionTypeOptions"
+            placeholder="Ej: Contestación de demanda, traslado simple, apelación..."
+          />
+
+          <datalist id="actionTypeOptions"></datalist>
+
           <small id="actionTypeHint" class="field-help">
-            Opcional. Al elegir una actuación, la app puede sugerir una cantidad de días editable.
+            Opcional. Podés elegir una sugerencia o escribir la actuación exacta. Si la app reconoce la actuación, sugerirá una cantidad de días editable.
           </small>
         </div>
 
@@ -218,9 +224,9 @@
 
   <script src="./js/config.js?v=2"></script>
   <script src="./js/pba-departments.js?v=1"></script>
-  <script src="./js/action-types.js?v=1"></script> 
+  <script src="./js/action-types.js?v=2"></script> 
   <script src="./js/auth-guard.js?v=2"></script>
-  <script src="./js/calculator.js?v=51"></script>
+  <script src="./js/calculator.js?v=52"></script>
   
 </body>
 </html>

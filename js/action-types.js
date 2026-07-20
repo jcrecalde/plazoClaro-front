@@ -123,10 +123,35 @@ const ACTION_TYPE_GROUPS = [
   },
 ];
 
-function populateActionTypeSelect(selectElement) {
-  if (!selectElement) return;
+function getAllActionTypeItems() {
+  return ACTION_TYPE_GROUPS.flatMap((group) => group.items);
+}
 
-  selectElement.innerHTML = '<option value="">Seleccionar opcionalmente</option>';
+function populateActionTypeSelect(element) {
+  if (!element) return;
+
+  const isInputWithDatalist = element.tagName === "INPUT" && element.getAttribute("list");
+  const targetElement = isInputWithDatalist
+    ? document.getElementById(element.getAttribute("list"))
+    : element;
+
+  if (!targetElement) return;
+
+  targetElement.innerHTML = "";
+
+  if (targetElement.tagName === "DATALIST") {
+    getAllActionTypeItems().forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.value;
+      option.label = item.label;
+
+      targetElement.appendChild(option);
+    });
+
+    return;
+  }
+
+  targetElement.innerHTML = '<option value="">Seleccionar opcionalmente</option>';
 
   ACTION_TYPE_GROUPS.forEach((group) => {
     const optgroup = document.createElement("optgroup");
@@ -140,15 +165,19 @@ function populateActionTypeSelect(selectElement) {
       optgroup.appendChild(option);
     });
 
-    selectElement.appendChild(optgroup);
+    targetElement.appendChild(optgroup);
   });
 }
 
 function getActionTypeRule(actionType) {
   if (!actionType) return null;
 
+  const normalizedActionType = actionType.trim().toLowerCase();
+
   for (const group of ACTION_TYPE_GROUPS) {
-    const foundItem = group.items.find((item) => item.value === actionType);
+    const foundItem = group.items.find((item) => {
+      return item.value.trim().toLowerCase() === normalizedActionType;
+    });
 
     if (foundItem) {
       return foundItem;
