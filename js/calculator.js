@@ -169,6 +169,20 @@ async function loadCasesForCalculator() {
   }
 } 
 
+function updateSaveDeadlineButtonLabel() {
+  if (!saveDeadlineBtn || !caseSelect) return;
+
+  if (caseSelect.value) {
+    saveDeadlineBtn.textContent = "Guardar plazo vinculado a la causa";
+    return;
+  }
+
+  saveDeadlineBtn.textContent = "Guardar como plazo general";
+}
+
+
+updateSaveDeadlineButtonLabel();
+
 
 function handleCaseSelectionChange() {
   if (!caseSelect || !caseSelect.value) {
@@ -202,8 +216,8 @@ function handleCaseSelectionChange() {
       caseCourtInfo.value = "";
       caseCourtInfoGroup.classList.add("hidden");
       caseCourtInfoGroup.style.display = "none";
-    }
-e
+    } 
+
     showCalculatorMessage(
       "No se puede vincular un plazo a una causa finalizada. Primero reactivá la causa.",
       true
@@ -245,7 +259,9 @@ e
   showCalculatorMessage(
     "Causa seleccionada. Se completaron automáticamente expediente, jurisdicción y datos vinculados.",
     true
-  );
+  ); 
+
+  updateSaveDeadlineButtonLabel();
 } 
 
 
@@ -255,7 +271,10 @@ updateJurisdictionDependentFields();
 loadCasesForCalculator();
 
 if (caseSelect) {
-  caseSelect.addEventListener("change", handleCaseSelectionChange);
+  caseSelect.addEventListener("change", function () {
+    handleCaseSelectionChange();
+    updateSaveDeadlineButtonLabel();
+  });
 } 
 
 if (actionTypeSelect) {
@@ -487,7 +506,7 @@ saveDeadlineBtn.addEventListener("click", async function () {
     showCalculatorMessage("No se pudo guardar el plazo. Verificá que el backend y MongoDB estén funcionando.", true);
   } finally {
     saveDeadlineBtn.disabled = false;
-    saveDeadlineBtn.textContent = "Guardar plazo";
+    updateSaveDeadlineButtonLabel();
   }
 });
 
@@ -673,7 +692,9 @@ clearResultBtn.addEventListener("click", function () {
 
   if (caseSelect) {
     caseSelect.value = "";
-  }
+  } 
+
+  updateSaveDeadlineButtonLabel();
 
   updateJurisdictionDependentFields();
  
