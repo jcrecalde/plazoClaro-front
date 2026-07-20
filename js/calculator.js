@@ -203,7 +203,7 @@ function handleCaseSelectionChange() {
       caseCourtInfoGroup.classList.add("hidden");
       caseCourtInfoGroup.style.display = "none";
     }
-
+e
     showCalculatorMessage(
       "No se puede vincular un plazo a una causa finalizada. Primero reactivá la causa.",
       true
@@ -289,16 +289,16 @@ function handleActionTypeChange() {
   }
 
   updateActionTypeHint();
-}
+} 
+
 
 function updateActionTypeHint() {
   if (!actionTypeHint || !actionTypeSelect) return;
 
   const selectedRule = getActionTypeRule(actionTypeSelect.value);
+  const typedActionType = actionTypeSelect.value.trim();
 
   if (!selectedRule) {
-    const typedActionType = actionTypeSelect.value.trim();
-
     if (typedActionType) {
       actionTypeHint.textContent =
         "Actuación personalizada. Cargá manualmente la cantidad de días según corresponda.";
